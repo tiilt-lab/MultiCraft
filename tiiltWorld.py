@@ -13,6 +13,7 @@ import pickle
 import numpy
 import unicodedata
 import SocketCommunication as Comm
+import SpeechToText as Spt
 
 
 def quit():
@@ -20,20 +21,30 @@ def quit():
 
 def inputLine(prompt):
     mc.events.clearAll()
+    sd = Spt.SpeechDetector()
+    sd.setup_mic()
     while True:
         chats = mc.events.pollChatPosts()
-        for c in chats:
-            if c.entityId == playerId:
-                if c.message == 'quit':
-                    return 'quit()'
-                elif c.message == ' ':
-                    return ''
-                elif "__" in c.message:
-                    sys.exit();
-                else:
-                	parsed = Comm.interpret_command(c.message)
-                	mc.postToChat(parsed['verb'])
-                	return "t.go(15)"
+        cmd = sd.run()
+
+        if c is not None:
+            for c in chats:
+                if c.entityId == playerId:
+                    if c.message == 'quit':
+                        return 'quit()'
+                    elif c.message == ' ':
+                        return ''
+                    elif "__" in c.message:
+                        sys.exit();
+                    else:
+                    	parsed = Comm.interpret_command(c.message)
+                    	mc.postToChat(parsed['verb'])
+                    	return "t.go(15)"
+        elif cmd is not None:
+            parsed = Comm.interpret_command(cmd)
+            mc.postToChat(parsed['verb'])
+            return "t.go(10)"
+            
         time.sleep(0.2)
 
 mc = minecraft.Minecraft()
