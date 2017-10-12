@@ -45,7 +45,7 @@ class SpeechDetector:
         self.CHANNELS = 1
         self.RATE = 16000
 
-        self.SILENCE_LIMIT = 2.5  # Silence limit in seconds. The max ammount of seconds where
+        self.SILENCE_LIMIT = 2  # Silence limit in seconds. The max ammount of seconds where
         # only silence is recorded. When this time passes the
         # recording finishes and the file is decoded
 
@@ -116,9 +116,9 @@ class SpeechDetector:
         audio2send = []
         cur_data = ''  # current chunk of audio data
         rel = self.RATE / self.CHUNK
-        slid_win = deque(maxlen=self.SILENCE_LIMIT * rel)
+        slid_win = deque(maxlen= (int(self.SILENCE_LIMIT * rel)))
         # Prepend audio from 0.5 seconds before noise was detected
-        prev_audio = deque(maxlen=self.PREV_AUDIO * rel)
+        prev_audio = deque(maxlen= (int(self.PREV_AUDIO * rel)))
         started = False
 
         while True:

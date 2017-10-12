@@ -42,11 +42,12 @@ def parse_phrase(phrase):
     doc = ''
     try:
         if isinstance(phrase, str):
-            doc = nlp(phrase.lower())
+            doc = nlp(unicode(phrase.lower(), encoding="utf-8"))
         else:
             doc = nlp(phrase)
     except:
         logging.exception('Unable to decode phrase')
+        return 'unable to decode phrase'
         exit()
     objects = []
     possible_objects = []

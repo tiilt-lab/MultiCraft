@@ -27,7 +27,7 @@ def inputLine(prompt):
         chats = mc.events.pollChatPosts()
         cmd = sd.run()
 
-        if c is not None:
+        if chats:
             for c in chats:
                 if c.entityId == playerId:
                     if c.message == 'quit':
@@ -38,11 +38,11 @@ def inputLine(prompt):
                         sys.exit();
                     else:
                     	parsed = Comm.interpret_command(c.message)
-                    	mc.postToChat(parsed['verb'])
+                    	mc.postToChat(parsed)
                     	return "t.go(15)"
         elif cmd is not None:
             parsed = Comm.interpret_command(cmd)
-            mc.postToChat(parsed['verb'])
+            mc.postToChat(parsed)
             return "t.go(10)"
             
         time.sleep(0.2)
