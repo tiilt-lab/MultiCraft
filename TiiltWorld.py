@@ -6,7 +6,6 @@ from mcpi.block import *
 from mcturtle import *
 import code
 import sys
-
 sys.path.append('.')
 import socket
 import json
@@ -15,76 +14,69 @@ import numpy
 import unicodedata
 import SocketCommunication as Comm
 import SpeechToText as Spt
-from MinecraftInterpreter import processInstruction
+from MineCraftInterpreter import process_instruction
 
 commands = {'build', 'move', 'turn'}
 
 
-def executeInstruction(instruction):
+def execute_instruction(instruction):
     # get dictionary for command and arguments
-    instructionDict = processInstruction(instruction)
-    mc.postToChat(instructionDict)
-
-    if instructionDict['command'] is None:
+    instruction_dict = process_instruction(instruction)
+    mc.postToChat(instruction_dict)
+    
+    if instruction_dict['command'] is None:
         return 'No command was recognized'
-    elif instructionDict['command'] not in commands:
-        return "The recognized command " + instructionDict['command'] + " is not supported by the system"
+    elif instruction_dict['command'] not in commands:
+        return "The recognized command " + instruction_dict['command'] + " is not supported by the system"
 
     # orient player to match turtle
     t.goto(mc.player.getPos().x, mc.player.getPos().y, mc.player.getPos().z)
-    t.angle(mc.player.getRotation())
+    t.angle(mc.player.getRotation())   
 
-    if instructionDict['command'] == 'move':
-        t.penup()
-        if instructionDict['direction'] == 'backward' or instructionDict['ADV'] == 'back':
+    if instruction_dict['command'] == 'move':
+        t.penup()        
+        if instruction_dict['direction'] == 'backward' or instruction_dict['direction'] == 'back':
             t.right(180)
-        elif instructionDict['direction'] is 'left':
+        elif instruction_dict['direction'] is 'left':
             t.left(90)
-        elif instructionDict['direction'] is 'right':
+        elif instruction_dict['direction'] is 'right':
             t.right(90)
-        else:
-            #NEED TO MOVE FORWARD AS DEFAULT MAYBE
-            return 'Please specify what direction you want the player to move in.'
-        t.go(instructionDict['dimensions'][0])
+        t.go(instruction_dict['quantity'])
         return 'executed'
-    elif instructionDict['command'] == 'build':
+    elif instruction_dict['command'] == 'build':
         t.gridalign()
-        comms = instructionDict['dimensions']
+        comms = instruction_dict['dimensions']
         pos = mc.player.getPos()
         x = pos.x
         y = pos.y
         z = pos.z
-        blockCode = instructionDict['block']
-        buildingBlocks(x, y, z, comms[0], comms[1], comms[2], blockCode)
-        if instructionDict['house'] is False:
+        block_code = instruction_dict['material']
+        mc.setBlocks(x, y, z, comms[0], comms[1], comms[2], block_code)
+        if instruction_dict['house'] is False:
             return 'executed'
-        elif instructionDict['hollow'] is True:
+        elif instruction_dict['house'] is True:
             x += 1
             y += 1
             z += 1
             comms[0] -= 2
             comms[1] -= 2
             comms[2] -= 1
-            buildingBlocks(x, y, z, comms[0], comms[1], comms[2], 0)
+            mc.setBlocks(x, y, z, comms[0], comms[1], comms[2], 0)
 
         return 'executed'
-    elif instructionDict['command'] == 'turn':
-        if instructionDict['direction'] == 'backward' or instructionDict['direction'] == 'back':
+    elif instruction_dict['command'] == 'turn':
+        if instruction_dict['direction'] == 'backward' or instruction_dict['direction'] == 'back':
             t.right(180)
-        elif instructionDict['direction'] is 'left':
+        elif instruction_dict['direction'] is 'left':
             t.left(90)
-        elif instructionDict['direction'] is 'right':
+        elif instruction_dict['direction'] is 'right':
             t.right(90)
         return 'executed'
     else:
         return 'Command is not supported'
 
 
-def buildingBlocks(x, y, z, width, height, length, blockType):
-    mc.setBlocks(x, y, z, x + width, y + height, z + length, blockType)
-
-
-def quit():
+def quit_mod():
     sys.exit()
 
 
@@ -102,14 +94,13 @@ def inputLine(prompt):
                     sys.exit();
                 else:
                     mc.postToChat(c.message)
-                    response = executeInstruction(c.message)
-                    if (response == 'executed'):
+                    response = process_instruction(c.message)
+                    if(response == 'executed'):
                         mc.postToChat('executed')
                         pass
                     else:
                         mc.postToChat(response)
         time.sleep(0.2)
-
 
 mc = minecraft.Minecraft()
 playerPos = mc.player.getPos()

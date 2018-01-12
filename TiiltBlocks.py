@@ -6,8 +6,6 @@ tiiltBlocks = {'GRASS' : 2, 'STONE' : 1, 'AIR' : 0 \
 def getBlockCode(block_name):
 	if block_name in tiiltBlocks.keys():
 		return tiiltBlocks[block_name]
-<<<<<<< HEAD
 	return None
-=======
-	return None
->>>>>>> master
+
+
