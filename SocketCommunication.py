@@ -4,7 +4,7 @@ import threading
 import logging
 import time
 import logging
-import MinecraftInterpreter as Inter
+import MineCraftInterpreter as Inter
 from pprint import pformat
 import pickle
 
