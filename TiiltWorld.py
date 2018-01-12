@@ -12,7 +12,6 @@ import json
 import pickle
 import numpy
 import unicodedata
-import SocketCommunication as Comm
 import SpeechToText as Spt
 from MineCraftInterpreter import process_instruction
 
@@ -41,7 +40,9 @@ def execute_instruction(instruction):
             t.left(90)
         elif instruction_dict['direction'] is 'right':
             t.right(90)
-        t.go(instruction_dict['quantity'])
+        if not ('dimensions' in list(instruction_dict.keys())):
+            return 'Please specify the number of steps the player should move'
+        t.go(instruction_dict['dimensions'][0])
         return 'executed'
     elif instruction_dict['command'] == 'build':
         t.gridalign()
@@ -51,7 +52,7 @@ def execute_instruction(instruction):
         y = pos.y
         z = pos.z
         block_code = instruction_dict['material']
-        mc.setBlocks(x, y, z, comms[0], comms[1], comms[2], block_code)
+        mc.setBlocks(x, y, z, x+comms[0], y+comms[1], z+comms[2], block_code)
         if instruction_dict['house'] is False:
             return 'executed'
         elif instruction_dict['house'] is True:
@@ -61,8 +62,7 @@ def execute_instruction(instruction):
             comms[0] -= 2
             comms[1] -= 2
             comms[2] -= 1
-            mc.setBlocks(x, y, z, comms[0], comms[1], comms[2], 0)
-
+            mc.setBlocks(x, y, z, x+comms[0], y+comms[1], z+comms[2], 0)
         return 'executed'
     elif instruction_dict['command'] == 'turn':
         if instruction_dict['direction'] == 'backward' or instruction_dict['direction'] == 'back':
@@ -94,8 +94,8 @@ def inputLine(prompt):
                     sys.exit();
                 else:
                     mc.postToChat(c.message)
-                    response = process_instruction(c.message)
-                    if(response == 'executed'):
+                    response = execute_instruction(c.message)
+                    if response == 'executed':
                         mc.postToChat('executed')
                         pass
                     else:

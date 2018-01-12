@@ -71,8 +71,11 @@ def process_instruction(instruction_to_process):
         if token.text == 'house':
             dict1['house'] = True
 
-    if len(dict1['dimensions']) != 0:
+    if len(num) != 0:
         dict1['dimensions'] = num
+
+    if(dict1['command'] == 'build' and (not ('material' in list(dict1.keys())))):
+        dict1['material'] = getBlockCode('STONE')
 
     return dict1
 
@@ -82,7 +85,3 @@ def process_instruction(instruction_to_process):
         strVar = raw_input("Please enter an instruction to process: ")
         print(process_instruction(strVar))
 '''
-
-
-
-
