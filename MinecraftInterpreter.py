@@ -1,135 +1,120 @@
-from __future__ import print_function
+import mcpi.minecraft as minecraft
+import time
+import math
+from math import *
+from mcpi.block import *
+from mcturtle import *
+import code
+import sys
 
-import EntityTrainer as Et
-from EntityTrainer import nlp
-import logging
+sys.path.append('.')
+import socket
+import json
+import pickle
+import numpy
+import unicodedata
+import SocketCommunication as Comm
+import SpeechToText as Spt
+from MinecraftInterpreter import processInstruction
 
-
-
-def text2int(textnum, numwords={}):
-    if not numwords:
-        units = [
-            "zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
-            "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen",
-            "sixteen", "seventeen", "eighteen", "nineteen",
-        ]
-
-        tens = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"]
-
-        scales = ["hundred", "thousand", "million", "billion", "trillion"]
-
-        numwords["and"] = (1, 0)
-        for idx, word in enumerate(units):    numwords[word] = (1, idx)
-        for idx, word in enumerate(tens):     numwords[word] = (1, idx * 10)
-        for idx, word in enumerate(scales):   numwords[word] = (10 ** (idx * 3 or 2), 0)
-
-    current = result = 0
-    for word in textnum.split():
-        if word not in numwords:
-            raise Exception("Illegal word: " + word)
-
-        scale, increment = numwords[word]
-        current = current * scale + increment
-        if scale > 100:
-            result += current
-            current = 0
-
-    return result + current
+commands = {'build', 'move', 'turn'}
 
 
-def parse_phrase(phrase):
-    parsed_phrase = dict.fromkeys(["verb", "object", "description", "quantity", "direction", "heresay", "coord"])
-    doc = ''
-    try:
-        if isinstance(phrase, str):
-            doc = nlp(unicode(phrase.lower(), encoding="utf-8"))
+def executeInstruction(instruction):
+    # get dictionary for command and arguments
+    instructionDict = processInstruction(instruction)
+    mc.postToChat(instructionDict)
+
+    if instructionDict['command'] is None:
+        return 'No command was recognized'
+    elif instructionDict['command'] not in commands:
+        return "The recognized command " + instructionDict['command'] + " is not supported by the system"
+
+    # orient player to match turtle
+    t.goto(mc.player.getPos().x, mc.player.getPos().y, mc.player.getPos().z)
+    t.angle(mc.player.getRotation())
+
+    if instructionDict['command'] == 'move':
+        t.penup()
+        if instructionDict['direction'] == 'backward' or instructionDict['ADV'] == 'back':
+            t.right(180)
+        elif instructionDict['direction'] is 'left':
+            t.left(90)
+        elif instructionDict['direction'] is 'right':
+            t.right(90)
         else:
-            doc = nlp(phrase)
-    except:
-        logging.exception('Unable to decode phrase')
-        return 'unable to decode phrase'
-        exit()
-    objects = []
-    possible_objects = []
-    # Layout of adjective is as follows
-    # shape_one: [ [colors] [other] ]
-    adjectives = []
-    possible_adjectives = []
-    verbs = []
-    quantity = []
-    possible_quantity = []
-    direction = []
-    possible_direction = []
-    here_say = False
-    for ent in Et.match(doc):
-        if ent.label_ == u'QUANTITY':
-            quantity.append(ent.text.lower())
-        elif ent.label_ == u'SHAPE':
-            possible_objects.append(ent.text.lower())
-        elif ent.label_ == u'DIRECTION':
-            possible_direction.append(ent.text.lower())
-    for np in doc.noun_chunks:
-        appended_direction = False
-        found_shape = False
-        if np.root.tag_ == 'PRP':
-            if len(objects) > 0:  # If the preposition is referring to a previous object...
-                objects.append(''.join(objects[-1:]))
-                adjectives.append(adjectives[-1:][0])
-            else:
-                logging.exception('Unable to find object of prepositional phrase.')
-                return
-        for word in np:
-            if word.text.lower() in possible_objects:
-                found_shape = True
-                objects.append(word.text.lower())
-            if word.text.lower() in 'here':
-                here_say = True
-        if found_shape:
-            temp_list = [[], []]
-            for ent in Et.match(doc):
-                if ent.label_ == u'COLOR' and ent.text in np.text:
-                    temp_list[0].append(ent.text.lower())
-            for word in np:
-                if word.pos_ == 'ADJ':
-                    temp_list[1].append(word.text.lower())
-            adjectives.append(temp_list)
+            #NEED TO MOVE FORWARD AS DEFAULT MAYBE
+            return 'Please specify what direction you want the player to move in.'
+        t.go(instructionDict['dimensions'][0])
+        return 'executed'
+    elif instructionDict['command'] == 'build':
+        t.gridalign()
+        comms = instructionDict['dimensions']
+        pos = mc.player.getPos()
+        x = pos.x
+        y = pos.y
+        z = pos.z
+        blockCode = instructionDict['block']
+        buildingBlocks(x, y, z, comms[0], comms[1], comms[2], blockCode)
+        if instructionDict['house'] is False:
+            return 'executed'
+        elif instructionDict['hollow'] is True:
+            x += 1
+            y += 1
+            z += 1
+            comms[0] -= 2
+            comms[1] -= 2
+            comms[2] -= 1
+            buildingBlocks(x, y, z, comms[0], comms[1], comms[2], 0)
 
-        if np.root.head.tag_ != 'IN':
-            for child in np.root.head.children:
-                if child.text.lower() in possible_direction:
-                    direction.append(child.text.lower())
-                    appended_direction = True
-            verbs.append(np.root.head.text.lower())
-            if not appended_direction:
-                direction.append(u'')
-    action_list = []
-    for i in range(len(verbs)):
-        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        # NOTE: This will not work
-        # Noun phrases need to be grouped together cohesively
-        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        verb = verbs[i]
-        parsed_phrase["verb"] = verb
-        obj = ''
-        if i < len(objects) and len(objects) > 0:
-            obj = objects[i]
-            parsed_phrase["object"] = obj
-        adj = ''
-        if i < len(adjectives) and len(adjectives) > 0:
-            adj = adjectives[i]
-        parsed_phrase["description"] = adj
-        quant = ''
-        if i < len(quantity) and len(quantity) > 0:
-            quant = quantity[i]
-        parsed_phrase["quantity"] = text2int(''.join(quant.split(" ")[:-1]))
-        dire = ''
-        if i < len(direction) and len(direction) > 0:
-            dire = direction[i]
-        parsed_phrase["direction"] = direction
-        action_list.append(take_action(verb, obj, adj, quant, dire, here_say))
-    return parsed_phrase
+        return 'executed'
+    elif instructionDict['command'] == 'turn':
+        if instructionDict['direction'] == 'backward' or instructionDict['direction'] == 'back':
+            t.right(180)
+        elif instructionDict['direction'] is 'left':
+            t.left(90)
+        elif instructionDict['direction'] is 'right':
+            t.right(90)
+        return 'executed'
+    else:
+        return 'Command is not supported'
 
 
-def take_action(verb, obj, desc, quantity, direction, here_say):
-    # logging.info('' + str(20) + 'Calling '+ verb+ ' with arguments: '+ desc+ ' -> '+ obj+ ', '+ text2int(''.join(quantity.split(" ")[:-1]))+ ''.join(quantity.split(" ")[-1:])+ ' '+ direction)
-    return [verb, desc, obj, quantity, direction, here_say]
+def buildingBlocks(x, y, z, width, height, length, blockType):
+    mc.setBlocks(x, y, z, x + width, y + height, z + length, blockType)
+
+
+def quit():
+    sys.exit()
+
+
+def inputLine(prompt):
+    mc.events.clearAll()
+    while True:
+        chats = mc.events.pollChatPosts()
+        for c in chats:
+            if c.entityId == playerId:
+                if c.message == 'quit':
+                    return 'quit()'
+                elif c.message == ' ':
+                    return ''
+                elif "__" in c.message:
+                    sys.exit();
+                else:
+                    mc.postToChat(c.message)
+                    response = executeInstruction(c.message)
+                    if (response == 'executed'):
+                        mc.postToChat('executed')
+                        pass
+                    else:
+                        mc.postToChat(response)
+        time.sleep(0.2)
+
+
+mc = minecraft.Minecraft()
+playerPos = mc.player.getPos()
+playerId = mc.getPlayerId()
+t = Turtle(mc)
+
+mc.postToChat("Enter python code into chat, type 'quit' to quit.")
+i = code.interact(banner="", readfunc=inputLine, local=locals())
