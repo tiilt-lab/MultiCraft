@@ -56,6 +56,7 @@ directions_dict = get_synonyms_dict(directions)
 def process_instruction(instruction_to_process):
     dict1 = {}
     num = []
+    dict1['command'] = None
 
     doc = nlp(unicode(instruction_to_process).lower())
     for token in doc:

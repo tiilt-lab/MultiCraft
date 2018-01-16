@@ -7,15 +7,15 @@ from mcturtle import *
 import code
 import sys
 sys.path.append('.')
-import socket
-import json
-import pickle
 import numpy
 import unicodedata
 import SpeechToText as Spt
 from MineCraftInterpreter import process_instruction
 
 commands = {'build', 'move', 'turn'}
+
+sd = Spt.SpeechDetector()
+sd.setup_mic()
 
 
 def execute_instruction(instruction):
@@ -83,6 +83,8 @@ def quit_mod():
 def inputLine(prompt):
     mc.events.clearAll()
     while True:
+        #chats = sd.run()
+        '''
         chats = mc.events.pollChatPosts()
         for c in chats:
             if c.entityId == playerId:
@@ -101,6 +103,15 @@ def inputLine(prompt):
                     else:
                         mc.postToChat(response)
         time.sleep(0.2)
+        '''
+        mess = sd.run()
+        mc.postToChat(mess)
+        response = execute_instruction(mess)
+        if response == 'executed':
+            mc.postToChat('executed')
+            pass
+        else:
+            mc.postToChat(response)
 
 mc = minecraft.Minecraft()
 playerPos = mc.player.getPos()
