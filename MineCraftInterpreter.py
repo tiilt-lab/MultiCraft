@@ -5,13 +5,14 @@ from nltk.corpus import wordnet as wn
 
 nlp = spacy.load('en')
 
-#List of the building materials supported
+# List of the building materials supported
 materials = ['stone', 'gold', 'golden', 'brick', 'lava', 'water']
 
-#List of the commands supported
+# List of the commands supported
 supported_commands = ['move', 'turn', 'build']
 
-#List of the directions for movement supported
+# List of the directions for movement supported
+
 directions = ['left', 'right', 'back', 'forward']
 
 
@@ -54,9 +55,17 @@ directions_dict = get_synonyms_dict(directions)
 
 
 def process_instruction(instruction_to_process):
-    dict1 = {}
+
+    dict1 = {
+        'command': None,
+        'house': None,
+        'material': None,
+        'dimensions': None,
+        'blockCode': None,
+        'direction': None,
+    }
+
     num = []
-    dict1['command'] = None
 
     doc = nlp(unicode(instruction_to_process).lower())
     for token in doc:
@@ -68,21 +77,13 @@ def process_instruction(instruction_to_process):
             dict1['direction'] = directions_dict[token.text]
         elif token.text in materials_dict:
             dict1['blockCode'] = getBlockCode(materials_dict[token.text].upper())
-
-        if token.text == 'house':
+        elif token.text == 'house':
             dict1['house'] = True
 
     if len(num) != 0:
         dict1['dimensions'] = num
 
-    if(dict1['command'] == 'build' and (not ('material' in list(dict1.keys())))):
+    if dict1['command'] == 'build' and (not ('material' in list(dict1.keys()))):
         dict1['material'] = getBlockCode('STONE')
 
     return dict1
-
-
-'''
-    while True:
-        strVar = raw_input("Please enter an instruction to process: ")
-        print(process_instruction(strVar))
-'''
