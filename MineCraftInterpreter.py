@@ -60,7 +60,7 @@ def process_instruction(instruction_to_process):
         'command': None,
         'house': None,
         'material': None,
-        'dimensions': None,
+        'dimensions': [],
         'blockCode': None,
         'direction': None,
     }
