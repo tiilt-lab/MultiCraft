@@ -1,21 +1,26 @@
 import mcpi.minecraft as minecraft
-import time
-import math
-from math import *
 from mcpi.block import *
 from mcturtle import *
 import code
+import time
 import sys
 sys.path.append('.')
-import socket
-import json
-import pickle
-import numpy
-import unicodedata
 import SpeechToText as Spt
 from MineCraftInterpreter import process_instruction
+import argparse
+
+
+# Get the specified input method
+parser = argparse.ArgumentParser(description='Specifies options (Voice Input or Text Input) for command input.')
+parser.add_argument('--input', dest='input_method', default='text', help='Specify the input method that will be used (default: text)', choices = ['voice','text'])
+args = vars(parser.parse_args())
+input_method = args['input_method']
+
 
 commands = {'build', 'move', 'turn'}
+
+sd = Spt.SpeechDetector()
+sd.setup_mic()
 
 
 def execute_instruction(instruction):
@@ -51,7 +56,7 @@ def execute_instruction(instruction):
         x = pos.x
         y = pos.y
         z = pos.z
-        block_code = instruction_dict['material']
+        block_code = instruction_dict['blockCode']
         mc.setBlocks(x, y, z, x+comms[0], y+comms[1], z+comms[2], block_code)
         if instruction_dict['house'] is False:
             return 'executed'
@@ -83,23 +88,29 @@ def quit_mod():
 def inputLine(prompt):
     mc.events.clearAll()
     while True:
-        chats = mc.events.pollChatPosts()
-        for c in chats:
-            if c.entityId == playerId:
-                if c.message == 'quit':
-                    return 'quit()'
-                elif c.message == ' ':
-                    return ''
-                elif "__" in c.message:
-                    sys.exit();
-                else:
-                    mc.postToChat(c.message)
-                    response = execute_instruction(c.message)
-                    if response == 'executed':
-                        mc.postToChat('executed')
-                        pass
+        response = None
+        if input_method == 'voice':
+            input_message = sd.run()
+            mc.postToChat(input_message)
+            response = execute_instruction(input_message)
+        else:
+            chats = mc.events.pollChatPosts()
+            for c in chats:
+                if c.entityId == playerId:
+                    if c.message == 'quit':
+                        return 'quit()'
+                    elif c.message == ' ':
+                        return ''
+                    elif "__" in c.message:
+                        sys.exit();
                     else:
-                        mc.postToChat(response)
+                        mc.postToChat(c.message)
+                        response = execute_instruction(c.message)
+        if response == 'executed':
+            mc.postToChat('executed')
+            pass
+        elif not response == None:
+            mc.postToChat(response)
         time.sleep(0.2)
 
 mc = minecraft.Minecraft()
