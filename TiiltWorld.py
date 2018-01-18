@@ -12,7 +12,7 @@ import argparse
 
 # Get the specified input method
 parser = argparse.ArgumentParser(description='Specifies options (Voice Input or Text Input) for command input.')
-parser.add_argument('--input', dest='input_method', default='text', help='Specify the input method that will be used (default: sphinx)', choices = ['voice','text'])
+parser.add_argument('--input', dest='input_method', default='text', help='Specify the input method that will be used (default: text)', choices = ['voice','text'])
 args = vars(parser.parse_args())
 input_method = args['input_method']
 
@@ -56,7 +56,7 @@ def execute_instruction(instruction):
         x = pos.x
         y = pos.y
         z = pos.z
-        block_code = instruction_dict['material']
+        block_code = instruction_dict['blockCode']
         mc.setBlocks(x, y, z, x+comms[0], y+comms[1], z+comms[2], block_code)
         if instruction_dict['house'] is False:
             return 'executed'
@@ -85,17 +85,15 @@ def quit_mod():
     sys.exit()
 
 
-def inputLine():
+def inputLine(prompt):
     mc.events.clearAll()
     while True:
         response = None
-        if input_method == 'speech':
-            print('INPUT METHOD: SPEECH...')
+        if input_method == 'voice':
             input_message = sd.run()
             mc.postToChat(input_message)
             response = execute_instruction(input_message)
         else:
-            print('INPUT METHOD: CONSOLE TEXT INPUT')
             chats = mc.events.pollChatPosts()
             for c in chats:
                 if c.entityId == playerId:
@@ -107,10 +105,11 @@ def inputLine():
                         sys.exit();
                     else:
                         mc.postToChat(c.message)
+                        response = execute_instruction(c.message)
         if response == 'executed':
             mc.postToChat('executed')
             pass
-        else:
+        elif not response == None:
             mc.postToChat(response)
         time.sleep(0.2)
 
