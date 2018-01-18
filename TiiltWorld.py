@@ -45,7 +45,7 @@ def execute_instruction(instruction):
             t.left(90)
         elif instruction_dict['direction'] is 'right':
             t.right(90)
-        if not ('dimensions' in list(instruction_dict.keys())):
+        if not instruction_dict['dimensions'] is None:
             return 'Please specify the number of steps the player should move'
         t.go(instruction_dict['dimensions'][0])
         return 'executed'
