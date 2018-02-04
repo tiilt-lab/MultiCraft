@@ -1,7 +1,6 @@
 # Open the File, Create File if it does not exist
 # locations_file = open('my_locations.txt', 'r+')
 
-
 def load_location_dict(file_to_read, locations_dict):
 	with open(file_to_read) as f:
 		locations = f.readlines()
@@ -17,5 +16,5 @@ def load_location_dict(file_to_read, locations_dict):
 
 def add_location_to_database(location_name, location_coord, db_file):
 	fl = open(db_file, "a")
-	fl.write(location_name + ':' + str(location_coord) + '\n')
+	fl.write(location_name + ':' + str(location_coord) + "\n")
 	fl.close()
