@@ -23,7 +23,7 @@ commands = {'build', 'move', 'turn', 'save', 'go'}
 try:
 	sd = Spt.SpeechDetector()
 	sd.setup_mic()
-except ImportError:
+except IOError:
 	pass
 
 # Load my saved locations
@@ -41,17 +41,17 @@ class TIILTMod(object):
 			self.save,
 			self.go,
 		]
-
-		self.commands = {f.__name__:f for f in _commands}
+		# mc = minecraft.Minecraft()
+		self.commands = {f.__name__: f for f in _commands}
 		self.mc = minecraft.Minecraft()
 		self.playerPos = self.mc.player.getPos()
 		self.playerId = self.mc.getPlayerId()
 		self.t = Turtle(self.mc)
 
-		self.mc.postToChat("Enter python code into chat, type 'quit' to quit.")
-		self.i = code.interact(banner="", readfunc=input_line, local=locals())
-
 	@classmethod
+	def test(cls):
+		pass
+
 	def move(self, instruction_dict):
 		self.t.penup()
 		if instruction_dict['direction'] == 'backward' or instruction_dict['direction'] == 'back':
@@ -62,9 +62,8 @@ class TIILTMod(object):
 			self.t.right(90)
 		if len(instruction_dict['dimensions']) == 0:
 			return 'Please specify the number of steps the player should move'
-			self.t.go(instruction_dict['dimensions'][0])
+		self.t.go(instruction_dict['dimensions'][0])
 		return 'executed'
-		pass
 
 	def go(self, instruction_dict):
 		coordinates = important_locations[instruction_dict['location_name']]
@@ -112,13 +111,17 @@ class TIILTMod(object):
 
 	def execute_instruction(self, instruction):
 		instruction_dict = process_instruction(instruction)
-
 		if instruction_dict['command'] is None:
 			return 'No command was recognized'
 		elif instruction_dict['command'] not in self.commands:
 			return "The recognized command " + instruction_dict['command'] + " is not supported by the system"
-		else:
-			self.commands[instruction_dict['command']](instruction_dict)
+		elif instruction_dict['command'] in self.commands:
+			# orient player to grid
+			self.t.goto(self.mc.player.getPos().x, self.mc.player.getPos().y, self.mc.player.getPos().z)
+			self.t.angle(self.mc.player.getRotation())
+			func = instruction_dict['command']
+			kwargs = instruction_dict
+			self.commands[func](kwargs)
 
 	def input_line(self, prompt):
 		self.mc.events.clearAll()
@@ -151,3 +154,5 @@ class TIILTMod(object):
 
 if __name__ == '__main__':
 	player = TIILTMod()
+	player.mc.postToChat("Enter python code into chat, type 'quit' to quit.")
+	i = code.interact(banner="", readfunc=player.input_line, local=locals())
