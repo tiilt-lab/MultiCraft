@@ -9,11 +9,11 @@ nlp = en_core_web_sm.load()
 materials = ['stone', 'gold', 'golden', 'brick', 'lava', 'water']
 
 # List of the commands supported
-supported_commands = ['move', 'turn', 'build', 'save', 'go']
+supported_commands = ['move', 'turn', 'build', 'save', 'go', 'tilt']
 
 # List of the directions for movement supported
 
-directions = ['left', 'right', 'back', 'forward']
+directions = ['left', 'right', 'back', 'forward', 'up', 'down']
 
 
 '''

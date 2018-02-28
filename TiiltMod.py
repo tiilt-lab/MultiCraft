@@ -18,7 +18,7 @@ parser.add_argument('--input', dest='input_method', default='text', help='Specif
 args = vars(parser.parse_args())
 input_method = args['input_method']
 
-commands = {'build', 'move', 'turn', 'save', 'go'}
+commands = {'build', 'move', 'turn', 'save', 'go', 'tilt'}
 
 try:
 	sd = Spt.SpeechDetector()
@@ -40,6 +40,7 @@ class TIILTMod(object):
 			self.place,
 			self.save,
 			self.go,
+			self.tilt,
 		]
 		# mc = minecraft.Minecraft()
 		self.commands = {f.__name__: f for f in _commands}
@@ -102,6 +103,14 @@ class TIILTMod(object):
 			self.t.right(90)
 		return 'executed'
 
+	def tilt(self, instruction_dict):
+		if instruction_dict['direction'] == 'up':
+			self.t.up(instruction_dict['dimensions'][0])
+		elif instruction_dict['direction'] == 'down':
+			self.t.down(instruction_dict['dimensions'][0])
+		else:
+			pass
+
 	def save(self, instruction_dict):
 		coordinates = [int(self.mc.player.getPos().x), int(self.mc.player.getPos().y), int(self.mc.player.getPos().z)]
 		important_locations[instruction_dict['location_name']] = coordinates
@@ -111,6 +120,7 @@ class TIILTMod(object):
 
 	def execute_instruction(self, instruction):
 		instruction_dict = process_instruction(instruction)
+		self.mc.postToChat(instruction_dict)
 		if instruction_dict['command'] is None:
 			return 'No command was recognized'
 		elif instruction_dict['command'] not in self.commands:
