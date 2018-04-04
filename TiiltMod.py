@@ -1,5 +1,3 @@
-import mcpi.minecraft as minecraft
-from mcpi.block import *
 from mcturtle import *
 import code
 import time
@@ -73,8 +71,16 @@ class TIILTMod(object):
 		return 'executed'
 
 	def go(self, instruction_dict):
-		coordinates = important_locations[instruction_dict['location_name']]
-		self.t.goto(coordinates[0], coordinates[1], coordinates[2])
+		self.t.penup()
+		if instruction_dict['location_name'] is not None and instruction_dict['location_name'] in instruction_dict.keys():
+			coordinates = important_locations[instruction_dict['location_name']]
+			self.t.goto(coordinates[0], coordinates[1], coordinates[2])
+		else:
+			dimensions = instruction_dict['dimensions']
+			try:
+				self.t.goto(dimensions[0], dimensions[1], dimensions[2])
+			except IndexError:
+				return 'Please specify the location to move to'
 
 	def place(self, instruction_dict):
 		pass

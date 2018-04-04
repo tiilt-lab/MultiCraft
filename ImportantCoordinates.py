@@ -1,6 +1,7 @@
 # Open the File, Create File if it does not exist
 # locations_file = open('my_locations.txt', 'r+')
 
+
 def load_location_dict(file_to_read, locations_dict):
 	with open(file_to_read) as f:
 		locations = f.readlines()

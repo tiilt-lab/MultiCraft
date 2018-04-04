@@ -2,6 +2,7 @@ import en_core_web_sm
 from Text2Int import text2int
 from TiiltBlocks import getBlockCode
 from nltk.corpus import wordnet as wn
+from ImportantCoordinates import load_location_dict
 
 nlp = en_core_web_sm.load()
 
@@ -12,13 +13,12 @@ materials = ['stone', 'gold', 'golden', 'brick', 'lava', 'water']
 supported_commands = ['move', 'turn', 'build', 'save', 'go', 'tilt']
 
 # List of the directions for movement supported
-
 directions = ['left', 'right', 'back', 'forward', 'up', 'down']
 
 
 '''
 	Given a list of strings, this maps every synonym of 
-	a given string to the string itself.
+	a given string to the string itself
 '''
 
 
@@ -41,7 +41,6 @@ def get_synonyms_dict(commands):
 Create the dictionaries for materials, commands and directions
 to help with word sense disambiguation
 '''
-
 
 materials_dict = get_synonyms_dict(materials)
 commands_dict = get_synonyms_dict(supported_commands)
@@ -74,8 +73,16 @@ def process_instruction(instruction_to_process):
 			if token.text == 'save':
 				dict1['location_name'] = instruction_to_process.lower().split(' ')[1]
 			elif token.text == 'go':
+				locations_dict = load_location_dict('important_locations.txt', {})
+				# check if locations exists in saved locations
 				words = instruction_to_process.lower().split(' ')
-				dict1['location_name'] = words[len(words)-1]
+				dict1['location_name'] = None
+				for word in words:
+					if word in locations_dict.keys():
+						dict1['location_name'] = word
+						dict1['dimensions'] = locations_dict[word]
+						break
+				# dict1['location_name'] = words[len(words)-1]
 		elif token.pos_ == u'NUM':
 			num.append(text2int(token.text))
 		elif token.text in directions_dict:
