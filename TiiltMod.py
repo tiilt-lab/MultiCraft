@@ -9,6 +9,7 @@ from MineCraftInterpreter import process_instruction
 import argparse
 from ImportantCoordinates import load_location_dict, add_location_to_database
 import os
+
 sys.path.append('.')
 
 # Get the specified input method
@@ -27,8 +28,13 @@ except IOError:
 	pass
 
 # Load my saved locations
-__location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
-important_locations = load_location_dict(os.path.join(__location__, 'important_locations.txt'), {})
+try:
+	__location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+	important_locations = load_location_dict(os.path.join(__location__, 'important_locations.txt'), {})
+except IOError:
+	locations_file = open('important_locations.txt', 'w')
+	__location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+	important_locations = load_location_dict(os.path.join(__location__, 'important_locations.txt'), {})
 
 
 class TIILTMod(object):
@@ -96,11 +102,14 @@ class TIILTMod(object):
 
 	def turn(self, instruction_dict):
 		if instruction_dict['direction'] == 'backward' or instruction_dict['direction'] == 'back':
-			self.t.right(180)
+			amount = instruction_dict['dimensions'][0] if not None else 180
+			self.t.right(amount)
 		elif instruction_dict['direction'] is 'left':
-			self.t.left(90)
+			amount = instruction_dict['dimensions'][0] if not None else 90
+			self.t.left(amount)
 		elif instruction_dict['direction'] is 'right':
-			self.t.right(90)
+			amount = instruction_dict['dimensions'][0] if not None else 90
+			self.t.right(amount)
 		return 'executed'
 
 	def tilt(self, instruction_dict):
@@ -115,7 +124,7 @@ class TIILTMod(object):
 		coordinates = [int(self.mc.player.getPos().x), int(self.mc.player.getPos().y), int(self.mc.player.getPos().z)]
 		important_locations[instruction_dict['location_name']] = coordinates
 		add_location_to_database(instruction_dict['location_name'],
-								coordinates, os.path.join(__location__, 'important_locations.txt'))
+		                         coordinates, os.path.join(__location__, 'important_locations.txt'))
 		return 'executed'
 
 	def execute_instruction(self, instruction):
