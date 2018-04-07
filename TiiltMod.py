@@ -108,13 +108,13 @@ class TIILTMod(object):
 
 	def turn(self, instruction_dict):
 		if instruction_dict['direction'] == 'backward' or instruction_dict['direction'] == 'back':
-			amount = instruction_dict['dimensions'][0] if not None else 180
+			amount = 180 if len(instruction_dict['dimensions']) == 0 else instruction_dict['dimensions'][0]
 			self.t.right(amount)
 		elif instruction_dict['direction'] is 'left':
-			amount = instruction_dict['dimensions'][0] if not None else 90
+			amount = 90 if len(instruction_dict['dimensions']) == 0 else instruction_dict['dimensions'][0]
 			self.t.left(amount)
 		elif instruction_dict['direction'] is 'right':
-			amount = instruction_dict['dimensions'][0] if not None else 90
+			amount = 90 if len(instruction_dict['dimensions']) == 0 else instruction_dict['dimensions'][0]
 			self.t.right(amount)
 		return 'executed'
 
