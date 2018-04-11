@@ -159,6 +159,7 @@ class TIILTMod(object):
 			else:
 				chats = self.mc.events.pollChatPosts()
 				for c in chats:
+					self.mc.postToChat(c.entityId)
 					if c.entityId == self.playerId:
 						if c.message == 'quit':
 							return 'quit()'
