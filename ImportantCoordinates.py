@@ -2,7 +2,7 @@
 # locations_file = open('my_locations.txt', 'r+')
 
 
-def load_location_dict(file_to_read, locations_dict):
+def load_location_dict(file_to_read = 'important_locations.txt', locations_dict={}):
 	with open(file_to_read) as f:
 		locations = f.readlines()
 	locations = [x.strip() for x in locations]

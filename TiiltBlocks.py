@@ -3,7 +3,7 @@ tiiltBlocks = {'GRASS' : 2, 'STONE' : 1, 'AIR' : 0 \
 			, 'BRICK' : 45, 'FIRE' : 51}
 
 
-def getBlockCode(block_name):
+def get_block_code(block_name):
 	if block_name in tiiltBlocks.keys():
 		return tiiltBlocks[block_name]
 	return None
