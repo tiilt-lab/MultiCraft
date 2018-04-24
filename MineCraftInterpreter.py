@@ -28,15 +28,15 @@ def process_instruction(instruction_to_process):
 		return game_command.args
 	return None
 
-test_strings = ['move forward sixteen steps',
-				'tilt body seventy degrees down',
-				'turn forty degrees right',
-				'build a thing measuring ten by ten by five',
-				'build a house measuring ten by six',
-				'build a square measuring four by four by one',
-				'save home2',
-				'go to home2'
-				]
-
-for command in test_strings:
-	print command, ': ',	process_instruction(command), '\n'
+# test_strings = ['move forward sixteen steps',
+# 				'tilt body seventy degrees down',
+# 				'turn forty degrees right',
+# 				'build a thing measuring ten by ten by five',
+# 				'build a house measuring ten by six',
+# 				'build a square measuring four by four by one',
+# 				'save home2',
+# 				'go to home2'
+# 				]
+#
+# for command in test_strings:
+# 	print command, ': ',	process_instruction(command), '\n'
