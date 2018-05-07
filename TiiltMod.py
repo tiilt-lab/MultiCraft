@@ -65,9 +65,9 @@ class TIILTMod(object):
 			self.t.left(90)
 		elif instruction_dict['direction'] is 'right':
 			self.t.right(90)
-		if len(instruction_dict['dimensions']) == 0:
-			return 'Please specify the number of steps the player should move'
-		self.t.go(instruction_dict['dimensions'][0])
+		# if len(instruction_dict['dimensions']) == 0:
+		# 	return 'Please specify the number of steps the player should move'
+		self.t.go(instruction_dict['dimensions'])
 		return 'executed'
 
 	def go(self, instruction_dict):
@@ -108,45 +108,44 @@ class TIILTMod(object):
 
 	def turn(self, instruction_dict):
 		if instruction_dict['direction'] == 'backward' or instruction_dict['direction'] == 'back':
-			amount = 180 if len(instruction_dict['dimensions']) == 0 else instruction_dict['dimensions'][0]
+			amount = instruction_dict['dimensions']
 			self.t.right(amount)
 		elif instruction_dict['direction'] is 'left':
-			amount = 90 if len(instruction_dict['dimensions']) == 0 else instruction_dict['dimensions'][0]
+			amount = instruction_dict['dimensions']
 			self.t.left(amount)
 		elif instruction_dict['direction'] is 'right':
-			amount = 90 if len(instruction_dict['dimensions']) == 0 else instruction_dict['dimensions'][0]
+			amount = instruction_dict['dimensions']
 			self.t.right(amount)
 		return 'executed'
 
 	def tilt(self, instruction_dict):
 		if instruction_dict['direction'] == 'up':
-			self.t.up(instruction_dict['dimensions'][0])
+			self.t.up(instruction_dict['dimensions'])
 		elif instruction_dict['direction'] == 'down':
-			self.t.down(instruction_dict['dimensions'][0])
-		else:
-			pass
+			self.t.down(instruction_dict['dimensions'])
+		return 'executed'
 
 	def save(self, instruction_dict):
 		coordinates = [int(self.mc.player.getPos().x), int(self.mc.player.getPos().y), int(self.mc.player.getPos().z)]
 		important_locations[instruction_dict['location_name']] = coordinates
-		add_location_to_database(instruction_dict['location_name'],
-		                         coordinates, os.path.join(__location__, 'important_locations.txt'))
+		add_location_to_database(instruction_dict['location_name'],coordinates,
+								 os.path.join(__location__, 'important_locations.txt'))
 		return 'executed'
 
 	def execute_instruction(self, instruction):
 		instruction_dict = process_instruction(instruction)
-		self.mc.postToChat(instruction_dict)
-		if instruction_dict['command'] is None:
-			return 'No command was recognized'
-		elif instruction_dict['command'] not in self.commands:
-			return "The recognized command " + instruction_dict['command'] + " is not supported by the system"
+		if instruction_dict is None:
+			return 'The command was not recognized'
 		elif instruction_dict['command'] in self.commands:
 			# orient player to grid
-			self.t.goto(self.mc.player.getPos().x, self.mc.player.getPos().y, self.mc.player.getPos().z)
-			self.t.angle(self.mc.player.getRotation())
+			self.orient_player_to_grid()
 			func = instruction_dict['command']
 			kwargs = instruction_dict
 			self.commands[func](kwargs)
+
+	def orient_player_to_grid(self):
+		self.t.goto(self.mc.player.getPos().x, self.mc.player.getPos().y, self.mc.player.getPos().z)
+		self.t.angele(self.mc.player.getRotation())
 
 	def input_line(self, prompt):
 		self.mc.events.clearAll()
