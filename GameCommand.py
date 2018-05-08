@@ -25,6 +25,8 @@ class GameCommand:
 			return self.get_go_args()
 		elif self.command == 'turn':
 			return self.get_turn_args()
+		elif self.command == 'pen':
+			return self.get_pen_args()
 		else:
 			return None
 
@@ -38,6 +40,10 @@ class GameCommand:
 		if 'dimensions' in self.args.keys():
 			if 'direction' not in self.args.keys():
 				self.args['direction'] = 'forward'
+			self.is_valid = True
+
+	def get_pen_args(self):
+			self.args['pen'] = True
 			self.is_valid = True
 
 	def get_build_args(self):
@@ -68,11 +74,18 @@ class GameCommand:
 	def get_tilt_args(self):
 		for word_token in self.command_token:
 			if word_token.pos == u'NUM':
-				print 'process dimension'
 				self.args['dimensions'] = text2int(word_token.text)
 			elif word_token.text in directions_dict:
 				self.args['direction'] = word_token.text
-
+				'''
+				if 'direction' in self.args.keys():
+					if 'dimension' not in self.args.keys():
+						self.args['dimensions'] = 45
+						self.is_valid = True
+				self.args['dimensions'] = text2int(word_token.text)
+			elif word_token.text in directions_dict:
+				self.args['direction'] = word_token.text
+			'''
 		if 'dimensions' in self.args.keys():
 			if 'direction' not in self.args.keys():
 				self.args['directions'] = 'up'
