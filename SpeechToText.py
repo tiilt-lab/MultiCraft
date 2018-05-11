@@ -1,159 +1,155 @@
-from __future__ import print_function
-
-from watson_developer_cloud import SpeechToTextV1
-
-import os
-import pyaudio
-import wave
-import audioop
-from collections import deque
+#!/usr/bin/env python
+#
+# Copyright 2016 IBM
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#import argparse
+import base64
+import configparser
+import json
+import threading
 import time
-import math
-
-import speech_recognition as sr
-
-"""
-Written by Timothy Mwiti, 2017
-Adapted from Sophie Li, 2016
-http://blog.justsophie.com/python-speech-to-text-with-pocketsphinx/
-"""
+import pyaudio
+import websocket
+from websocket._abnf import ABNF
+from collections import deque
 
 
-def speech_2_text(file_name):
-    speech_to_text = SpeechToTextV1(
-        username='',
-        password='',
-        x_watson_learning_opt_out=False
-    )
-    speech_to_text.get_model('en-US_BroadbandModel')
-    with open(file_name, 'rb') as audio_file:
-        results = speech_to_text.recognize(
-            audio_file, content_type='audio/wav', timestamps=True,
-            word_confidence=True)
-        first_array = results["results"]
-        transcript = ''
-        for element in first_array:
-            transcript += element["alternatives"][0]["transcript"] + ' '
+class Audio_Handler(object):
+	def __init__(self, rate=16000, channels=2, chunk_size=2048, socket_max_time=600, write_interval = 10):
+		self.CHUNK = chunk_size
+		self.FORMAT = pyaudio.paInt16
+		self.CHANNELS = channels
+		self.RATE = rate
+		self.DATA_QUEUE = deque()
+		self.audio_stream = None
+		self.ws = None
+		self.pyaudio_instance = pyaudio.PyAudio()
+		self.chunk_index = 0
+		self.recording_audio = False
+		self.write_interval = write_interval
+		self.chunk_count = int(self.RATE / self.CHUNK * self.write_interval)
+		self.socket_restart_count = int(self.RATE / self.CHUNK * socket_max_time)
+		print(self.socket_restart_count)
+		self.writing_audio_to_file = False
+		self.TRANSCRIPT_RESULTS_QUEUE = deque()
+		self.reset_count = 0
+		self.session = 0
+		self.last_chunk_sent = 0
+		self.read_audio()
 
-        return transcript
+	def callback(self, in_data, frame_count, time_info, status):
+		self.DATA_QUEUE.append((self.chunk_index, in_data, frame_count, time_info))
+		return (None, pyaudio.paContinue)
 
-class SpeechDetector:
-    def __init__(self):
-        # Microphone stream config.
-        self.CHUNK = 1024  # CHUNKS of bytes to read each time from mic
-        self.FORMAT = pyaudio.paInt16
-        self.CHANNELS = 1
-        self.RATE = 16000
+	def read_audio(self):
+		self.audio_stream = self.pyaudio_instance.open(format=self.FORMAT,
+													   channels=self.CHANNELS,
+													   rate=self.RATE,
+													   start=False,
+													   input=True,
+													   frames_per_buffer=self.CHUNK,
+													   stream_callback=self.callback)
+		self.recording_audio = False
 
-        self.SILENCE_LIMIT = 2  # Silence limit in seconds. The max ammount of seconds where
-        # only silence is recorded. When this time passes the
-        # recording finishes and the file is decoded
+	def pass_audio_to_socket(self):
+		if self.reset_count == 0:
+			self.audio_stream.start_stream()
+			print("recording started...")
+		self.session += 1
+		self.recording_audio = True
+		self.reset_count += 1
+		while self.ws.sock.connected and (self.audio_stream.is_active() or len(self.DATA_QUEUE) > 0) and (
+				self.chunk_index < self.socket_restart_count * self.reset_count):
+			if self.DATA_QUEUE:
+				(chunk_index, in_data, frame_count, time_info) = self.DATA_QUEUE.popleft()
+				self.ws.send(in_data, ABNF.OPCODE_BINARY)
+		print("* done recording")
+		data = {"action": "stop"}
+		self.ws.send(json.dumps(data).encode('utf8'))
+		time.sleep(1)
+		self.ws.close()
+		self.ws = None
+		self.setup_websocket()
 
-        self.PREV_AUDIO = 0.5  # Previous audio (in seconds) to prepend. When noise
-        # is detected, how much of previously recorded audio is
-        # prepended. This helps to prevent chopping the beginning
-        # of the phrase.
+	def __exit__(self):
+		self.audio_stream.stop_stream()
+		self.audio_stream.close()
+		self.ws.close()
+		self.pyaudio_instance.terminate()
 
-        self.THRESHOLD = 2500
-        self.num_phrases = -1
+	def on_message(self, ws, msg):
+		data = json.loads(msg)
+		if 'results' in data.keys() and data['results'][0]['final'] == True:
+			transcript = data['results'][0]['alternatives'][0]['transcript']
+			#print(transcript)
+			self.TRANSCRIPT_RESULTS_QUEUE.append(transcript)
 
-    def setup_mic(self, num_samples=50):
-        """ Gets average audio intensity of your mic sound. You can use it to get
-            average intensities while you're talking and/or silent. The average
-            is the avg of the .2 of the largest intensities recorded.
-        """
+	def setup_websocket(self):
+		headers = {}
+		userpass = ":".join(get_auth())
+		headers["Authorization"] = "Basic " + base64.b64encode(
+			userpass.encode()).decode()
+		url = ("wss://stream.watsonplatform.net//speech-to-text/api/v1/recognize?model=en-US_BroadbandModel")
+		self.ws = websocket.WebSocketApp(url,
+										 header=headers,
+										 on_message=self.on_message,
+										 on_error=self.on_error,
+										 on_close=self.on_close)
+		self.ws.on_open = self.on_open
+		#self.ws.args = parse_args()
+		#self.ws.run_forever()
 
-        print("Getting intensity values from mic.")
-        p = pyaudio.PyAudio()
-        stream = p.open(format=self.FORMAT,
-                        channels=self.CHANNELS,
-                        rate=self.RATE,
-                        input=True,
-                        frames_per_buffer=self.CHUNK)
+	def on_error(self, ws, error):
+		print(error)
 
-        values = [math.sqrt(abs(audioop.avg(stream.read(self.CHUNK), 4)))
-                  for x in range(num_samples)]
-        values = sorted(values, reverse=True)
-        r = sum(values[:int(num_samples * 0.2)]) / int(num_samples * 0.2)
-        print(" Finished ")
-        print(" Average audio intensity is ", r)
-        stream.close()
-        p.terminate()
-        return r
+	def on_close(self, ws):
+		print("Socket Closed")
+
+	def on_open(self, ws):
+		print("Websocket Opened")
+		#args = self.ws.args
+		data = {
+			"action": "start",
+			"content-type": "audio/l16;rate=%d;channels=%d" % (self.RATE, self.CHANNELS),
+			"interim_results": True,
+			"word_confidence": True,
+			"timestamps": True,
+			"speaker_labels": True,
+		}
+		self.ws.send(json.dumps(data).encode('utf8'))
+		threading.Thread(target=self.pass_audio_to_socket).start()
 
 
-    def save_speech(self, data, p):
-        """
-        Saves mic data to temporary WAV file. Returns filename of saved
-        file
-        """
-        filename = 'tempfiles/output_' + str(int(time.time()))
-        # writes data to WAV file
-        data = ''.join(data)
-        wf = wave.open(filename + '.wav', 'wb')
-        wf.setnchannels(1)
-        wf.setsampwidth(p.get_sample_size(pyaudio.paInt16))
-        wf.setframerate(self.RATE)  # TODO make this value a function parameter?
-        wf.writeframes(data)
-        wf.close()
-        return filename + '.wav'
+def get_auth():
+	config = configparser.RawConfigParser()
+	config.read('speech.cfg')
+	user = config.get('auth', 'username')
+	password = config.get('auth', 'password')
+	return (user, password)
 
-    def run(self):
-        """
-        Listens to Microphone, extracts phrases from it and calls pocketsphinx
-        to decode the sound
-        """
 
-        # Open stream
-        p = pyaudio.PyAudio()
-        stream = p.open(format=self.FORMAT,
-                        channels=self.CHANNELS,
-                        rate=self.RATE,
-                        input=True,
-                        frames_per_buffer=self.CHUNK)
-        print("* Mic set up and listening. ")
-
-        audio2send = []
-        cur_data = ''  # current chunk of audio data
-        rel = self.RATE / self.CHUNK
-        slid_win = deque(maxlen= (int(self.SILENCE_LIMIT * rel)))
-        # Prepend audio from 0.5 seconds before noise was detected
-        prev_audio = deque(maxlen= (int(self.PREV_AUDIO * rel)))
-        started = False
-
-        while True:
-            cur_data = stream.read(self.CHUNK)
-            slid_win.append(math.sqrt(abs(audioop.avg(cur_data, 4))))
-
-            if sum([x > self.THRESHOLD for x in slid_win]) > 0:
-                if not started:
-                    print("Starting recording of phrase")
-                    started = True
-                audio2send.append(cur_data)
-
-            elif started:
-                print("Finished recording, decoding phrase")
-                filename = self.save_speech(list(prev_audio) + audio2send, p)
-                # r = self.decode_phrase(filename)  # Pocketsphinx Decoder
-                #r = self.decode_phrase_sphinx(filename)  # Sphinx Decoder
-                
-                r = speech_2_text(filename)
-                # Removes temp audio file
-                os.remove(filename)
-                stream.close()
-                # Reset all
-                print("Ending Loop")
-                return r
-
-            else:
-                prev_audio.append(cur_data)
-
-        print("* Done listening")
-        stream.close()
-        p.terminate()
-
+def print_every_5_seconds():
+	i = 0
+	while True:
+		print(i)
+		time.sleep(5)
 
 if __name__ == "__main__":
-    sd = SpeechDetector()
-    sd.setup_mic()
-    sd.run()
+	a = Audio_Handler(channels=2)
+	a.setup_websocket()
+
+	time_thread = threading.Thread(target=print_every_5_seconds)
+	audio_thread = threading.Thread(target=a.ws.run_forever)
+	time_thread.start()
+	audio_thread.start()

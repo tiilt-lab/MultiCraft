@@ -2,29 +2,31 @@ from mcturtle import *
 import code
 import time
 import sys
-import SpeechToText as Spt
+from SpeechToText import Audio_Handler
 from MineCraftInterpreter import process_instruction
 import argparse
 from ImportantCoordinates import load_location_dict, add_location_to_database
 import os
 from coordinate_calculations import *
+import threading
 
 sys.path.append('.')
 
 # Get the specified input method
 parser = argparse.ArgumentParser(description='Specifies options (Voice Input or Text Input) for command input.')
-parser.add_argument('--input', dest='input_method', default='text', help='Specify the input method that will be used \
- (default: text)', choices=['voice', 'text'])
+parser.add_argument('--input', dest='input_method', default='text', help='Specify the input method that will be used (default: text)', choices=['voice', 'text'])
 args = vars(parser.parse_args())
+
 input_method = args['input_method']
 
 commands = {'build', 'move', 'turn', 'save', 'go', 'tilt', 'pen'}
 
+
 try:
-	sd = Spt.SpeechDetector()
-	sd.setup_mic()
-except IOError:
-	pass
+	a = Audio_Handler(channels=2)
+	a.setup_websocket()
+except:
+	exit()
 
 # Load my saved locations
 try:
@@ -74,7 +76,7 @@ class TIILTMod(object):
 
 	def go(self, instruction_dict):
 		self.t.penup()
-		if instruction_dict['location_name'] is not None and instruction_dict['location_name'] in instruction_dict.keys():
+		if 'location_name' in instruction_dict.keys() and instruction_dict['location_name'] is not None:
 			coordinates = important_locations[instruction_dict['location_name']]
 			self.t.goto(coordinates[0], coordinates[1], coordinates[2])
 		else:
@@ -158,13 +160,17 @@ class TIILTMod(object):
 
 	def input_line(self, prompt):
 		self.mc.events.clearAll()
+		if input_method == 'voice':
+				self.mc.postToChat('running via mic')
 		while True:
 			response = None
 			if input_method == 'voice':
-				self.mc.postToChat('running via mic')
-				input_message = sd.run()
-				self.mc.postToChat(input_message)
-				response = self.execute_instruction(input_message)
+				input_message = ''
+				if len(a.TRANSCRIPT_RESULTS_QUEUE):
+					input_message = a.TRANSCRIPT_RESULTS_QUEUE.popleft()
+				if input_message is not '':
+					self.mc.postToChat(input_message)
+					response = self.execute_instruction(input_message)
 			else:
 				chats = self.mc.events.pollChatPosts()
 				for c in chats:
@@ -183,9 +189,18 @@ class TIILTMod(object):
 				pass
 			elif response is not None:
 				self.mc.postToChat(response)
-			time.sleep(0.2)
+			time.sleep(2)
+
+	def start_threads():
+		speech_thread = threading.Thread(target=a.ws.run_forrever)
+		execute_thread = threading.Thread(target=self.input_line)
+		speech_thread.start()
+		execute_thread.start()
 
 if __name__ == '__main__':
 	player = TIILTMod()
+	if input_method == 'voice':
+		speech_thread = threading.Thread(target=a.ws.run_forever)
+		speech_thread.start()
 	player.mc.postToChat("Enter python code into chat, type 'quit' to quit.")
 	i = code.interact(banner="", readfunc=player.input_line, local=locals())
