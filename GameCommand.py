@@ -27,6 +27,8 @@ class GameCommand:
 			return self.get_turn_args()
 		elif self.command == 'pen':
 			return self.get_pen_args()
+		elif self.command == 'undo':
+			return self.get_undo_args()
 		else:
 			return None
 
@@ -42,9 +44,9 @@ class GameCommand:
 				self.args['direction'] = 'forward'
 			self.is_valid = True
 
-	def get_pen_args(self):
-			self.args['pen'] = True
-			self.is_valid = True
+		def get_pen_args(self):
+				self.args['pen'] = True
+				self.is_valid = True
 
 	def get_build_args(self):
 		dimensions = []
@@ -53,10 +55,18 @@ class GameCommand:
 				dimensions.append(text2int(word_token.text))
 			if word_token.text == 'house':
 				self.args['house'] = True
+			if word_token.text == 'wall':
+				self.args['wall'] = True
+			if word_token.text == 'sphere':
+				self.args['sphere'] = True
 			if word_token.text in materials_dict:
 				self.args['block_code'] = get_block_code(materials_dict[word_token.text].upper())
 
-		if len(dimensions) < 3:
+		if 'wall' in self.args.keys() and len(dimensions) == 2:
+			dimensions.append(0)
+		elif 'sphere' in self.args.keys() and len(dimensions) == 1:
+			pass # This is a valid dict therefore skip the return
+		elif len(dimensions) < 3:
 			self.args = {}
 			return
 		self.args['dimensions'] = dimensions
@@ -66,7 +76,7 @@ class GameCommand:
 
 	def get_save_args(self):
 		command_words = self.command_text.lower().split(' ')
-		if len(command_words) >= 2:
+		if len(command_words) > 2:
 			return
 		self.args['location_name'] = command_words[1]
 		self.is_valid = True
@@ -77,19 +87,10 @@ class GameCommand:
 				self.args['dimensions'] = text2int(word_token.text)
 			elif word_token.text in directions_dict:
 				self.args['direction'] = word_token.text
-				'''
 				if 'direction' in self.args.keys():
-					if 'dimension' not in self.args.keys():
-						self.args['dimensions'] = 45
+						if 'dimension' not in self.args.keys():
+								self.args['dimensions'] = 45
 						self.is_valid = True
-				self.args['dimensions'] = text2int(word_token.text)
-			elif word_token.text in directions_dict:
-				self.args['direction'] = word_token.text
-			'''
-		if 'dimensions' in self.args.keys():
-			if 'direction' not in self.args.keys():
-				self.args['directions'] = 'up'
-			self.is_valid = True
 
 	def get_go_args(self):
 		locations_dict = load_location_dict()
@@ -110,3 +111,6 @@ class GameCommand:
 			if 'dimensions' not in self.args.keys():
 				self.args['dimensions'] = 90
 			self.is_valid = True
+
+	def get_undo_args(self):
+		self.is_valid = True

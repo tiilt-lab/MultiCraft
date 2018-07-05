@@ -13,7 +13,8 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-#import argparse
+
+
 import base64
 import configparser
 import json
@@ -23,10 +24,14 @@ import pyaudio
 import websocket
 from websocket._abnf import ABNF
 from collections import deque
+import os
+import wave
 
 
-class Audio_Handler(object):
-	def __init__(self, rate=16000, channels=2, chunk_size=2048, socket_max_time=600, write_interval = 10):
+class AudioHandler(object):
+	def __init__(
+			self, rate=16000, channels=2, chunk_size=2048, socket_max_time=600, write_interval=10,
+			audio_folder='audio_output'):
 		self.CHUNK = chunk_size
 		self.FORMAT = pyaudio.paInt16
 		self.CHANNELS = channels
@@ -40,26 +45,59 @@ class Audio_Handler(object):
 		self.write_interval = write_interval
 		self.chunk_count = int(self.RATE / self.CHUNK * self.write_interval)
 		self.socket_restart_count = int(self.RATE / self.CHUNK * socket_max_time)
-		print(self.socket_restart_count)
 		self.writing_audio_to_file = False
 		self.TRANSCRIPT_RESULTS_QUEUE = deque()
+		self.AUDIO_QUEUE = deque()
 		self.reset_count = 0
 		self.session = 0
 		self.last_chunk_sent = 0
 		self.read_audio()
 
+		self.audio_folder = audio_folder + str(int(time.time()))
+		if not os.path.exists(self.audio_folder):
+			os.mkdir(self.audio_folder)
+
 	def callback(self, in_data, frame_count, time_info, status):
 		self.DATA_QUEUE.append((self.chunk_index, in_data, frame_count, time_info))
-		return (None, pyaudio.paContinue)
+		self.AUDIO_QUEUE.append((self.chunk_index, in_data, frame_count, time_info))
+
+		if self.chunk_index % self.chunk_count == self.chunk_count - 1:
+			self.writing_audio_to_file = True
+		self.chunk_index += 1
+		return None, pyaudio.paContinue
+
+	def write_to_file(self):
+		while True:
+			if self.writing_audio_to_file:
+				data_to_write = []
+				start_time = None
+				for i in range(int(self.chunk_count)):
+					if self.AUDIO_QUEUE:
+						chunk_index, data, frame_count, time_info = self.AUDIO_QUEUE.popleft()
+						if len(data_to_write) == 0:
+							start_time = chunk_index
+						data_to_write.append(data)
+
+				if len(data_to_write):
+					full_file_path = os.path.join(self.audio_folder, str(start_time) + ".wav")
+					wf = wave.open(full_file_path, 'wb')
+					wf.setnchannels(self.CHANNELS)
+					wf.setsampwidth(self.pyaudio_instance.get_sample_size(pyaudio.paInt16))
+					wf.setframerate(self.RATE)
+					wf.writeframes(b''.join(data_to_write))
+					wf.close()
+
+				self.writing_audio_to_file = False
 
 	def read_audio(self):
-		self.audio_stream = self.pyaudio_instance.open(format=self.FORMAT,
-													   channels=self.CHANNELS,
-													   rate=self.RATE,
-													   start=False,
-													   input=True,
-													   frames_per_buffer=self.CHUNK,
-													   stream_callback=self.callback)
+		self.audio_stream = self.pyaudio_instance.open(
+			format=self.FORMAT,
+			channels=self.CHANNELS,
+			rate=self.RATE,
+			start=False,
+			input=True,
+			frames_per_buffer=self.CHUNK,
+			stream_callback=self.callback)
 		self.recording_audio = False
 
 	def pass_audio_to_socket(self):
@@ -68,6 +106,7 @@ class Audio_Handler(object):
 			print("recording started...")
 		self.session += 1
 		self.recording_audio = True
+		threading.Thread(target=self.write_to_file).start()
 		self.reset_count += 1
 		while self.ws.sock.connected and (self.audio_stream.is_active() or len(self.DATA_QUEUE) > 0) and (
 				self.chunk_index < self.socket_restart_count * self.reset_count):
@@ -92,7 +131,7 @@ class Audio_Handler(object):
 		data = json.loads(msg)
 		if 'results' in data.keys() and data['results'][0]['final'] == True:
 			transcript = data['results'][0]['alternatives'][0]['transcript']
-			#print(transcript)
+			print(transcript)
 			self.TRANSCRIPT_RESULTS_QUEUE.append(transcript)
 
 	def setup_websocket(self):
@@ -100,15 +139,14 @@ class Audio_Handler(object):
 		userpass = ":".join(get_auth())
 		headers["Authorization"] = "Basic " + base64.b64encode(
 			userpass.encode()).decode()
-		url = ("wss://stream.watsonplatform.net//speech-to-text/api/v1/recognize?model=en-US_BroadbandModel")
-		self.ws = websocket.WebSocketApp(url,
-										 header=headers,
-										 on_message=self.on_message,
-										 on_error=self.on_error,
-										 on_close=self.on_close)
+		url = "wss://stream.watsonplatform.net//speech-to-text/api/v1/recognize?model=en-US_BroadbandModel"
+		self.ws = websocket.WebSocketApp(
+			url,
+			header=headers,
+			on_message=self.on_message,
+			on_error=self.on_error,
+			on_close=self.on_close)
 		self.ws.on_open = self.on_open
-		#self.ws.args = parse_args()
-		#self.ws.run_forever()
 
 	def on_error(self, ws, error):
 		print(error)
@@ -118,7 +156,6 @@ class Audio_Handler(object):
 
 	def on_open(self, ws):
 		print("Websocket Opened")
-		#args = self.ws.args
 		data = {
 			"action": "start",
 			"content-type": "audio/l16;rate=%d;channels=%d" % (self.RATE, self.CHANNELS),
@@ -136,20 +173,10 @@ def get_auth():
 	config.read('speech.cfg')
 	user = config.get('auth', 'username')
 	password = config.get('auth', 'password')
-	return (user, password)
+	return user, password
 
-
-def print_every_5_seconds():
-	i = 0
-	while True:
-		print(i)
-		time.sleep(5)
 
 if __name__ == "__main__":
-	a = Audio_Handler(channels=2)
+	a = AudioHandler(channels=2)
 	a.setup_websocket()
-
-	time_thread = threading.Thread(target=print_every_5_seconds)
-	audio_thread = threading.Thread(target=a.ws.run_forever)
-	time_thread.start()
-	audio_thread.start()
+	a.ws.run_forever()

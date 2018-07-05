@@ -4,10 +4,11 @@ from nltk.corpus import wordnet as wn
 materials = ['stone', 'gold', 'golden', 'brick', 'lava', 'water']
 
 # List of the commands supported
-supported_commands = ['move', 'turn', 'build', 'save', 'go', 'tilt']
+supported_commands = ['move', 'turn', 'build', 'save', 'go', 'tilt', 'pen', 'undo']
 
 # List of the directions for movement supported
 directions = ['left', 'right', 'back', 'forward', 'up', 'down']
+
 
 # Given a list of strings, this maps every synonym of
 # a given string to the string itself
@@ -21,6 +22,7 @@ def get_word_synonyms_as_dict(commands):
 		for word in get_word_synonyms(comm):
 			synonyms_dict[word] = comm
 	return synonyms_dict
+
 
 def get_word_synonyms(word):
 	synonyms = []
