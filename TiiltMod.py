@@ -164,12 +164,9 @@ class TIILTMod(object):
 		if 'house' not in instruction_dict.keys():
 			return 'executed'
 		elif instruction_dict['house'] is True:
-			start_x += 1
-			start_y += 1
-			start_z += 1
-			end_x -= 2
-			end_y -= 2
-			end_z -= 1
+			start_x, start_y, start_z, end_x, end_y, end_z = get_hollow_dimensions(
+				start_x, start_y, start_z, end_x, end_y, end_z, rotation, dimensions
+			)
 			self.mc.setBlocks(start_x, start_y, start_z, end_x, end_y, end_z, 0)
 		return 'executed'
 
