@@ -1,13 +1,17 @@
 from __future__ import print_function
-import pyautogui
 import socket
-
-
+import subprocess
+import platform
 
 
 def socket_gaze_test():
+	if platform.system() == 'Windows':
+		print('Starting eye gaze tracking...')
+		try:
+			eye_gaze = subprocess.Popen("eye_gaze\Interaction_Streams_101.exe", shell=False)
+		except Exception as e:
+			raise e
 
-	# Create a TCP/IP socket
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 	# Bind the socket to the port
@@ -19,34 +23,35 @@ def socket_gaze_test():
 	sock.listen(1)
 
 	while True:
-		# Wait for a connection
 		print('waiting for a connection')
 		connection, client_address = sock.accept()
 		try:
 			print('connection from', client_address)
-
-			# Receive the data in small chunks and retransmit it
+			# this variable is for debugging purposes
+			print_count = 0
 			while True:
+				print_count += 1
 				data = connection.recv(50)
-				# print('received {!r}'.format(data))
-				data = data.decode("utf-8").replace(" ","")
+				data = data.decode("utf-8").replace(" ", "")
 				coordinates = data.split(":")
 				if len(coordinates) == 2:
 					try:
 						x_coord = int(float(coordinates[0]))
 						y_coord = int(float(coordinates[1]))
-
-						pyautogui.moveTo(x_coord, y_coord)
+						if print_count % 200 == 0:
+							print("You are looking at %s , %s" % (x_coord, y_coord))
 					except ValueError:
 						continue
-
 				if data:
-					print('sending data back to the client')
-					#connection.sendall(data)
+					continue
 				else:
-					print('no data from', client_address)
+					print('No data from', client_address)
 					break
 
 		finally:
 			# Clean up the connection
 			connection.close()
+
+
+if __name__ == "__main__":
+	socket_gaze_test()

@@ -1,7 +1,7 @@
 from nltk.corpus import wordnet as wn
 
 # List of the building materials supported
-materials = ['stone', 'gold', 'golden', 'brick', 'lava', 'water']
+materials = ['stone', 'gold', 'golden', 'brick', 'lava', 'water', 'stair', 'door', 'tnt']
 
 # List of the commands supported
 supported_commands = ['move', 'turn', 'build', 'save', 'go', 'tilt', 'pen', 'undo']

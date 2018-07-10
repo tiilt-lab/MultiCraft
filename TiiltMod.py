@@ -11,12 +11,13 @@ from coordinate_calculations import *
 import threading
 from Structures import sphere
 import mcpi.minecraft as minecraft
-import queue
 import socket
+import platform
+import subprocess
 import pyautogui
 
-sys.path.append('.')
 
+sys.path.append('.')
 # Get the specified input method
 parser = argparse.ArgumentParser(description='Specifies options (Voice Input or Text Input) for command input.')
 parser.add_argument(
@@ -32,8 +33,6 @@ args = vars(parser.parse_args())
 
 input_method = args['input_method']
 eye_tracking = args['eye_tracking']
-
-
 commands = {'build', 'move', 'turn', 'save', 'go', 'tilt', 'pen', 'undo'}
 
 if input_method == 'voice':
@@ -56,8 +55,13 @@ except IOError:
 
 
 def eye_data_setup():
-	global EYE_DATA
-	# Create a TCP/IP socket
+	if platform.system() == 'Windows':
+		print('Starting eye gaze tracking...')
+		try:
+			eye_gaze = subprocess.Popen("eye_gaze\Interaction_Streams_101.exe", shell=False)
+		except Exception as e:
+			raise e
+
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 	# Bind the socket to the port
@@ -67,35 +71,35 @@ def eye_data_setup():
 
 	# Listen for incoming connections
 	sock.listen(1)
+
 	while True:
-		# Wait for a connection
 		print('waiting for a connection')
 		connection, client_address = sock.accept()
 		try:
 			print('connection from', client_address)
-
-			# Receive the data in small chunks and retransmit it
+			# this variable is for debugging purposes
+			print_count = 0
 			while True:
+				print_count += 1
 				data = connection.recv(50)
 				data = data.decode("utf-8").replace(" ", "")
 				coordinates = data.split(":")
-				if len(EYE_DATA) > 500:
-					EYE_DATA = []
 				if len(coordinates) == 2:
 					try:
 						x_coord = int(float(coordinates[0]))
 						y_coord = int(float(coordinates[1]))
-						EYE_DATA.append([x_coord, y_coord])
+						if print_count % 200 == 0:
+							print("You are looking at %s , %s" % (x_coord, y_coord))
 					except ValueError:
 						continue
-
 				if data:
 					continue
 				else:
-					print('no data from', client_address)
+					print('No data from', client_address)
 					break
 
 		finally:
+			# Clean up the connection
 			connection.close()
 
 
@@ -197,18 +201,16 @@ class TIILTMod(object):
 			os.path.join(__location__, 'important_locations.txt'))
 		return 'executed'
 
-	def pen(self, instruction_dict):
+	def pen(self):
 			self.t.penup()
 			return 'executed'
 
-	def undo(self, instruction_dict):
+	def undo(self):
 		self.mc.postToChat("Undoing action")
 		self.mc.restoreCheckpoint()
 
 	def execute_instruction(self, instruction):
 		self.mc.postToChat('Your angle orientation is: ' + str(self.mc.player.getRotation()))
-		# self.mc.postToChat('Your position on the map is: ' + str(self.mc.player.getPos()))
-		# self.mc.postToChat('Your pitch is: ' + str(self.mc.player.getPitch()))
 		instruction_dict = process_instruction(instruction)
 		if instruction_dict is None:
 			return 'The command was not recognized'
@@ -220,12 +222,70 @@ class TIILTMod(object):
 			self.commands[func](kwargs)
 
 		self.mc.postToChat('Your angle orientation is: ' + str(self.mc.player.getRotation()))
-		# self.mc.postToChat('Your position on the map is: ' + str(self.mc.player.getPos()))
-		# self.mc.postToChat('Your pitch is: ' + str(self.mc.player.getPitch()))
 
 	def orient_player_to_grid(self):
 		self.t.goto(self.mc.player.getPos().x, self.mc.player.getPos().y, self.mc.player.getPos().z)
 		self.t.angle(self.mc.player.getRotation())
+
+	def protrude_eye_gaze(self):
+		player_loc = self.mc.player.getPos()
+		player_loc.y += 1
+		for i in range(0,20):
+			player_loc.x += 1
+			block_id = self.mc.getBlock(player_loc.x, player_loc.y, player_loc.z)
+			if block_id > 0:
+				self.mc.postToChat("Here here here here")
+				self.mc.setBlock(player_loc.x, player_loc.y, player_loc.z,0)
+				break
+		return "Has been executed"
+
+	def eye_data_setup(self):
+		if platform.system() == 'Windows':
+			self.mc.postToChat('Starting eye gaze tracking...')
+			try:
+				eye_gaze = subprocess.Popen("eye_gaze\Interaction_Streams_101.exe", shell=False)
+			except Exception as e:
+				raise e
+
+		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+		# Bind the socket to the port
+		server_address = ('localhost', 8080)
+		self.mc.postToChat('starting up on {} port {}'.format(*server_address))
+		sock.bind(server_address)
+
+		# Listen for incoming connections
+		sock.listen(1)
+
+		while True:
+			self.mc.postToChat('waiting for a connection')
+			connection, client_address = sock.accept()
+			try:
+				# self.mc.postToChat('connection from', client_address)
+				# this variable is for debugging purposes
+				print_count = 0
+				while True:
+					print_count += 1
+					data = connection.recv(50)
+					data = data.decode("utf-8").replace(" ", "")
+					coordinates = data.split(":")
+					if len(coordinates) == 2:
+						try:
+							x_coord = int(float(coordinates[0]))
+							y_coord = int(float(coordinates[1]))
+							if print_count % 10 == 0:
+								self.mc.postToChat("You are looking at %s , %s" % (x_coord, y_coord))
+								# pyautogui.moveTo(x_coord, y_coord)
+						except ValueError:
+							continue
+					if data:
+						continue
+					else:
+						self.mc.postToChat('No data from', client_address)
+						break
+
+			finally:
+				connection.close()
 
 	def input_line(self, prompt):
 		self.mc.events.clearAll()
@@ -253,6 +313,7 @@ class TIILTMod(object):
 						else:
 							self.mc.postToChat(c.message)
 							response = self.execute_instruction(c.message)
+
 			if response == 'executed':
 				self.mc.postToChat('executed')
 				pass
@@ -266,8 +327,6 @@ if __name__ == '__main__':
 	if input_method == 'voice':
 		speech_thread = threading.Thread(target=a.ws.run_forever)
 		speech_thread.start()
-	# gaze_thread = threading.Thread(target=eye_data_setup)
 	player.mc.postToChat("Getting ready to start")
-	# gaze_thread.start()
 	player.mc.postToChat("Enter python code into chat, type 'quit' to quit.")
 	i = code.interact(banner="", readfunc=player.input_line, local=locals())
