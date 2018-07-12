@@ -14,7 +14,8 @@ import mcpi.minecraft as minecraft
 import socket
 import platform
 import subprocess
-import pyautogui
+# import pyautogui
+import math
 
 
 sys.path.append('.')
@@ -222,6 +223,7 @@ class TIILTMod(object):
 			self.commands[func](kwargs)
 
 		self.mc.postToChat('Your angle orientation is: ' + str(self.mc.player.getRotation()))
+		self.mc.postToChat('Your angle orientation is: ' + str(self.mc.player.getPos()))
 
 	def orient_player_to_grid(self):
 		self.t.goto(self.mc.player.getPos().x, self.mc.player.getPos().y, self.mc.player.getPos().z)
@@ -230,13 +232,23 @@ class TIILTMod(object):
 	def protrude_eye_gaze(self):
 		player_loc = self.mc.player.getPos()
 		player_loc.y += 1
-		for i in range(0,20):
+		self.mc.postToChat(player_loc)
+		for i in range(0, 10):
+			x2 = player_loc.x + (i * math.sin(math.radians(self.mc.player.getRotation())) * math.cos(math.radians(-self.mc.player.getPitch())))
+			y2 = player_loc.y + (i * math.sin(math.radians(-self.mc.player.getPitch())))
+			z2 = player_loc.z + (i * math.cos(math.radians(-self.mc.player.getPitch())) * math.cos(math.radians(self.mc.player.getRotation())))
 			player_loc.x += 1
-			block_id = self.mc.getBlock(player_loc.x, player_loc.y, player_loc.z)
+			block_id = self.mc.getBlock(x2, y2, z2)
 			if block_id > 0:
-				self.mc.postToChat("Here here here here")
-				self.mc.setBlock(player_loc.x, player_loc.y, player_loc.z,0)
+				self.mc.postToChat("Inserting Block")
+				self.mc.postToChat(i)
+				self.mc.postToChat(str(x2) + ', ' + str(y2) + ', ' + str(z2))
+				self.mc.setBlock(x2, y2, z2, 23)
 				break
+			if i == 9:
+				self.mc.postToChat("No block was reached")
+		self.mc.postToChat('Your angle orientation is: ' + str(self.mc.player.getRotation()))
+		self.mc.postToChat('Your pitch orientation is: ' + str(self.mc.player.getPitch()))
 		return "Has been executed"
 
 	def eye_data_setup(self):
@@ -312,7 +324,8 @@ class TIILTMod(object):
 							sys.exit()
 						else:
 							self.mc.postToChat(c.message)
-							response = self.execute_instruction(c.message)
+							# response = self.execute_instruction(c.message)
+							response = self.protrude_eye_gaze()
 
 			if response == 'executed':
 				self.mc.postToChat('executed')
