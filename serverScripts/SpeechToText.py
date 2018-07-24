@@ -52,10 +52,9 @@ class AudioHandler(object):
 		self.session = 0
 		self.last_chunk_sent = 0
 		self.read_audio()
-
+		self.speech_thread = None
+		self.owner = None
 		self.audio_folder = audio_folder + str(int(time.time()))
-		if not os.path.exists(self.audio_folder):
-			os.mkdir(self.audio_folder)
 
 	def callback(self, in_data, frame_count, time_info, status):
 		self.DATA_QUEUE.append((self.chunk_index, in_data, frame_count, time_info))
@@ -67,6 +66,12 @@ class AudioHandler(object):
 		return None, pyaudio.paContinue
 
 	def write_to_file(self):
+		if not None:
+			self.audio_folder = str(self.owner) + "_" + self.audio_folder
+
+		if not os.path.exists(self.audio_folder):
+			os.mkdir(self.audio_folder)
+
 		while True:
 			if self.writing_audio_to_file:
 				data_to_write = []
