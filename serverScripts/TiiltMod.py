@@ -14,23 +14,15 @@ from MineCraftInterpreter import process_instruction
 from mcturtle import *
 from SpeechToText import AudioHandler
 from Structures import sphere
-from mcpi.mutil import flatten
+import sys
+from Player import Player
+from TranscriptsServer import run_server, TRANSCRIPTS
 
 input_method = ''
 eye_tracking = ''
-
+tiiltmod = None
+speech_thread = None
 commands = {'build', 'move', 'turn', 'save', 'go', 'tilt', 'pen', 'undo'}
-
-
-if input_method == 'voice':
-	try:
-		a = AudioHandler(channels=2)
-		a.setup_websocket()
-	except:
-		exit()
-else:
-	a = None
-
 
 try:
 	__location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
@@ -39,55 +31,6 @@ except IOError:
 	locations_file = open('important_locations.txt', 'w')
 	__location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 	important_locations = load_location_dict(os.path.join(__location__, 'important_locations.txt'), {})
-
-
-def eye_data_setup():
-	if platform.system() == 'Windows':
-		print('Starting eye gaze tracking...')
-		try:
-			eye_gaze = subprocess.Popen("eye_gaze\Interaction_Streams_101.exe", shell=False)
-		except Exception as e:
-			raise e
-
-	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-	# Bind the socket to the port
-	server_address = ('localhost', 8080)
-	print('starting up on {} port {}'.format(*server_address))
-	sock.bind(server_address)
-
-	# Listen for incoming connections
-	sock.listen(1)
-
-	while True:
-		print('waiting for a connection')
-		connection, client_address = sock.accept()
-		try:
-			print('connection from', client_address)
-			# this variable is for debugging purposes
-			print_count = 0
-			while True:
-				print_count += 1
-				data = connection.recv(50)
-				data = data.decode("utf-8").replace(" ", "")
-				coordinates = data.split(":")
-				if len(coordinates) == 2:
-					try:
-						x_coord = int(float(coordinates[0]))
-						y_coord = int(float(coordinates[1]))
-						if print_count % 200 == 0:
-							print("You are looking at %s , %s" % (x_coord, y_coord))
-					except ValueError:
-						continue
-				if data:
-					continue
-				else:
-					print('No data from', client_address)
-					break
-
-		finally:
-			# Clean up the connection
-			connection.close()
 
 
 class TIILTMod(object):
@@ -105,19 +48,16 @@ class TIILTMod(object):
 		]
 		self.commands = {f.__name__: f for f in _commands}
 		self.mc = minecraft.Minecraft.create()
-		self.mc.postToChat("Minecraft self has been created")
-		self.playerPos = self.mc.player.getPos()
-		# self.playerId = self.mc.getPlayerId()
-		self.mc.postToChat("Preparing to create turtle")
 		self.t = Turtle(self.mc)
-		self.mc.postToChat("Turtle has been created")
+		self.players = {}
+		self.transcripts_thread = None
+		self.modvoice_ids = {}
 
 	@classmethod
 	def test(cls):
 		pass
 
 	def move(self, instruction_dict):
-		global EYE_DATA
 		self.t.penup()
 		if instruction_dict['direction'] == 'backward' or instruction_dict['direction'] == 'back':
 			self.t.right(180)
@@ -152,13 +92,9 @@ class TIILTMod(object):
 		dimensions = instruction_dict['dimensions']
 		pos = self.mc.entity.getPos(instruction_dict['player_id'])
 		rotation = self.mc.entity.getRotation(instruction_dict['player_id'])
-		start_x, start_y, start_z, end_x, end_y, end_z, direction = get_build_coordinates(pos, rotation, dimensions)
-		block_code = instruction_dict['block_code']
-		self.mc.postToChat(direction)
-		self.mc.setBlocks(start_x, start_y, start_z, end_x, end_y, end_z, block_code)
-		if 'house' not in instruction_dict.keys():
-			return 'executed'
-		elif instruction_dict['house'] is True:
+		start_x, start_y, start_z, end_x, end_y, end_z = get_build_coordinates(pos, rotation, dimensions)
+		self.mc.setBlocks(start_x, start_y, start_z, end_x, end_y, end_z, instruction_dict['block_code'])
+		if 'house' in instruction_dict.keys() and instruction_dict["house"]:
 			start_x, start_y, start_z, end_x, end_y, end_z = get_hollow_dimensions(
 				start_x, start_y, start_z, end_x, end_y, end_z, rotation, dimensions
 			)
@@ -199,22 +135,6 @@ class TIILTMod(object):
 	def undo(self):
 		self.mc.postToChat("Undoing action")
 		self.mc.restoreCheckpoint()
-
-	def execute_instruction(self, instruction, player_id):
-		# self.mc.postToChat('Your angle orientation is: ' + str(self.mc.player.getRotation()))
-		instruction_dict = process_instruction(instruction)
-		if instruction_dict is None:
-			return 'The command was not recognized'
-		elif instruction_dict['command'] in self.commands:
-			self.mc.postToChat(instruction_dict)
-			instruction_dict['player_id'] = player_id
-			# self.orient_player_to_grid()
-			func = instruction_dict['command']
-			kwargs = instruction_dict
-			self.commands[func](kwargs)
-
-		# self.mc.postToChat('Your angle orientation is: ' + str(self.mc.player.getRotation()))
-		# self.mc.postToChat('Your position on the map is: ' + str(self.mc.player.getPos()))
 
 	def orient_player_to_grid(self):
 		self.t.goto(self.mc.player.getPos().x, self.mc.player.getPos().y, self.mc.player.getPos().z)
@@ -290,19 +210,51 @@ class TIILTMod(object):
 			finally:
 				connection.close()
 
+	def check_and_execute_commands(self):
+		for key, value in self.players.items():
+			if len(value.audio_handler.TRANSCRIPT_RESULTS_QUEUE) > 0:
+				input_message = value.audio_handler.TRANSCRIPT_RESULTS_QUEUE.popleft()
+				self.mc.postToChat(value.name)
+				self.mc.postToChat(input_message)
+				response = self.execute_instruction(input_message, value.id)
+
+	def execute_instruction(self, instruction, player_id):
+		self.mc.postToChat("Executing command")
+		instruction_dict = process_instruction(instruction)
+		if instruction_dict is None:
+			return 'The command was not recognized'
+		elif instruction_dict['command'] in self.commands:
+			self.mc.postToChat(instruction_dict)
+			instruction_dict['player_id'] = player_id
+			func = instruction_dict['command']
+			kwargs = instruction_dict
+			self.commands[func](kwargs)
+
 	def input_line(self, prompt):
+		global input_method
 		self.mc.events.clearAll()
-		if input_method == 'voice':
-				self.mc.postToChat('running via mic')
 		while True:
 			response = None
+			self.update_modvoice_ids()
 			if input_method == 'voice':
-				input_message = ''
-				if len(a.TRANSCRIPT_RESULTS_QUEUE):
-					input_message = a.TRANSCRIPT_RESULTS_QUEUE.popleft()
-				if input_message is not '':
-					self.mc.postToChat(input_message)
-					response = self.execute_instruction(input_message)
+				while len(TRANSCRIPTS) > 0:
+					command = TRANSCRIPTS.popleft()
+					self.mc.postToChat(command)
+					command_words = command.split()
+					if command_words[0] not in self.players.keys():
+						self.mc.postToChat("Registering new player")
+						new_player = Player()
+						new_player.id = self.modvoice_ids[command_words[0].lower()]
+						self.mc.postToChat("Associated player with ID")
+						new_player.name = command_words[0]
+						self.players[new_player.name] = new_player
+						self.mc.postToChat(command_words[0] + " has been registered.")
+					elif command_words[0] in self.players.keys():
+						self.mc.postToChat("Processing command")
+						response = self.execute_instruction(command.split(' ', 1)[1], self.players[command_words[0]].id)
+						self.mc.postToChat(response)
+					else:
+						self.mc.postToChat(command_words[0] + " has not completed registration.")
 			else:
 				chats = self.mc.events.pollChatPosts()
 				for c in chats:
@@ -314,27 +266,43 @@ class TIILTMod(object):
 						sys.exit()
 					else:
 						response = self.execute_instruction(c.message, c.entityId)
-						ids = self.mc.getPlayerEntityIds()
-						for player_id in ids:
-							self.mc.postToChat(player_id)
-							# self.mc.postToChat(self.mc.entity.getRotation(player_id))
-							# self.mc.postToChat(self.mc.entity.getDirection(player_id))
-							self.mc.postToChat(get_general_direction(self.mc.entity.getRotation(player_id)))
-							self.mc.postToChat("---------")
-
 			if response == 'executed':
-				self.mc.postToChat('executed')
 				pass
 			elif response is not None:
-				self.mc.postToChat(response)
+				pass
 			time.sleep(2)
+
+	def update_modvoice_ids(self):
+		chats = self.mc.events.pollChatPosts()
+		for c in chats:
+			if len(c.message.split()) == 2 and c.message.split()[0] == 'register':
+				self.mc.postToChat("Found a new player id to register")
+				self.modvoice_ids[c.message.split()[1].lower()] = c.entityId
 
 
 def mod():
 	"_mcp"
+	global tiiltmod
 	tiiltmod = TIILTMod()
-	if input_method == 'voice':
-		speech_thread = threading.Thread(target=a.ws.run_forever)
-		speech_thread.start()
 	tiiltmod.mc.postToChat("Enter python method chat, type 'quit' to quit.")
 	i = code.interact(banner="", readfunc=tiiltmod.input_line, local=locals())
+
+
+def modvoice():
+	"_mcp_"
+	global tiiltmod, input_method
+	input_method = "voice"
+	tiiltmod = TIILTMod()
+	tiiltmod.transcripts_thread = threading.Thread(
+		target=run_server, daemon=True)
+	tiiltmod.transcripts_thread.start()
+	tiiltmod.mc.postToChat("Speak into the microphone to execute commands")
+	i = code.interact(banner="", readfunc=tiiltmod.input_line, local=locals())
+
+
+def close_stuff():
+	"_mcp_"
+	global tiiltmod
+	del tiiltmod.transcripts_thread
+	del tiiltmod
+	del TRANSCRIPTS

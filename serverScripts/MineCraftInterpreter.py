@@ -32,6 +32,4 @@ def process_instruction(instruction_to_process):
 
 
 if __name__ == "__main__":
-	test_strings = ['pen up']
-	for command in test_strings:
-			print(command, ': ',	process_instruction(command), '\n')
+	print(process_instruction('build a six by four by one code lock'))

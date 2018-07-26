@@ -18,7 +18,7 @@ def get_build_coordinates(player_pos, player_angle, structure_dimensions):
 		end_x, end_y, end_z = get_facing_west_coordinates(start_x, start_y, start_z, structure_dimensions)
 		direction = direction + "west"
 
-	return start_x, start_y, start_z, end_x, end_y, end_z, direction
+	return start_x, start_y, start_z, end_x, end_y, end_z
 
 
 def get_hollow_dimensions(start_x, start_y, start_z, end_x, end_y, end_z, player_angle, structure_dimensions):
