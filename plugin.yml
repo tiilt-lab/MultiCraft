@@ -1,0 +1,4 @@
+name: MultiCraft
+main: com.timkanake.multicraft.MultiCraft
+version: 1.0 (alpha)
+commands:
