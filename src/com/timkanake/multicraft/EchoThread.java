@@ -10,8 +10,10 @@ import com.timkanake.multicraft.CommandsQueue;
 public class EchoThread extends Thread{
 	protected Socket socket;
 	CommandsQueue cQ = CommandsQueue.getInstance();
-	public EchoThread(Socket clientSocket) {
+	MultiCraft plugin;
+	public EchoThread(Socket clientSocket, MultiCraft pl) {
 		socket = clientSocket;
+		plugin = pl;
 	}
 	
 	public void run() {
@@ -32,7 +34,8 @@ public class EchoThread extends Thread{
                     return;
                 } else {
                 	cQ.commandsQ.add(line);
-                	System.out.println("RECIEVED :" + line);
+                	plugin.getServer().broadcastMessage(line);
+                	// System.out.println("RECIEVED :" + line);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
