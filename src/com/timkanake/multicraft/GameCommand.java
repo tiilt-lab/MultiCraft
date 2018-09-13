@@ -34,7 +34,7 @@ public class GameCommand {
 		String house;
 		int materialId;
 		for(String s: args) {
-			if(Materials.getInstance().materials.contains(s)) {
+			if(Materials.getInstance().materials.containsKey(s)) {
 				materialId = Materials.getInstance().getId(s);
 				continue;
 			}
