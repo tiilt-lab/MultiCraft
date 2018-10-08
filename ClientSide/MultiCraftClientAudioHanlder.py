@@ -60,7 +60,6 @@ class MyRecognizeCallback(RecognizeCallback):
 
     def on_data(self, data):
         if(data['results'][0]['final']):
-            # THIS IS WHERE TO GET THE TRANSCRIPT
             transcript = data['results'][0]['alternatives'][0]['transcript']
             client_socket.send((CLIENT_NAME + " " + transcript).encode())
 

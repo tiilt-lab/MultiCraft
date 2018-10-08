@@ -3,7 +3,6 @@ import sys
 import traceback
 from threading import Thread
 
-
 sending_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 host = "127.0.0.1"
 port = 5003
@@ -22,8 +21,6 @@ def start_server():
     global host
     port = 5001
     soc = socket.socket()
-    # soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # soc.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     print("Socket created")
 
     try:
@@ -48,19 +45,20 @@ def start_server():
 
     soc.close()
 
-
 def client_thread(connection, ip, port):
     is_active = True
     while is_active:
-        client_input = connection.recv(1024)
-        if "QUIT" in client_input.decode():
-            print("Client is requesting to quit")
-            connection.close()
-            print("Connection " + ip + ":" + port + " closed")
-            is_active = False
-        else:
-            sending_socket.send((client_input.decode() + "\n").encode())
-            print(client_input.decode())
+        try:
+            client_input = connection.recv(1024)
+            if "quit" in client_input.decode():
+                connection.close()
+                print("Connection " + ip + ":" + port + " closed")
+                is_active = False
+            else:
+                sending_socket.send((client_input.decode() + "\n").encode())
+                print(client_input.decode())
+        except:
+            pass
 
 def process_input(input_str):
     print("Processing the input received from client")
@@ -68,4 +66,3 @@ def process_input(input_str):
 
 if __name__ == "__main__":
     main()
-
