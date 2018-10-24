@@ -2,6 +2,8 @@ import socket
 import sys
 import traceback
 from threading import Thread
+from MinecraftInterpreter import process_instruction
+import json
 
 sending_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 host = "127.0.0.1"
@@ -55,8 +57,12 @@ def client_thread(connection, ip, port):
                 print("Connection " + ip + ":" + port + " closed")
                 is_active = False
             else:
-                sending_socket.send((client_input.decode() + "\n").encode())
-                print(client_input.decode())
+                client_transcript = client_input.decode().split(' ', 1)[1]
+                if len(client_transcript) > 0:
+                    args = process_instruction(client_transcript)
+                    args['client_name'] = client_input.decode().split(' ')[0]
+                    print("sending " + json.dumps(args))
+                    sending_socket.send((json.dumps(args) + "\n").encode())
         except:
             pass
 
