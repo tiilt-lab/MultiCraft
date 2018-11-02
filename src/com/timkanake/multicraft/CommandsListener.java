@@ -1,22 +1,22 @@
 package com.timkanake.multicraft;
 
-import java.util.LinkedList;
-import java.util.Queue;
-import com.timkanake.multicraft.GameCommand;
 
-public class CommandsListener{
-	CommandsQueue cQ = CommandsQueue.getInstance();
-	CommandWords cW = CommandWords.getInstance();
-	public void handleCommands() {
-		while(true) {
-			while(! cQ.commandsQ.isEmpty()) {
-				executeCommand(cQ.commandsQ.poll());
-			}
-		}
+import org.json.simple.JSONObject;
+
+public class CommandsListener extends Thread{	
+	MultiCraft plugin;
+	
+	public CommandsListener(MultiCraft pl) {
+		plugin = pl;
 	}
 	
-	public void executeCommand(String command) {
-		GameCommand gameCommand = new GameCommand(command);
-		gameCommand.execute();
+	public void run() {
+		while(true) {
+			if(! CommandsQueue.getInstance().commands.isEmpty()){
+				String str = "[" + CommandsQueue.getInstance().commands.remove() + "]";
+				JSONObject jsonObject = (JSONObject) JSONParsing.JSONFromString(str);
+				CommandsQueue.getInstance().commandsQ.add(jsonObject);
+			}
+		}
 	}
 }

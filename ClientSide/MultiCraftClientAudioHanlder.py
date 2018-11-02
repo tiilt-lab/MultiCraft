@@ -86,33 +86,36 @@ def pyaudio_callback(in_data, frame_count, time_info, status):
 
 def main():
     # instantiate pyaudio
-    audio = pyaudio.PyAudio()
+    # audio = pyaudio.PyAudio()
 
-    # open stream using callback
-    stream = audio.open(
-        format=FORMAT,
-        channels=CHANNELS,
-        rate=RATE,
-        input=True,
-        frames_per_buffer=CHUNK,
-        stream_callback=pyaudio_callback,
-        start=False
-    )
+    # # open stream using callback
+    # stream = audio.open(
+    #     format=FORMAT,
+    #     channels=CHANNELS,
+    #     rate=RATE,
+    #     input=True,
+    #     frames_per_buffer=CHUNK,
+    #     stream_callback=pyaudio_callback,
+    #     start=False
+    # )
 
-    print("Enter CTRL+C to end recording...")
-    stream.start_stream()
+    # print("Enter CTRL+C to end recording...")
+    # stream.start_stream()
 
-    try:
-        recognize_thread = Thread(target=recognize_using_weboscket, args=())
-        recognize_thread.start()
-        while True:
-            pass
-    except KeyboardInterrupt:
-        # stop recording
-        audio_source.completed_recording()
-        stream.stop_stream()
-        stream.close()
-        audio.terminate()
+    # try:
+    #     recognize_thread = Thread(target=recognize_using_weboscket, args=())
+    #     recognize_thread.start()
+    #     while True:
+    #         pass
+    # except KeyboardInterrupt:
+    #     # stop recording
+    #     audio_source.completed_recording()
+    #     stream.stop_stream()
+    #     stream.close()
+    #     audio.terminate()
+    while True:
+        input_s = input("Please enter a message to send: ")
+        client_socket.send((CLIENT_NAME + " " + input_s).encode())
 
 def tiilt_main():
     client_socket.connect((HOST, PORT))

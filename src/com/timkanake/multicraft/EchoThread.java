@@ -33,9 +33,8 @@ public class EchoThread extends Thread{
                     socket.close();
                     return;
                 } else {
-                	cQ.commandsQ.add(line);
-                	plugin.getServer().broadcastMessage(line);
-                	// System.out.println("RECIEVED :" + line);
+                	CommandsQueue.getInstance().commands.add(line);
+                	//plugin.getServer().broadcastMessage(line);
                 }
             } catch (IOException e) {
                 e.printStackTrace();

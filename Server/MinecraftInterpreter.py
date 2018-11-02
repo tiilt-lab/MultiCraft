@@ -1,11 +1,10 @@
-import spacy
+import en_core_web_sm
 from GameCommand import GameCommand
 from SynonymDictionaries import commands_dict, supported_commands
 import json
 import socket
 
-nlp = spacy.load('en')
-
+nlp = en_core_web_sm.load()
 def get_supported_word(word, synonyms_dict):
 	return synonyms_dict[word]
 
@@ -43,14 +42,8 @@ def create_json(game_command):
 
 
 if __name__ == "__main__":
-	gcomm = GameCommand()
-	gcomm.command = "move"
-	gcomm.args["direction"] = "left"
-	gcomm.args["dimensions"] = [4,5,6]
-	print(create_json(gcomm))
-	client_socket = socket.socket()
-	client_socket.connect(("127.0.0.1", 5000))
-	client_socket.send(json.dumps(create_json(gcomm)).encode())
-	print("Message has been sent")
-	client_socket.close()
-	
+	while True:
+		input_s = input("Please enter a message to interprete: ")
+		print(process_instruction(input_s))
+
+

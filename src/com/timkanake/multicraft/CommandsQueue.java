@@ -1,14 +1,16 @@
 package com.timkanake.multicraft;
 
-import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
+import org.json.simple.JSONObject;
+
 
 public class CommandsQueue {
-	Queue<String> commandsQ = new LinkedList<String>();
-	
+	Queue<JSONObject> commandsQ = new ConcurrentLinkedQueue<JSONObject>();
+	Queue<String> commands = new ConcurrentLinkedQueue<String>();
 	private static CommandsQueue instance = null;
-	private void CommandsQueue() {		
-	}
+	
 	public static CommandsQueue getInstance() {
 		if(instance == null) {
 			instance = new CommandsQueue();

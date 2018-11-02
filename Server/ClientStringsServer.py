@@ -9,6 +9,9 @@ sending_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 host = "127.0.0.1"
 port = 5003
 
+print('Trying to connect to server: ')
+
+
 try:
     sending_socket.connect((host, port))
     print("Connected")
@@ -47,28 +50,47 @@ def start_server():
 
     soc.close()
 
-def client_thread(connection, ip, port):
+# def client_thread(connection, ip, port):
+def client_thread():
     is_active = True
-    while is_active:
-        try:
-            client_input = connection.recv(1024)
-            if "quit" in client_input.decode():
-                connection.close()
-                print("Connection " + ip + ":" + port + " closed")
-                is_active = False
-            else:
-                client_transcript = client_input.decode().split(' ', 1)[1]
-                if len(client_transcript) > 0:
-                    args = process_instruction(client_transcript)
-                    args['client_name'] = client_input.decode().split(' ')[0]
-                    print("sending " + json.dumps(args))
-                    sending_socket.send((json.dumps(args) + "\n").encode())
-        except:
-            pass
+
+    comm_str = ["build a three by three by three stone house here",
+                "move forward six steps",
+                "build a three by three by three stone house here"]
+    for i in range(0, len(comm_str)):
+        client_input = ("dbbfcee1-4f09-44c2-b877-528bebe5d55f " + comm_str[i]).encode()
+
+        client_transcript = client_input.decode().split(' ', 1)[1]
+        if len(client_transcript) > 0:
+            print(client_transcript)
+            args = process_instruction(client_transcript)
+            print(args)
+            args['client_name'] = client_input.decode().split(' ')[0]
+            print("sending " + json.dumps(args))
+            sending_socket.send((json.dumps(args) + "\n").encode())
+
+    # while is_active:
+    #     try:
+    #         client_input = ("dbbfcee1-4f09-44c2-b877-528bebe5d55f " + input("Please enter a command: ")).encode()
+    #         if "quit" in client_input.decode():
+    #             # connection.close()
+    #             # print("Connection " + ip + ":" + port + " closed")
+    #             is_active = False
+    #         else:
+    #             client_transcript = client_input.decode().split(' ', 1)[1]
+    #             if len(client_transcript) > 0:
+    #                 print(client_transcript)
+    #                 args = process_instruction(client_transcript)
+    #                 print(args)
+    #                 args['client_name'] = client_input.decode().split(' ')[0]
+    #                 print("sending " + json.dumps(args))
+    #                 sending_socket.send((json.dumps(args) + "\n").encode())
+    #     except:
+    #         pass
 
 def process_input(input_str):
     print("Processing the input received from client")
     return "Hello " + str(input_str).lower()
 
 if __name__ == "__main__":
-    main()
+    client_thread()

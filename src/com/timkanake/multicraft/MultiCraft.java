@@ -11,15 +11,17 @@ public class MultiCraft extends JavaPlugin{
 	@Override
 	public void onEnable() {
 		getLogger().info("MultiCraft has been enabled");
+		@SuppressWarnings("unused")
 		PluginManager pm = getServer().getPluginManager();
 		
 		// MySQL.connect();
 		
-		
 		// location tracking listener
-		// LocationsListener locationsListener = new LocationsListener(this);
-		// pm.registerEvents(locationsListener, this);
+//		 LocationsListener locationsListener = new LocationsListener(this);
+//		 pm.registerEvents(locationsListener, this);
 		new SpeechToTextServer(this).start();
+		new CommandsListener(this).start();
+		new CommandExecution(this).start();
 	}
 	
 	@Override

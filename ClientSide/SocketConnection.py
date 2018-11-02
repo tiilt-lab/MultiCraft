@@ -22,7 +22,7 @@ def socket_conn():
 
 def main():
     threading.Thread(target=socket_conn).start()
-    threading.Thread(target=MAH.tiilt_main).start()
+    # threading.Thread(target=MAH.tiilt_main).start()
     
 
 main()

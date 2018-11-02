@@ -61,7 +61,7 @@ class GameCommand:
 			if word_token.text == 'sphere':
 				self.args['sphere'] = True
 			if word_token.text in materials_dict:
-				self.args['block_code'] = get_block_code(materials_dict[word_token.text].upper())
+				self.args['block_code'] = materials_dict[word_token.text]
 
 		if 'wall' in self.args.keys() and len(dimensions) == 2:
 			dimensions.append(0)
