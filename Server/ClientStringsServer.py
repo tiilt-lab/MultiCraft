@@ -54,11 +54,10 @@ def start_server():
 def client_thread():
     is_active = True
 
-    comm_str = ["build a three by three by three stone house here",
-                "move forward six steps",
-                "build a three by three by three stone house here"]
-    for i in range(0, len(comm_str)):
-        client_input = ("dbbfcee1-4f09-44c2-b877-528bebe5d55f " + comm_str[i]).encode()
+    while is_active:
+        comm_str = input("Please enter a command: ")
+    #for i in range(0, len(comm_str)):
+        client_input = ("dbbfcee1-4f09-44c2-b877-528bebe5d55f " + comm_str).encode()
 
         client_transcript = client_input.decode().split(' ', 1)[1]
         if len(client_transcript) > 0:

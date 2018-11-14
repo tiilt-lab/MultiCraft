@@ -5,16 +5,21 @@ import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+
+import com.timkanake.multicraft.CoordinateCalculations;
 
 public class GameCommand {
 	String commandName;
 	Player issuer;
 	JSONObject args;
 	MultiCraft plugin;
+	
+	
 	public GameCommand(JSONObject argss, MultiCraft pl) {
 		plugin = pl;
 		args = argss;
@@ -37,6 +42,7 @@ public class GameCommand {
 		}
 	}
 	
+	@SuppressWarnings("deprecation")
 	public void executeBuild() {
 		JSONArray dimAr = (JSONArray) args.get("dimensions");
 		int[] dimensions = new int[3];
@@ -45,14 +51,43 @@ public class GameCommand {
 		dimensions[2] = ((Long) dimAr.get(2)).intValue();
 		Location l = issuer.getLocation();
 		
-		Material m = Material.STONE;
-		plugin.getServer().broadcastMessage(((Boolean) (m == null)).toString());
-		Block b = l.getBlock();
-		updateBlock(b, m, (byte) 0);
+		int[] buildCoordinates = CoordinateCalculations.getBuildCoordinates(l, dimensions);
+		Location l2 = new Location(l.getWorld(), buildCoordinates[0], buildCoordinates[1], buildCoordinates[2]);
+		
+		int id = ((Long) args.get("block_code")).intValue();
+		Material m = Material.getMaterial(id);
+		updateBlocks(l, l2, m);
 		plugin.getServer().broadcastMessage("3");
 
 	}
 	
+	private void updateBlocks(Location pos1, Location pos2, Material m) {
+		int minX, maxX, minY, maxY, minZ, maxZ;
+		World world = pos1.getWorld();
+		minX = pos1.getBlockX() < pos2.getBlockX() ? pos1.getBlockX() : pos2.getBlockX();
+		maxX = pos1.getBlockX() >= pos2.getBlockX() ? pos1.getBlockX() : pos2.getBlockX();
+		minY = pos1.getBlockY() < pos2.getBlockY() ? pos1.getBlockY() : pos2.getBlockY();
+		maxY = pos1.getBlockY() >= pos2.getBlockY() ? pos1.getBlockY() : pos2.getBlockY();
+		minZ = pos1.getBlockZ() < pos2.getBlockZ() ? pos1.getBlockZ() : pos2.getBlockZ();
+		maxZ = pos1.getBlockZ() >= pos2.getBlockZ() ? pos1.getBlockZ() : pos2.getBlockZ();
+
+		for (int x = minX; x <= maxX; ++x) {
+			for (int z = minZ; z <= maxZ; ++z) {
+				for (int y = minY; y <= maxY; ++y) {
+					updateBlock(world, x, y, z, m,(byte) 0);
+				}
+			}
+		}
+	}
+	
+	
+	
+	private void updateBlock(World world, int x, int y, int z, Material blockType, byte blockData) {
+		Block thisBlock = world.getBlockAt(x,y,z);
+		updateBlock(thisBlock, blockType, blockData);
+		
+	}
+
 	private void updateBlock(Block block, Material m, byte blockData) {
 		try {
 			block.setType(m);
@@ -77,24 +112,5 @@ public class GameCommand {
 	
 	public boolean playerIsOnline(Player p) {
 		return Bukkit.getOnlinePlayers().contains(p);
-	}
-	
-	// updates a block
-//	private void updateBlock(World world, Location loc, int blockType, byte blockData) {
-//		Block thisBlock = world.getBlockAt(loc);
-//		updateBlock(thisBlock, blockType, blockData);
-//	}
-//	
-//	private void updateBlock(World world, int x, int y, int z, int blockType, byte blockData) {
-//		Block thisBlock = world.getBlockAt(x,y,z);
-//		updateBlock(thisBlock, blockType, blockData);
-//	}
-//	
-//	private void updateBlock(Block block, int blockType, byte blockData) {
-//		if ((block.getTypeId() != blockType) || (block.getData() != blockData)) {
-//			block.setTypeIdAndData(blockType, blockData, true);
-//		}
-//	}
-	
-	
+	}	
 }

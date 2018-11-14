@@ -5,10 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.Clock;
 import java.util.ArrayList;
-import com.timkanake.multicraft.SpeechToTextServer;
-
 import com.timkanake.multicraft.MySQL;
-
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -28,25 +25,20 @@ public class LocationsListener implements Listener{
 	
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent event) {
-		plugin.getServer().broadcastMessage("Trying to setup speech to text sockets...");
-		new SpeechToTextServer(plugin).start();
-		plugin.getServer().broadcastMessage("Trying to setup commands listener sockets...");
-		// new CommandsListener(plugin).handleCommands();
-		plugin.getServer().broadcastMessage("Sockets have been setup...");
-//		players.add(event.getPlayer());
-//		if(MySQL.isConnected()) {
-//			Player p = event.getPlayer();
-//			p.sendMessage("Database is connected");
-//		}
+		players.add(event.getPlayer());
+		if(MySQL.isConnected()) {
+			Player p = event.getPlayer();
+			p.sendMessage("Database is connected");
+		}
 	}
 	
-//	@EventHandler
-//	public void onPlayerQuit(PlayerQuitEvent event) {
-//		Player pl = event.getPlayer();
-//		if(players.contains(pl)) {
-//			players.remove(pl);
-//		}
-//	}
+	@EventHandler
+	public void onPlayerQuit(PlayerQuitEvent event) {
+		Player pl = event.getPlayer();
+		if(players.contains(pl)) {
+			players.remove(pl);
+		}
+	}
 	
 	@EventHandler
 	public void onPlayerKickedOut(PlayerKickEvent event) {
@@ -56,17 +48,15 @@ public class LocationsListener implements Listener{
 		}
 	}
 	
-//	@EventHandler
-//	public void onPlayerMovement(PlayerMoveEvent event) throws SQLException {
-//		Player pl = event.getPlayer();
-//		Location prevLocation = event.getFrom();
-//		Location newLocation = event.getTo();
-//		if(movementMagnitude(prevLocation, newLocation) >= 1) {
-//			recordLocation(newLocation, pl.getDisplayName());
-//			// long secs = recordLocation(newLocation, pl.getDisplayName());
-//			// pl.sendMessage("You moved at " + Long.toString(secs));
-//		}		
-//	}
+	@EventHandler
+	public void onPlayerMovement(PlayerMoveEvent event) throws SQLException {
+		Player pl = event.getPlayer();
+		Location prevLocation = event.getFrom();
+		Location newLocation = event.getTo();
+		if(movementMagnitude(prevLocation, newLocation) >= 1) {
+			recordLocation(newLocation, pl.getDisplayName());
+		}		
+	}
 	
 	private int movementMagnitude(Location loc1, Location loc2) {
 		double xMag = Math.pow((loc2.getX() - loc1.getX()), 2);
