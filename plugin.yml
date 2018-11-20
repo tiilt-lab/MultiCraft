@@ -2,3 +2,6 @@ name: MultiCraft
 main: com.timkanake.multicraft.MultiCraft
 version: 1.0 (alpha)
 commands:
+  mbuild:
+      description: MultiCraft Build Command
+      usage: /<command> x-coord(int) y-coord(int) z-coord(int) material-code(int) hollow-flag(int)

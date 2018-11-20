@@ -27,6 +27,11 @@ public class GameCommand {
 		issuer = (Player) Bukkit.getPlayer(UUID.fromString((String) args.get("client_name")));		
 	}
 	
+	public GameCommand(MultiCraft pl) {
+		this.plugin = pl;
+	}
+	
+	
 	public boolean commandSupported(String com) {
 		return CommandWords.getInstance().commands.contains(com);
 	}
@@ -61,7 +66,7 @@ public class GameCommand {
 
 	}
 	
-	private void updateBlocks(Location pos1, Location pos2, Material m) {
+	public void  updateBlocks(Location pos1, Location pos2, Material m) {
 		int minX, maxX, minY, maxY, minZ, maxZ;
 		World world = pos1.getWorld();
 		minX = pos1.getBlockX() < pos2.getBlockX() ? pos1.getBlockX() : pos2.getBlockX();
@@ -89,13 +94,12 @@ public class GameCommand {
 	}
 
 	private void updateBlock(Block block, Material m, byte blockData) {
-		try {
+		try {			
 			block.setType(m);
 		}catch(Exception e) {
 			plugin.getServer().broadcastMessage(e.toString());
-			plugin.getServer().broadcastMessage("whhaaat!");
+			plugin.getServer().broadcastMessage("Failed to update Blocks :(");
 		}
-		block.setType(m);
 	}
 	
 	public void executeMove() {

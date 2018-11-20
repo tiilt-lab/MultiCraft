@@ -4,9 +4,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.Clock;
-import java.util.ArrayList;
+import java.util.HashMap;
+
 import com.timkanake.multicraft.MySQL;
+
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -16,36 +20,47 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 public class LocationsListener implements Listener{
-	private ArrayList<Player> players = new ArrayList<Player>();
+	private HashMap<String, Integer> playerLastRecordedTime = new HashMap<String, Integer>();
 	private Clock cl = Clock.systemDefaultZone();
 	MultiCraft plugin;
+	static ConsoleCommandSender console = Bukkit.getConsoleSender();
 	public LocationsListener(MultiCraft pl) {
 		plugin = pl;
 	}
 	
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent event) {
-		players.add(event.getPlayer());
-		if(MySQL.isConnected()) {
+		try {
 			Player p = event.getPlayer();
-			p.sendMessage("Database is connected");
+			if(!playerLastRecordedTime.containsKey(p.getDisplayName())) {
+				playerLastRecordedTime.put(p.getDisplayName(), Integer.MIN_VALUE);
+			}
+			if(MySQL.isConnected()) {			
+				p.sendMessage("Database is connected");
+			}
+		}catch(Exception e) {
+			return;
 		}
+		
 	}
 	
 	@EventHandler
-	public void onPlayerQuit(PlayerQuitEvent event) {
-		Player pl = event.getPlayer();
-		if(players.contains(pl)) {
-			players.remove(pl);
+	public void onPlayerQuit(PlayerQuitEvent event) {	
+		removePlayerFromTimeRecordedMap(event.getPlayer().getDisplayName());
+	}
+	
+	public void removePlayerFromTimeRecordedMap(String displayName) {
+		try {
+			playerLastRecordedTime.remove(displayName);
+		}catch(Exception e) {
+			console.sendMessage("\247c[\2476MultiCraft\247c] \247bTried to remove player from locations map but name not found");
+			return;
 		}
 	}
 	
 	@EventHandler
 	public void onPlayerKickedOut(PlayerKickEvent event) {
-		Player pl = event.getPlayer();
-		if(players.contains(pl)) {
-			players.remove(pl);
-		}
+		removePlayerFromTimeRecordedMap(event.getPlayer().getDisplayName());
 	}
 	
 	@EventHandler

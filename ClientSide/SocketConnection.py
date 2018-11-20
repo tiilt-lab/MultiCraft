@@ -21,8 +21,8 @@ def socket_conn():
     conn.close()
 
 def main():
-    threading.Thread(target=socket_conn).start()
-    # threading.Thread(target=MAH.tiilt_main).start()
+    # threading.Thread(target=socket_conn).start()
+    threading.Thread(target=MAH.tiilt_main).start()
     
 
 main()

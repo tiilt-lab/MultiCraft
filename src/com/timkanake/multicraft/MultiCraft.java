@@ -11,14 +11,18 @@ public class MultiCraft extends JavaPlugin{
 	@Override
 	public void onEnable() {
 		getLogger().info("MultiCraft has been enabled");
-		@SuppressWarnings("unused")
 		PluginManager pm = getServer().getPluginManager();
+		this.getCommand("mbuild").setExecutor(new MultiCraftCommandExecutor(this));
 		
-		// MySQL.connect();
+		MySQL.connect();
+		InventoryListener inventoryListener = new InventoryListener(this);
+		pm.registerEvents(inventoryListener,  this);
 		
-		// location tracking listener
-//		 LocationsListener locationsListener = new LocationsListener(this);
-//		 pm.registerEvents(locationsListener, this);
+		
+	 LocationsListener locationsListener = new LocationsListener(this);
+	 pm.registerEvents(locationsListener, this);
+		
+		
 		new SpeechToTextServer(this).start();
 		new CommandsListener(this).start();
 		new CommandExecution(this).start();
@@ -26,7 +30,8 @@ public class MultiCraft extends JavaPlugin{
 	
 	@Override
 	public void onDisable() {
-		// MySQL.disconnect();
+		
+		MySQL.disconnect();
 		getLogger().info("MultiCraft has been disabled");
 	}
 	
