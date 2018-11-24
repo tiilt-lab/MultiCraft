@@ -23,7 +23,7 @@ HOST = "127.0.0.1"
 PORT = 5001
 
 client_socket = socket.socket()
-CLIENT_NAME = "dbbfcee1-4f09-44c2-b877-528bebe5d55f" # input("Please enter your screen name: ")
+CLIENT_NAME = "" # input("Please enter your screen name: ")
 
 # Create an instance of AudioSource
 audio_source = AudioSource(q, True, True)
