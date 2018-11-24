@@ -7,7 +7,7 @@ import java.time.Clock;
 import java.util.HashMap;
 
 import com.timkanake.multicraft.MySQL;
-
+import com.timkanake.multicraft.UtilityFunctions;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.ConsoleCommandSender;
@@ -24,6 +24,7 @@ public class LocationsListener implements Listener{
 	private Clock cl = Clock.systemDefaultZone();
 	MultiCraft plugin;
 	static ConsoleCommandSender console = Bukkit.getConsoleSender();
+	
 	public LocationsListener(MultiCraft pl) {
 		plugin = pl;
 	}
@@ -53,7 +54,7 @@ public class LocationsListener implements Listener{
 		try {
 			playerLastRecordedTime.remove(displayName);
 		}catch(Exception e) {
-			console.sendMessage("\247c[\2476MultiCraft\247c] \247bTried to remove player from locations map but name not found");
+			UtilityFunctions.printToConsole("Tried to remove player from locations map but name not found");
 			return;
 		}
 	}
@@ -68,7 +69,11 @@ public class LocationsListener implements Listener{
 		Player pl = event.getPlayer();
 		Location prevLocation = event.getFrom();
 		Location newLocation = event.getTo();
-		if(movementMagnitude(prevLocation, newLocation) >= 1) {
+		int curTime = (int) cl.millis();
+		int timeDiff = curTime - this.playerLastRecordedTime.get(pl.getDisplayName());
+		if(timeDiff > 5000 && movementMagnitude(prevLocation, newLocation) >= 1) {
+			UtilityFunctions.printToConsole("recording movement");
+			this.playerLastRecordedTime.put(pl.getDisplayName(), curTime);
 			recordLocation(newLocation, pl.getDisplayName());
 		}		
 	}

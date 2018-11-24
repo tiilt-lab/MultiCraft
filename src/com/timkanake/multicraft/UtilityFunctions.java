@@ -9,5 +9,4 @@ public class UtilityFunctions {
 	public static void printToConsole(String s) {
 		console.sendMessage("\247c[\2476MultiCraft\247c] \247b " + s);		
 	}
-
 }

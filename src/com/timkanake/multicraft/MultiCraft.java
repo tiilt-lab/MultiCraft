@@ -15,13 +15,15 @@ public class MultiCraft extends JavaPlugin{
 		this.getCommand("mbuild").setExecutor(new MultiCraftCommandExecutor(this));
 		
 		MySQL.connect();
+		
 		InventoryListener inventoryListener = new InventoryListener(this);
 		pm.registerEvents(inventoryListener,  this);
 		
+		LocationsListener locationsListener = new LocationsListener(this);
+		pm.registerEvents(locationsListener, this);
 		
-	 LocationsListener locationsListener = new LocationsListener(this);
-	 pm.registerEvents(locationsListener, this);
-		
+		BlockEventsListener blockPlacementListener = new BlockEventsListener(this);
+		pm.registerEvents(blockPlacementListener, this);
 		
 		new SpeechToTextServer(this).start();
 		new CommandsListener(this).start();

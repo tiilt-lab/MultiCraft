@@ -23,7 +23,8 @@ public class MySQL {
         if (!isConnected()) {
             try {
                 con = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database, username, password);
-                console.sendMessage("\247c[\2476Minepedia-System\247c] \247bMySQL-A connection was established!");
+                UtilityFunctions.printToConsole("MySQL connection was established");
+//                console.sendMessage("\247c[\2476Minepedia-System\247c] \247bMySQL-A connection was established!");
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -35,7 +36,8 @@ public class MySQL {
         if (isConnected()) {
             try {
                 con.close();
-                console.sendMessage("\247c[\2476Minepedia-System\247c]\247bMySQL-Connection has been closed!");
+                UtilityFunctions.printToConsole("MySQL connection has been closed!");
+//                console.sendMessage("\247c[\2476Minepedia-System\247c]\247bMySQL-Connection has been closed!");
             } catch (SQLException e) {
                 e.printStackTrace();
             }

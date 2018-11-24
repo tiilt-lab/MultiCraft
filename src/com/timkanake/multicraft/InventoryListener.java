@@ -22,7 +22,7 @@ public class InventoryListener implements Listener{
 	MultiCraft plugin;
 	public InventoryListener(MultiCraft pl) {		
 		plugin = pl;
-		console.sendMessage("\247c[\2476Minepedia-System\247c] \247bInventory Listener Initialized.  :)");
+		UtilityFunctions.printToConsole("Inventory Listener Initialized");
 	}
 	
 	@EventHandler
@@ -60,5 +60,4 @@ public class InventoryListener implements Listener{
 		prepStatement.setInt(3, flag);
 		prepStatement.executeUpdate();
 	}
-
 }

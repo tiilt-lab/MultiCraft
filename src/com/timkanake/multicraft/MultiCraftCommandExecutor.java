@@ -1,6 +1,8 @@
 package com.timkanake.multicraft;
 
 
+import java.sql.SQLException;
+
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -10,6 +12,7 @@ import org.bukkit.entity.Player;
 
 public class MultiCraftCommandExecutor implements CommandExecutor{
 	private final MultiCraft plugin;
+	private static final int NOT_HOLLOW_FLAG = 0;
 	
 	public MultiCraftCommandExecutor(MultiCraft plugin) {
 		this.plugin = plugin;
@@ -35,6 +38,13 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 			}
 			GameCommand gComm = new GameCommand(this.plugin);
 			gComm.updateBlocks(playerLoc, endLoc, material);
+			try {
+				MultiCraftBuildsListener.recordBuild(p.getDisplayName(), playerLoc, dimensions, Integer.parseInt(args[3]), NOT_HOLLOW_FLAG);
+			} catch (NumberFormatException e) {
+				e.printStackTrace();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
 			return true;
 		}
 		return false;
