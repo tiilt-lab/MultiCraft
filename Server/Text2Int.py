@@ -1,29 +1,17 @@
-def text2int(textnum, numwords={}):
-    if not numwords:
-      units = [
-        "zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
-        "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen",
-        "sixteen", "seventeen", "eighteen", "nineteen",
-      ]
+from word2number import w2n
+import spacy
+from spacy.lang.en import English
+nlp = spacy.load('en_core_web_sm')
 
-      tens = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"]
 
-      scales = ["hundred", "thousand", "million", "billion", "trillion"]
-
-      numwords["and"] = (1, 0)
-      for idx, word in enumerate(units):    numwords[word] = (1, idx)
-      for idx, word in enumerate(tens):     numwords[word] = (1, idx * 10)
-      for idx, word in enumerate(scales):   numwords[word] = (10 ** (idx * 3 or 2), 0)
-
-    current = result = 0
-    for word in textnum.split():
-        if word not in numwords:
-          raise Exception("Illegal word: " + word)
-
-        scale, increment = numwords[word]
-        current = current * scale + increment
-        if scale > 100:
-            result += current
-            current = 0
-
-    return result + current
+def text2int(textnum):
+  num=""
+  #use spacy to recognize numerical parts of the text and concatenate them
+  spacy_ent=nlp(textnum)
+  for ent in spacy_ent.ents:
+      if ent.label_=='CARDINAL':
+          num+=ent.text+" "
+  #use word2number to convert to integer
+  result=w2n.word_to_num(num)
+  return result
+    
