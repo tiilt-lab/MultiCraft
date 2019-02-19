@@ -10,30 +10,34 @@ public class MultiCraft extends JavaPlugin{
 	
 	@Override
 	public void onEnable() {
-		getLogger().info("MultiCraft has been enabled");
+		getLogger().info("MultiCraft without database has been enabled!");
 		PluginManager pm = getServer().getPluginManager();
 		this.getCommand("mbuild").setExecutor(new MultiCraftCommandExecutor(this));
 		
-		MySQL.connect();
+//		try {
+//			MySQL.connect();
+//			
+//			InventoryListener inventoryListener = new InventoryListener(this);
+//			pm.registerEvents(inventoryListener,  this);
+//			
+//			LocationsListener locationsListener = new LocationsListener(this);
+//			pm.registerEvents(locationsListener, this);
+//			
+//			BlockEventsListener blockPlacementListener = new BlockEventsListener(this);
+//			pm.registerEvents(blockPlacementListener, this);
+//		}catch(Exception e) {
+//			//do nothing
+//		}
 		
-		InventoryListener inventoryListener = new InventoryListener(this);
-		pm.registerEvents(inventoryListener,  this);
-		
-		LocationsListener locationsListener = new LocationsListener(this);
-		pm.registerEvents(locationsListener, this);
-		
-		BlockEventsListener blockPlacementListener = new BlockEventsListener(this);
-		pm.registerEvents(blockPlacementListener, this);
-		
-		new SpeechToTextServer(this).start();
-		new CommandsListener(this).start();
-		new CommandExecution(this).start();
+//		new SpeechToTextServer(this).start();
+//		new CommandsListener(this).start();
+//		new CommandExecution(this).start();
 	}
 	
 	@Override
 	public void onDisable() {
 		
-		MySQL.disconnect();
+//		MySQL.disconnect();
 		getLogger().info("MultiCraft has been disabled");
 	}
 	

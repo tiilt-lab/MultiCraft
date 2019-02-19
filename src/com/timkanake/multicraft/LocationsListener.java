@@ -70,9 +70,8 @@ public class LocationsListener implements Listener{
 		Location prevLocation = event.getFrom();
 		Location newLocation = event.getTo();
 		int curTime = (int) cl.millis();
-		int timeDiff = curTime - this.playerLastRecordedTime.get(pl.getDisplayName());
-		if(timeDiff > 5000 && movementMagnitude(prevLocation, newLocation) >= 1) {
-			UtilityFunctions.printToConsole("recording movement");
+//		int timeDiff = curTime - this.playerLastRecordedTime.get(pl.getDisplayName());
+		if(movementMagnitude(prevLocation, newLocation) >= 1) {
 			this.playerLastRecordedTime.put(pl.getDisplayName(), curTime);
 			recordLocation(newLocation, pl.getDisplayName());
 		}		
