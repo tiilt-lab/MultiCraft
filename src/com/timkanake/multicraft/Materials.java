@@ -19,7 +19,7 @@ public class Materials {
 	}
 	
 	public static int getId(String s) throws MaterialDoesNotExistException {		
-		if(! materials.containsKey(s.toLowerCase())) {
+		if(! getInstance().materials.containsKey(s.toLowerCase())) {
 			throw new MaterialDoesNotExistException("The material you requested does not exits");
 		}
 		return materials.get(s);
