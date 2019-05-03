@@ -10,9 +10,10 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import com.timkanake.multicraft.Materials.MaterialDoesNotExistException;
+
 public class MultiCraftCommandExecutor implements CommandExecutor{
 	private final MultiCraft plugin;
-	private static int HOLLOW_FLAG = 0;
 	
 	public MultiCraftCommandExecutor(MultiCraft plugin) {
 		this.plugin = plugin;
@@ -24,6 +25,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		Player p = (Player) sender;
 		if(cmd.getName().equalsIgnoreCase("mbuild")) {
+			// TODO: Give user feedback
 			if(args.length < 3)
 				return false;
 			
@@ -34,13 +36,27 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 			int[] buildCoordinates = CoordinateCalculations.getBuildCoordinates(playerLoc, dimensions);
 			Location endLoc = new Location(playerLoc.getWorld(), buildCoordinates[0], buildCoordinates[1], buildCoordinates[2]);
 			
-			Material material = Material.getMaterial(1);
+			
+			// TODO: Get the material
+			
 			int materialId = 1;
+			
 			if(args.length > 3) {
-				material = Material.getMaterial(Integer.parseInt(args[3]));
-				materialId = Integer.parseInt(args[3]);
+				// TODO: Check if int or string
+				try {
+					materialId = Integer.parseInt(args[3]);
+				}catch(NumberFormatException e) {
+					try {
+						materialId = Materials.getId(args[3]);
+					}catch(MaterialDoesNotExistException f) {
+						// TODO: Give signal
+						materialId = 1;
+					}
+				}
 			}
 			
+			
+			Material material = Material.getMaterial(materialId);
 			
 			GameCommand gComm = new GameCommand(this.plugin);
 			
