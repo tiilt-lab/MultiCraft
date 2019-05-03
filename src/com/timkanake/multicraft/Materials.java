@@ -3,8 +3,10 @@ package com.timkanake.multicraft;
 import java.util.HashMap;
 
 public class Materials {
+	
 	private static Materials instance = null;
-	HashMap<String, Integer> materials = null;
+	static HashMap<String, Integer> materials = null;
+	
 	private Materials() {
 		materials = initializeMaterialsDict();
 	}
@@ -16,20 +18,23 @@ public class Materials {
 		return instance;
 	}
 	
-	public int getId(String s) {
+	public static int getId(String s) throws MaterialDoesNotExistException {		
+		if(! materials.containsKey(s.toLowerCase())) {
+			throw new MaterialDoesNotExistException("The material you requested does not exits");
+		}
 		return materials.get(s);
 	}
 	
 	@SuppressWarnings("serial")
 	public static HashMap<String, Integer> initializeMaterialsDict(){
 		 return new HashMap<String, Integer>(){{
-			put("Air",0);
-			put("Stone",1);
-			put("Grass",2);
-			put("Dirt",3);
-			put("Cobblestone",4);
-			put("Oak Wood Plank",5);
-			put("Oak Sapling",6);
+			put("air",0);
+			put("stone",1);
+			put("grass",2);
+			put("dirt",3);
+			put("cobblestone",4);
+			put("oak wood plank",5);
+			put("oak sapling",6);
 			put("Bedrock",7);
 			put("Flowing Water",8);
 			put("Still Water",9);
@@ -486,6 +491,13 @@ public class Materials {
 			put("Wait Disc",2267);
 		}
 		};
+	}
+	
+	
+	public static class MaterialDoesNotExistException extends Exception {
+		public MaterialDoesNotExistException(String errorMessage) {
+			super(errorMessage);
+		}
 	}
 
 }
