@@ -13,6 +13,7 @@ public class MultiCraft extends JavaPlugin{
 		getLogger().info("MultiCraft without database has been enabled!");
 		PluginManager pm = getServer().getPluginManager();
 		this.getCommand("mbuild").setExecutor(new MultiCraftCommandExecutor(this));
+		this.getCommand("pyramid").setExecutor(new PyramidBuilder(this));
 		
 //		try {
 //			MySQL.connect();

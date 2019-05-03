@@ -62,8 +62,6 @@ public class GameCommand {
 		int id = ((Long) args.get("block_code")).intValue();
 		Material m = Material.getMaterial(id);
 		updateBlocks(l, l2, m);
-		plugin.getServer().broadcastMessage("3");
-
 	}
 	
 	public void  updateBlocks(Location pos1, Location pos2, Material m) {
