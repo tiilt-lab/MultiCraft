@@ -23,6 +23,7 @@ public class PyramidBuilder implements CommandExecutor {
 		this.plugin = pl;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		// TODO Auto-generated method stub
@@ -52,8 +53,6 @@ public class PyramidBuilder implements CommandExecutor {
 					}
 				}
 			}
-			
-			@SuppressWarnings("deprecation")
 			Material material = Material.getMaterial(materialId);
 			
 			// TODO: Check if Hollow
@@ -62,7 +61,7 @@ public class PyramidBuilder implements CommandExecutor {
 				hollow = true;
 			}
 			
-			makePyramid(playerLoc, material, size, hollow);
+			makePyramid(new BlockVector3(playerLoc.getX(), playerLoc.getY(), playerLoc.getZ()), material, size, hollow, playerLoc.getWorld());
 			
 			return true;
 		}
@@ -71,7 +70,7 @@ public class PyramidBuilder implements CommandExecutor {
 	}
 	
 	
-	public void makePyramid(Location position, Material block, int size, boolean hollow){
+	public void makePyramid(BlockVector3 position, Material block, int size, boolean hollow, World w){
 		plugin.getServer().broadcastMessage(position.toString());
         int height = size;
         for (int y = 0; y <= height; ++y) {
@@ -81,22 +80,15 @@ public class PyramidBuilder implements CommandExecutor {
 
                     if ((hollow && z <= size && x <= size) || z == size || x == size) {
                     	// one
-                    	World w = position.getWorld();
                     	byte tempByte = (byte) 0;
-                    	Location tempLoc = position.add(x, y, z);
-                    	updateBlock(w, (int) tempLoc.getX(), (int) tempLoc.getY(), (int) tempLoc.getZ(), block, tempByte);
                     	
-                    	// two
-                    	tempLoc = position.add(-x, y, z);
-                    	updateBlock(w, (int) tempLoc.getX(), (int) tempLoc.getY(), (int) tempLoc.getZ(), block, tempByte);
+                    	updateBlock(w, (int) position.x + x, (int) position.y + y, (int) position.z + z, block, tempByte);
                     	
-                    	// three
-                    	tempLoc = position.add(x, y, -z);
-                    	updateBlock(w, (int) tempLoc.getX(), (int) tempLoc.getY(), (int) tempLoc.getZ(), block, tempByte);
+                    	updateBlock(w, (int) position.x - x, (int) position.y + y, (int) position.z + z, block, tempByte);
                     	
-                    	// four
-                    	tempLoc = position.add(-x, y, z);
-                    	updateBlock(w, (int) tempLoc.getX(), (int) tempLoc.getY(), (int) tempLoc.getZ(), block, tempByte);
+                    	updateBlock(w, (int) position.x + x, (int) position.y + y, (int) position.z - z, block, tempByte);
+                    	
+                    	updateBlock(w, (int) position.x - x, (int) position.y + y, (int) position.z - z, block, tempByte);
                     }
                 }
             }
@@ -116,5 +108,16 @@ public class PyramidBuilder implements CommandExecutor {
             plugin.getServer().broadcastMessage("Failed to update Blocks :(");
         }
     }
+	
+	private class BlockVector3{
+		public double x;
+		public double y;
+		public double z;
+		public BlockVector3(double x, double y, double z) {
+			this.x = x;
+			this.y = y;
+			this.z = z;
+		}
+	}
 
 }
