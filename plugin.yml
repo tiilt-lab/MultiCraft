@@ -3,5 +3,11 @@ main: com.timkanake.multicraft.MultiCraft
 version: 1.0 (alpha)
 commands:
   mbuild:
-      description: MultiCraft Build Command
-      usage: /<command> x-coord(int) y-coord(int) z-coord(int) material-code(int) hollow-flag(int)
+    description: MultiCraft Build Command
+    usage: /<command> x-coord(int) y-coord(int) z-coord(int) material-code(int) hollow-flag(int)
+  pyramid:
+    description: Build a Square pyramid
+    usage: /<command> size(int) material-code(int) hollow-flag(int)
+  ray:
+    description: Trace a ray for now
+    usage: /<command>

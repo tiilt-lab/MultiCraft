@@ -14,6 +14,7 @@ public class MultiCraft extends JavaPlugin{
 		PluginManager pm = getServer().getPluginManager();
 		this.getCommand("mbuild").setExecutor(new MultiCraftCommandExecutor(this));
 		this.getCommand("pyramid").setExecutor(new PyramidBuilder(this));
+		this.getCommand("ray").setExecutor(new RayTracingTest(this));
 		
 //		try {
 //			MySQL.connect();
