@@ -2,7 +2,7 @@ package com.timkanake.multicraft;
 
 import java.sql.Connection;
 
-import org.bukkit.plugin.PluginManager;
+// import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class MultiCraft extends JavaPlugin{
@@ -11,7 +11,7 @@ public class MultiCraft extends JavaPlugin{
 	@Override
 	public void onEnable() {
 		getLogger().info("MultiCraft without database has been enabled!");
-		PluginManager pm = getServer().getPluginManager();
+		// PluginManager pm = getServer().getPluginManager();
 		this.getCommand("mbuild").setExecutor(new MultiCraftCommandExecutor(this));
 		this.getCommand("pyramid").setExecutor(new PyramidBuilder(this));
 		this.getCommand("ray").setExecutor(new RayTracingTest(this));

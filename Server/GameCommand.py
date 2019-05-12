@@ -60,6 +60,8 @@ class GameCommand:
 				self.args['wall'] = True
 			if word_token.text == 'sphere':
 				self.args['sphere'] = True
+			if word_token.text == 'roof':
+				self.args['roof'] = True
 			if word_token.text in materials_dict.keys():
 				self.args['block_code'] = materials_dict[word_token.text]
 
@@ -67,7 +69,9 @@ class GameCommand:
 			dimensions.append(0)
 		elif 'sphere' in self.args.keys() and len(dimensions) == 1:
 			pass # This is a valid dict therefore skip the return
-		elif len(dimensions) < 3:
+		elif 'roof' in self.args.keys() and len(dimensions) == 2:
+			dimensions.append(0)
+		elif len(dimensions) < 3:			
 			self.args = {}
 			return
 		self.args['dimensions'] = dimensions

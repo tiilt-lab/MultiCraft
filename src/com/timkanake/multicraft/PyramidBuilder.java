@@ -109,7 +109,7 @@ public class PyramidBuilder implements CommandExecutor {
         }
     }
 	
-	private class BlockVector3{
+	public static class BlockVector3{
 		public double x;
 		public double y;
 		public double z;

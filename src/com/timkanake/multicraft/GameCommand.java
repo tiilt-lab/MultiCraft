@@ -12,6 +12,8 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.timkanake.multicraft.CoordinateCalculations;
+import com.timkanake.multicraft.PyramidBuilder.BlockVector3;
+import com.timkanake.multicraft.PyramidBuilder;
 
 public class GameCommand {
 	String commandName;
@@ -54,13 +56,22 @@ public class GameCommand {
 		dimensions[0] = ((Long) dimAr.get(0)).intValue();
 		dimensions[1] = ((Long) dimAr.get(1)).intValue();
 		dimensions[2] = ((Long) dimAr.get(2)).intValue();
-		Location l = issuer.getLocation();
 		
+		Location l = issuer.getLocation();
+		int id = ((Long) args.get("block_code")).intValue();
+		Material m = Material.getMaterial(id);
+		// TODO: Clean up this logic
+		if ((String) args.get("roof") == "True") {
+			// build a roof
+			// makePyramid(new BlockVector3(playerLoc.getX(), playerLoc.getY(), playerLoc.getZ()), material, size, hollow, playerLoc.getWorld());
+			PyramidBuilder tempBuilder = new PyramidBuilder(this.plugin);
+			tempBuilder.makePyramid(new BlockVector3(l.getX(), l.getY(), l.getZ()), m, dimensions[0], true, issuer.getWorld());
+			return;
+		}
 		int[] buildCoordinates = CoordinateCalculations.getBuildCoordinates(l, dimensions);
 		Location l2 = new Location(l.getWorld(), buildCoordinates[0], buildCoordinates[1], buildCoordinates[2]);
 		
-		int id = ((Long) args.get("block_code")).intValue();
-		Material m = Material.getMaterial(id);
+		
 		updateBlocks(l, l2, m);
 	}
 	
