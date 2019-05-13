@@ -61,7 +61,9 @@ public class GameCommand {
 		int id = ((Long) args.get("block_code")).intValue();
 		Material m = Material.getMaterial(id);
 		// TODO: Clean up this logic
-		if ((String) args.get("roof") == "True") {
+//		plugin.getServer().broadcastMessage("Check for if roof is a boolean");
+//		plugin.getServer().broadcastMessage(Boolean.toString((Boolean) args.get("roof") == true));
+		if (args.containsKey("roof") && (Boolean) args.get("roof")) {
 			// build a roof
 			// makePyramid(new BlockVector3(playerLoc.getX(), playerLoc.getY(), playerLoc.getZ()), material, size, hollow, playerLoc.getWorld());
 			PyramidBuilder tempBuilder = new PyramidBuilder(this.plugin);
@@ -72,7 +74,12 @@ public class GameCommand {
 		Location l2 = new Location(l.getWorld(), buildCoordinates[0], buildCoordinates[1], buildCoordinates[2]);
 		
 		
-		updateBlocks(l, l2, m);
+		if(args.containsKey("hollow") && (Boolean) args.get("hollow")) {
+			buildHollow(dimensions, l, l2, this, m);
+		}else {
+			updateBlocks(l, l2, m);
+		}
+		
 	}
 	
 	public void  updateBlocks(Location pos1, Location pos2, Material m) {
@@ -92,6 +99,28 @@ public class GameCommand {
 				}
 			}
 		}
+	}
+	
+	
+	public void buildHollow(int[] dimensions, Location startLoc, Location endLoc, GameCommand gComm, Material m) {		
+		// bottom Wall
+		gComm.updateBlocks(startLoc, new Location(endLoc.getWorld(), endLoc.getX(), startLoc.getY(), endLoc.getZ()), m);
+		
+		// top wall
+		gComm.updateBlocks(new Location(startLoc.getWorld(), startLoc.getX(), endLoc.getY(), startLoc.getZ()), 
+				endLoc, m);
+		
+		// back wall
+		gComm.updateBlocks(new Location(startLoc.getWorld(), startLoc.getX(), startLoc.getY(), endLoc.getZ()), endLoc, m);
+		
+		// front wall
+		gComm.updateBlocks(startLoc, new Location(endLoc.getWorld(), endLoc.getX(), endLoc.getY(), startLoc.getZ()), m);
+
+		// right wall
+		gComm.updateBlocks(new Location(startLoc.getWorld(), endLoc.getX(), startLoc.getY(), startLoc.getZ()), endLoc, m);
+		
+		// left wall
+		gComm.updateBlocks(startLoc, new Location(endLoc.getWorld(), startLoc.getX(), endLoc.getY(), endLoc.getZ()), m);
 	}
 	
 	

@@ -15,7 +15,8 @@ print('Trying to connect to server: ')
 try:
     sending_socket.connect((host, send_port))
     print("Connected")
-except:
+except Exception as e:
+    print(e)
     print("Sending strings socket connection error")
     sys.exit()
 
@@ -27,8 +28,9 @@ def start_server():
 
     try:
         soc.bind(("0.0.0.0", port))
-    except:
-        print("Bind failed. Error : " + str(sys.exc_info()))
+    except Exception as e:
+        print(e)
+        # print("Bind failed. Error : " + str(sys.exc_info()))
         sys.exit()
 
     soc.listen(1) # queue up to 5 requests
@@ -73,10 +75,11 @@ def client_thread(connection, ip, port):
                 client_transcript = client_input.split(' ', 1)[1]
                 print(client_transcript)
                 args = process_instruction(client_transcript)
-                print(args)
-                args['client_name'] = client_input.split(' ')[0]
-                print("sending " + json.dumps(args))
-                sending_socket.send((json.dumps(args) + "\n").encode())
+                if args is not None:
+                    print(args)
+                    args['client_name'] = client_input.split(' ')[0]
+                    print("sending " + json.dumps(args))
+                    sending_socket.send((json.dumps(args) + "\n").encode())
 
 
         # comm_str = input("Please enter a command: ")

@@ -34,7 +34,7 @@ public class EchoThread extends Thread{
                     return;
                 } else {
                 	CommandsQueue.getInstance().commands.add(line);
-                	//plugin.getServer().broadcastMessage(line);
+                	plugin.getServer().broadcastMessage(line);
                 }
             } catch (IOException e) {
                 e.printStackTrace();

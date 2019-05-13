@@ -1,13 +1,13 @@
-# import en_core_web_sm # Windows
-import spacy # macOS
+import en_core_web_sm # Windows
+# import spacy # macOS
 
 from GameCommand import GameCommand
 from SynonymDictionaries import commands_dict, supported_commands
 import json
 import socket
 
-# nlp = en_core_web_sm.load() windows
-nlp = spacy.load("en_core_web_sm") # macOS
+nlp = en_core_web_sm.load() # windows
+#nlp = spacy.load("en_core_web_sm") # macOS
 def get_supported_word(word, synonyms_dict):
 	return synonyms_dict[word]
 
@@ -21,13 +21,15 @@ def process_instruction(instruction_to_process):
 		if word in supported_commands:
 			game_command.command = word
 			break
-		elif word in commands_dict.keys():
-			game_command.command = get_supported_word(word, commands_dict)
-			break
+		else: 
+			return None
+		# elif word in commands_dict.keys():
+		# 	game_command.command = get_supported_word(word, commands_dict)
+		# 	break
 
 	if game_command.command is None:
 		game_command.is_valid = False
-		return game_command
+		return None
 
 	game_command.args['command'] = game_command.command
 	game_command.get_game_command_args()

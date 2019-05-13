@@ -64,6 +64,8 @@ class GameCommand:
 				self.args['roof'] = True
 			if word_token.text in materials_dict.keys():
 				self.args['block_code'] = materials_dict[word_token.text]
+			if word_token.text == 'hollow':
+				self.args['hollow'] = True
 
 		if 'wall' in self.args.keys() and len(dimensions) == 2:
 			dimensions.append(0)

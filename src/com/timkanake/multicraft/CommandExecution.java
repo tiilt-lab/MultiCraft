@@ -14,7 +14,7 @@ public class CommandExecution extends Thread{
 			if(! CommandsQueue.getInstance().commandsQ.isEmpty()){
 				try {
 					JSONObject o = CommandsQueue.getInstance().commandsQ.remove();
-					plugin.getServer().broadcastMessage(o.toJSONString() + " this is right");
+					// plugin.getServer().broadcastMessage(o.toJSONString() + " this is right");
 					GameCommand gComm = new GameCommand(o, plugin);
 					gComm.execute();
 				}catch(Exception e){

@@ -31,9 +31,9 @@ public class MultiCraft extends JavaPlugin{
 //			//do nothing
 //		}
 		
-//		new SpeechToTextServer(this).start();
-//		new CommandsListener(this).start();
-//		new CommandExecution(this).start();
+		new SpeechToTextServer(this).start();
+		new CommandsListener(this).start();
+		new CommandExecution(this).start();
 	}
 	
 	@Override
