@@ -2,9 +2,12 @@ package com.timkanake.multicraft;
 
 
 import java.sql.SQLException;
+import java.util.List;
+import java.util.Set;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -32,9 +35,12 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 			// parse args to dimensions
 			int[] dimensions = new int[] {Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2])};
 			
-			Location playerLoc = p.getLocation();
-			int[] buildCoordinates = CoordinateCalculations.getBuildCoordinates(playerLoc, dimensions);
-			Location endLoc = new Location(playerLoc.getWorld(), buildCoordinates[0], buildCoordinates[1], buildCoordinates[2]);
+			// Location playerLoc = p.getLocation();
+			List<Block> blocks = p.getLineOfSight((Set<Material>) null, 5);
+			Location startLocation = blocks.get(4).getLocation();
+			
+			int[] buildCoordinates = CoordinateCalculations.getBuildCoordinates(startLocation, dimensions);
+			Location endLoc = new Location(startLocation.getWorld(), buildCoordinates[0], buildCoordinates[1], buildCoordinates[2]);
 			
 			
 			// TODO: Get the material
@@ -61,9 +67,9 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 			GameCommand gComm = new GameCommand(this.plugin);
 			
 			if(args.length > 4)
-				buildHollow(dimensions, playerLoc,  endLoc, gComm, material);
+				buildHollow(dimensions, startLocation,  endLoc, gComm, material);
 			else
-				gComm.updateBlocks(playerLoc, endLoc, material);
+				gComm.updateBlocks(startLocation, endLoc, material);
 //			
 //			try {
 //				MultiCraftBuildsListener.recordBuild(p.getDisplayName(), playerLoc, dimensions, materialId, HOLLOW_FLAG);
