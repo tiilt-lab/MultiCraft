@@ -10,7 +10,8 @@ public class Structures {
 
     public static MultiCraft plugin;
 
-    public Structures(MultiCraft pl){
+    @SuppressWarnings("static-access")
+	public Structures(MultiCraft pl){
         this.plugin = pl;
     }
 

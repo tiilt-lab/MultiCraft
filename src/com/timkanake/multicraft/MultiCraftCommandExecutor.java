@@ -1,10 +1,7 @@
 package com.timkanake.multicraft;
 
-
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
-
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -36,8 +33,20 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 			int[] dimensions = new int[] {Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2])};
 			
 			// Location playerLoc = p.getLocation();
-			List<Block> blocks = p.getLineOfSight((Set<Material>) null, 5);
-			Location startLocation = blocks.get(4).getLocation();
+			List<Block> blocks = p.getLineOfSight((Set<Material>) null, 6);
+			
+			
+			Material tempMaterial = null;
+			// get Start Location, defaults to the block in front of the player
+			Location startLocation = blocks.get(0).getLocation();
+			for(Block b : blocks) {
+				tempMaterial = b.getType();
+				if(! tempMaterial.equals(Material.AIR)) {
+					startLocation = b.getLocation().add(0, 1, 0);
+				}else {
+					this.plugin.getServer().broadcastMessage("An airblock has been detected in the line of sight");
+				}
+			}
 			
 			int[] buildCoordinates = CoordinateCalculations.getBuildCoordinates(startLocation, dimensions);
 			Location endLoc = new Location(startLocation.getWorld(), buildCoordinates[0], buildCoordinates[1], buildCoordinates[2]);
@@ -70,16 +79,6 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 				buildHollow(dimensions, startLocation,  endLoc, gComm, material);
 			else
 				gComm.updateBlocks(startLocation, endLoc, material);
-//			
-//			try {
-//				MultiCraftBuildsListener.recordBuild(p.getDisplayName(), playerLoc, dimensions, materialId, HOLLOW_FLAG);
-//			} catch (NumberFormatException e) {
-//				e.printStackTrace();
-//			} catch (SQLException e) {
-//				e.printStackTrace();
-//			} catch(Exception e) {
-//				//do nothing;
-//			}
 			
 			return true;
 		}

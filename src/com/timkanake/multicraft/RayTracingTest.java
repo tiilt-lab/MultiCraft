@@ -2,7 +2,6 @@ package com.timkanake.multicraft;
 
 import java.util.List;
 import java.util.Set;
-
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -25,6 +24,7 @@ public class RayTracingTest implements CommandExecutor {
 	}
 
 	
+	@SuppressWarnings("deprecation")
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		// TODO Auto-generated method stub
@@ -32,7 +32,6 @@ public class RayTracingTest implements CommandExecutor {
 		World w = p.getWorld();
 		if(cmd.getName().equalsIgnoreCase("ray")) {
 			plugin.getServer().broadcastMessage("The ray command has been called");
-			// plugin.getServer().broadcastMessage(Integer.toString(args.length));
 			// TODO: Give user feedback
 			List<Block> blocks = p.getLineOfSight((Set<Material>) null, 5);
 			

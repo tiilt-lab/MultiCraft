@@ -18,6 +18,7 @@ public class Materials {
 		return instance;
 	}
 	
+	@SuppressWarnings("static-access")
 	public static int getId(String s) throws MaterialDoesNotExistException {		
 		if(! getInstance().materials.containsKey(s.toLowerCase())) {
 			throw new MaterialDoesNotExistException("The material you requested does not exits");
@@ -494,6 +495,7 @@ public class Materials {
 	}
 	
 	
+	@SuppressWarnings("serial")
 	public static class MaterialDoesNotExistException extends Exception {
 		public MaterialDoesNotExistException(String errorMessage) {
 			super(errorMessage);
