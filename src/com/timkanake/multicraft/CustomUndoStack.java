@@ -31,6 +31,7 @@ public class CustomUndoStack {
 	
 	public void push(BuildCommandData data) {
 		this.dataArr[this.insertIndex] = data;
+		this.insertIndex++;
 		if(this.insertIndex == size) {
 			this.insertIndex = 0;
 		}
@@ -47,5 +48,9 @@ public class CustomUndoStack {
 		}
 		
 		return false;
+	}
+	
+	public int getSize() {
+		return this.size;
 	}
 }

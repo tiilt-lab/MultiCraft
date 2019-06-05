@@ -1,7 +1,5 @@
 package com.timkanake.multicraft;
 
-import com.timkanake.multicraft.CustomUndoStack.NoCommandHistoryException;
-
 public class CustomRedoStack {
 	public CustomUndoStack redoStack;
 	

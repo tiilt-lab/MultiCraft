@@ -10,9 +10,11 @@ public class MultiCraft extends JavaPlugin{
 	@Override
 	public void onEnable() {
 		getLogger().info("MultiCraft without database has been enabled!");
-		this.getCommand("mbuild").setExecutor(new MultiCraftCommandExecutor(this));
+		MultiCraftCommandExecutor mExec = new MultiCraftCommandExecutor(this);
+		this.getCommand("mbuild").setExecutor(mExec);
 		this.getCommand("pyramid").setExecutor(new PyramidBuilder(this));
 		this.getCommand("ray").setExecutor(new RayTracingTest(this));
+		this.getCommand("mundo").setExecutor(mExec);
 		
 		new SpeechToTextServer(this).start();
 		new CommandsListener(this).start();

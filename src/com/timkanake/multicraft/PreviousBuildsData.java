@@ -18,6 +18,9 @@ public class PreviousBuildsData {
 		}
 		return instance;
 	}
+	
+	private PreviousBuildsData() {
+	}
 		
 	
 	public void appendBuildRecord(Player p, BuildCommandData buildData) {
@@ -30,6 +33,9 @@ public class PreviousBuildsData {
 	}
 	
 	public void clearPlayerRedo(Player p) {
+		if(!buildsRedoData.containsKey(p)) {
+			return;
+		}
 		CustomRedoStack temp = new CustomRedoStack(buildsRedoData.get(p).getSize());
 		buildsRedoData.put(p, temp);
 	}
@@ -37,8 +43,13 @@ public class PreviousBuildsData {
 	public BuildCommandData getPlayersBuildRecordForUndo(Player p) throws NoCommandHistoryException{
 		
 		BuildCommandData temp = null;
+		if(! buildsUndoData.containsKey(p))
+			throw new NoCommandHistoryException();
+		
 		try {
-			temp = instance.buildsUndoData.get(p).pop();
+			CustomUndoStack tempStack = instance.buildsUndoData.get(p);
+			temp = tempStack.pop();
+//			temp = instance.buildsUndoData.get(p).pop();
 		}catch(NoCommandHistoryException e) {
 			throw e;
 		}
@@ -46,6 +57,8 @@ public class PreviousBuildsData {
 	}
 	
 	public BuildCommandData getPlayersBuildRecordForRedo(Player p) throws NoCommandHistoryException{
+		if(! buildsRedoData.containsKey(p))
+			throw new NoCommandHistoryException();
 		BuildCommandData temp = null;
 		try {
 			temp = instance.buildsRedoData.get(p).pop();
@@ -62,5 +75,9 @@ public class PreviousBuildsData {
 		CustomRedoStack temp = buildsRedoData.get(p);
 		temp.push(data);
 		buildsRedoData.put(p, temp);
+	}
+	
+	public int getPlayerUndoStackSize(Player p) {
+		return instance.buildsUndoData.get(p).getSize();
 	}
 }

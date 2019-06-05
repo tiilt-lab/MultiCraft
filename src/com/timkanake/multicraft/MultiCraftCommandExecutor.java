@@ -45,8 +45,6 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 				tempMaterial = b.getType();
 				if(! tempMaterial.equals(Material.AIR)) {
 					startLocation = b.getLocation().add(0, 1, 0);
-				}else {
-					this.plugin.getServer().broadcastMessage("An airblock has been detected in the line of sight");
 				}
 			}
 			
@@ -82,36 +80,43 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 				blocksAffected = gComm.updateBlocks(startLocation, endLoc, material);
 			
 			BuildCommandData affectedBlocksData = new BuildCommandData(blocksAffected, blocksAffected.size());
-			PreviousBuildsData.getInstance().clearPlayerRedo(p);
-			PreviousBuildsData.getInstance().appendBuildRecord(p, affectedBlocksData);			
+			PreviousBuildsData pData = PreviousBuildsData.getInstance();
+			pData.clearPlayerRedo(p);
+			pData.appendBuildRecord(p, affectedBlocksData);
+			this.plugin.getServer().broadcastMessage(Integer.toString(pData.getPlayerUndoStackSize(p)));
 			return true;
 		}else if(cmd.getName().equalsIgnoreCase("mundo")) {
+			
 			// do nothing for now
 			// TODO: Implement this
-			
+			PreviousBuildsData pData = PreviousBuildsData.getInstance();
 			BuildCommandData playerBuildRecord;
+			
 			// get their build record
 			try {
-				playerBuildRecord = PreviousBuildsData.getInstance().getPlayersBuildRecordForUndo(p);
+				playerBuildRecord = pData.getPlayersBuildRecordForUndo(p);
 			}catch(NoCommandHistoryException e) {
 				this.plugin.getServer().broadcastMessage("You have no build record");
 				return false;
 			}
+			this.plugin.getServer().broadcastMessage("111111111111111111111");
 			
 			// restore blocks			
 			List<Block> blocksToChange = playerBuildRecord.blocksAffected;
 			List<Block> blocksAffectedDuringUndo = new ArrayList<Block>();
 			World world = p.getWorld();
+			this.plugin.getServer().broadcastMessage("222222222222222222222222");
 			for (Block b: blocksToChange) {				
 				Block t = world.getBlockAt(b.getX(), b.getY(), b.getZ());
 				t.setType(b.getType());
 				blocksAffectedDuringUndo.add(t);
 			}			
+			this.plugin.getServer().broadcastMessage("33333333333333333");
 			
 			// update redo stack
 			BuildCommandData toStoreInRedo = new BuildCommandData(blocksAffectedDuringUndo, blocksAffectedDuringUndo.size());
-			PreviousBuildsData.getInstance().addToRedoStack(p, toStoreInRedo);	
-			
+			pData.addToRedoStack(p, toStoreInRedo);	
+			return true;
 		}else if(cmd.getName().equalsIgnoreCase("mredo")) {
 			// TODO: Implement this
 			// get data from redoStack
