@@ -1,6 +1,8 @@
 package com.timkanake.multicraft;
 
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -61,8 +63,6 @@ public class GameCommand {
 		int id = ((Long) args.get("block_code")).intValue();
 		Material m = Material.getMaterial(id);
 		// TODO: Clean up this logic
-//		plugin.getServer().broadcastMessage("Check for if roof is a boolean");
-//		plugin.getServer().broadcastMessage(Boolean.toString((Boolean) args.get("roof") == true));
 		if (args.containsKey("roof") && (Boolean) args.get("roof")) {
 			// build a roof
 			// makePyramid(new BlockVector3(playerLoc.getX(), playerLoc.getY(), playerLoc.getZ()), material, size, hollow, playerLoc.getWorld());
@@ -82,7 +82,7 @@ public class GameCommand {
 		
 	}
 	
-	public void  updateBlocks(Location pos1, Location pos2, Material m) {
+	public List<Block>  updateBlocks(Location pos1, Location pos2, Material m) {
 		int minX, maxX, minY, maxY, minZ, maxZ;
 		World world = pos1.getWorld();
 		minX = pos1.getBlockX() < pos2.getBlockX() ? pos1.getBlockX() : pos2.getBlockX();
@@ -91,14 +91,17 @@ public class GameCommand {
 		maxY = pos1.getBlockY() >= pos2.getBlockY() ? pos1.getBlockY() : pos2.getBlockY();
 		minZ = pos1.getBlockZ() < pos2.getBlockZ() ? pos1.getBlockZ() : pos2.getBlockZ();
 		maxZ = pos1.getBlockZ() >= pos2.getBlockZ() ? pos1.getBlockZ() : pos2.getBlockZ();
+		
+		List<Block> blocksAffected = new ArrayList<Block>();
 
 		for (int x = minX; x <= maxX; ++x) {
 			for (int z = minZ; z <= maxZ; ++z) {
 				for (int y = minY; y <= maxY; ++y) {
-					updateBlock(world, x, y, z, m,(byte) 0);
+					blocksAffected.add(updateBlock(world, x, y, z, m,(byte) 0));
 				}
 			}
 		}
+		return blocksAffected;
 	}
 	
 	
@@ -125,19 +128,20 @@ public class GameCommand {
 	
 	
 	
-	private void updateBlock(World world, int x, int y, int z, Material blockType, byte blockData) {
+	private Block updateBlock(World world, int x, int y, int z, Material blockType, byte blockData) {
 		Block thisBlock = world.getBlockAt(x,y,z);
-		updateBlock(thisBlock, blockType, blockData);
+		return updateBlock(thisBlock, blockType, blockData);
 		
 	}
 
-	private void updateBlock(Block block, Material m, byte blockData) {
+	private Block updateBlock(Block block, Material m, byte blockData) {
 		try {			
 			block.setType(m);
 		}catch(Exception e) {
 			plugin.getServer().broadcastMessage(e.toString());
 			plugin.getServer().broadcastMessage("Failed to update Blocks :(");
 		}
+		return block;
 	}
 	
 	public void executeMove() {

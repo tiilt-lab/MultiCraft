@@ -490,13 +490,16 @@ public class Materials {
 			put("Ward Disc",2265);
 			put("11 Disc",2266);
 			put("Wait Disc",2267);
-		}
-		};
+		 }
+		 };
 	}
 	
-	
-	@SuppressWarnings("serial")
 	public static class MaterialDoesNotExistException extends Exception {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
 		public MaterialDoesNotExistException(String errorMessage) {
 			super(errorMessage);
 		}

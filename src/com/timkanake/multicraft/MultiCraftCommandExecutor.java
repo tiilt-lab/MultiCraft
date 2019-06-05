@@ -1,9 +1,11 @@
 package com.timkanake.multicraft;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -68,42 +70,81 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 						materialId = 1;
 					}
 				}
-			}
-			
+			}			
 			
 			Material material = Material.getMaterial(materialId);
 			
 			GameCommand gComm = new GameCommand(this.plugin);
-			
+			List<Block> blocksAffected = new ArrayList<Block>();
 			if(args.length > 4)
-				buildHollow(dimensions, startLocation,  endLoc, gComm, material);
+				blocksAffected = buildHollow(dimensions, startLocation,  endLoc, gComm, material);
 			else
-				gComm.updateBlocks(startLocation, endLoc, material);
+				blocksAffected = gComm.updateBlocks(startLocation, endLoc, material);
 			
+			BuildCommandData affectedBlocksData = new BuildCommandData(blocksAffected, blocksAffected.size());
+			PreviousBuildsData.getInstance().clearPlayerRedo(p);
+			PreviousBuildsData.getInstance().appendBuildRecord(p, affectedBlocksData);			
 			return true;
+		}else if(cmd.getName().equalsIgnoreCase("mundo")) {
+			// do nothing for now
+			// TODO: Implement this
+			
+			BuildCommandData playerBuildRecord;
+			// get their build record
+			try {
+				playerBuildRecord = PreviousBuildsData.getInstance().getPlayersBuildRecordForUndo(p);
+			}catch(NoCommandHistoryException e) {
+				this.plugin.getServer().broadcastMessage("You have no build record");
+				return false;
+			}
+			
+			// restore blocks			
+			List<Block> blocksToChange = playerBuildRecord.blocksAffected;
+			List<Block> blocksAffectedDuringUndo = new ArrayList<Block>();
+			World world = p.getWorld();
+			for (Block b: blocksToChange) {				
+				Block t = world.getBlockAt(b.getX(), b.getY(), b.getZ());
+				t.setType(b.getType());
+				blocksAffectedDuringUndo.add(t);
+			}			
+			
+			// update redo stack
+			BuildCommandData toStoreInRedo = new BuildCommandData(blocksAffectedDuringUndo, blocksAffectedDuringUndo.size());
+			PreviousBuildsData.getInstance().addToRedoStack(p, toStoreInRedo);	
+			
+		}else if(cmd.getName().equalsIgnoreCase("mredo")) {
+			// TODO: Implement this
+			// get data from redoStack
+			
+			// restore block
+			
+			// update undo stack
 		}
 		return false;
 	}
 	
-	public void buildHollow(int[] dimensions, Location startLoc, Location endLoc, GameCommand gComm, Material m) {		
+	public List<Block> buildHollow(int[] dimensions, Location startLoc, Location endLoc, GameCommand gComm, Material m) {	
+		List<Block> blocksAffected = new ArrayList<Block>();
 		// bottom Wall
-		gComm.updateBlocks(startLoc, new Location(endLoc.getWorld(), endLoc.getX(), startLoc.getY(), endLoc.getZ()), m);
+		blocksAffected.addAll(gComm.updateBlocks(startLoc, new Location(endLoc.getWorld(), endLoc.getX(), startLoc.getY(), endLoc.getZ()), m));
 		
 		// top wall
-		gComm.updateBlocks(new Location(startLoc.getWorld(), startLoc.getX(), endLoc.getY(), startLoc.getZ()), 
-				endLoc, m);
+		blocksAffected.addAll(gComm.updateBlocks(new Location(startLoc.getWorld(), startLoc.getX(), endLoc.getY(), startLoc.getZ()), 
+				endLoc, m));
 		
 		// back wall
-		gComm.updateBlocks(new Location(startLoc.getWorld(), startLoc.getX(), startLoc.getY(), endLoc.getZ()), endLoc, m);
+		blocksAffected.addAll(gComm.updateBlocks(new Location(startLoc.getWorld(), startLoc.getX(), startLoc.getY(), endLoc.getZ()), endLoc, m));
 		
 		// front wall
-		gComm.updateBlocks(startLoc, new Location(endLoc.getWorld(), endLoc.getX(), endLoc.getY(), startLoc.getZ()), m);
+		blocksAffected.addAll(gComm.updateBlocks(startLoc, new Location(endLoc.getWorld(), endLoc.getX(), endLoc.getY(), startLoc.getZ()), m));
 
 		// right wall
-		gComm.updateBlocks(new Location(startLoc.getWorld(), endLoc.getX(), startLoc.getY(), startLoc.getZ()), endLoc, m);
+		blocksAffected.addAll(gComm.updateBlocks(new Location(startLoc.getWorld(), endLoc.getX(), startLoc.getY(), startLoc.getZ()), endLoc, m));
 		
 		// left wall
-		gComm.updateBlocks(startLoc, new Location(endLoc.getWorld(), startLoc.getX(), endLoc.getY(), endLoc.getZ()), m);
+		blocksAffected.addAll(gComm.updateBlocks(startLoc, new Location(endLoc.getWorld(), startLoc.getX(), endLoc.getY(), endLoc.getZ()), m));
+		
+		return blocksAffected;
 	}
 	
 

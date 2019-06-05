@@ -11,3 +11,9 @@ commands:
   ray:
     description: Trace a ray for now
     usage: /<command>
+  mundo:
+    description: MultiCraft Undo Command
+    usage: /<command>
+  mredo:
+    description: MultiCraft Redo Command
+    usage: /<command>
