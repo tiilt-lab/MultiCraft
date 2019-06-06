@@ -43,11 +43,12 @@ public class PreviousBuildsData {
 	public BuildCommandData getPlayersBuildRecordForUndo(Player p) throws NoCommandHistoryException{
 		
 		BuildCommandData temp = null;
-		if(! buildsUndoData.containsKey(p))
-			throw new NoCommandHistoryException();
+		if(! buildsUndoData.containsKey(p)) {
+			throw new NoCommandHistoryException("Player is not in the dictionary.");
+		}
 		
 		try {
-			CustomUndoStack tempStack = instance.buildsUndoData.get(p);
+			CustomUndoStack tempStack = buildsUndoData.get(p);
 			temp = tempStack.pop();
 //			temp = instance.buildsUndoData.get(p).pop();
 		}catch(NoCommandHistoryException e) {
@@ -58,7 +59,7 @@ public class PreviousBuildsData {
 	
 	public BuildCommandData getPlayersBuildRecordForRedo(Player p) throws NoCommandHistoryException{
 		if(! buildsRedoData.containsKey(p))
-			throw new NoCommandHistoryException();
+			throw new NoCommandHistoryException("Player is not in the redo dictionary.");
 		BuildCommandData temp = null;
 		try {
 			temp = instance.buildsRedoData.get(p).pop();
@@ -77,7 +78,20 @@ public class PreviousBuildsData {
 		buildsRedoData.put(p, temp);
 	}
 	
+	public void addToUndoStack(Player p, BuildCommandData data) {
+		if(! buildsUndoData.containsKey(p)) {
+			buildsUndoData.put(p, new CustomUndoStack(DEFAULT_UNDO_STACK_SIZE));
+		}
+		CustomUndoStack temp = buildsUndoData.get(p);
+		temp.push(data);
+		buildsUndoData.put(p, temp);
+	}
+	
 	public int getPlayerUndoStackSize(Player p) {
 		return instance.buildsUndoData.get(p).getSize();
+	}
+	
+	public BuildCommandData getItemAtIndexForPlayer(Player p, int i) {
+		return buildsUndoData.get(p).getItemAtIndex(i);
 	}
 }

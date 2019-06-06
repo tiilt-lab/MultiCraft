@@ -82,7 +82,7 @@ public class GameCommand {
 		
 	}
 	
-	public List<Block>  updateBlocks(Location pos1, Location pos2, Material m) {
+	public List<BlockRecord>  updateBlocks(Location pos1, Location pos2, Material m) {
 		int minX, maxX, minY, maxY, minZ, maxZ;
 		World world = pos1.getWorld();
 		minX = pos1.getBlockX() < pos2.getBlockX() ? pos1.getBlockX() : pos2.getBlockX();
@@ -92,7 +92,7 @@ public class GameCommand {
 		minZ = pos1.getBlockZ() < pos2.getBlockZ() ? pos1.getBlockZ() : pos2.getBlockZ();
 		maxZ = pos1.getBlockZ() >= pos2.getBlockZ() ? pos1.getBlockZ() : pos2.getBlockZ();
 		
-		List<Block> blocksAffected = new ArrayList<Block>();
+		List<BlockRecord> blocksAffected = new ArrayList<BlockRecord>();
 
 		for (int x = minX; x <= maxX; ++x) {
 			for (int z = minZ; z <= maxZ; ++z) {
@@ -128,20 +128,21 @@ public class GameCommand {
 	
 	
 	
-	private Block updateBlock(World world, int x, int y, int z, Material blockType, byte blockData) {
+	private BlockRecord updateBlock(World world, int x, int y, int z, Material blockType, byte blockData) {
 		Block thisBlock = world.getBlockAt(x,y,z);
 		return updateBlock(thisBlock, blockType, blockData);
 		
 	}
 
-	private Block updateBlock(Block block, Material m, byte blockData) {
+	private BlockRecord updateBlock(Block block, Material m, byte blockData) {
+		BlockRecord toReturn = new BlockRecord(block.getType(), block.getX(), block.getY(), block.getZ());
 		try {			
 			block.setType(m);
 		}catch(Exception e) {
 			plugin.getServer().broadcastMessage(e.toString());
 			plugin.getServer().broadcastMessage("Failed to update Blocks :(");
 		}
-		return block;
+		return toReturn;
 	}
 	
 	public void executeMove() {

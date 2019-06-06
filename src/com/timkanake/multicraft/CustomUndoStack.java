@@ -15,10 +15,10 @@ public class CustomUndoStack {
 	
 	public BuildCommandData pop() throws NoCommandHistoryException {
 		if(this.isEmpty()) {
-			throw new NoCommandHistoryException();
+			throw new NoCommandHistoryException("The stack is empty.");
 		}
 		
-		insertIndex--;
+		insertIndex-=1;
 		
 		if(insertIndex < 0) {
 			insertIndex = this.size-1;
@@ -31,14 +31,18 @@ public class CustomUndoStack {
 	
 	public void push(BuildCommandData data) {
 		this.dataArr[this.insertIndex] = data;
-		this.insertIndex++;
+		this.insertIndex+=1;
 		if(this.insertIndex == size) {
 			this.insertIndex = 0;
 		}
 	}
 	
+	public BuildCommandData getItemAtIndex(int i) {
+		return dataArr[i];
+	}
+	
 	public boolean isEmpty() {
-		int indexToCheck = insertIndex--;
+		int indexToCheck = insertIndex-1;
 		
 		if(indexToCheck < 0)
 			indexToCheck = this.size-1;

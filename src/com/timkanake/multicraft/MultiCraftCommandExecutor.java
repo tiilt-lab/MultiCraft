@@ -73,7 +73,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 			Material material = Material.getMaterial(materialId);
 			
 			GameCommand gComm = new GameCommand(this.plugin);
-			List<Block> blocksAffected = new ArrayList<Block>();
+			List<BlockRecord> blocksAffected = new ArrayList<BlockRecord>();
 			if(args.length > 4)
 				blocksAffected = buildHollow(dimensions, startLocation,  endLoc, gComm, material);
 			else
@@ -83,13 +83,15 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 			PreviousBuildsData pData = PreviousBuildsData.getInstance();
 			pData.clearPlayerRedo(p);
 			pData.appendBuildRecord(p, affectedBlocksData);
-			this.plugin.getServer().broadcastMessage(Integer.toString(pData.getPlayerUndoStackSize(p)));
+			
 			return true;
 		}else if(cmd.getName().equalsIgnoreCase("mundo")) {
 			
 			// do nothing for now
 			// TODO: Implement this
 			PreviousBuildsData pData = PreviousBuildsData.getInstance();
+			
+			
 			BuildCommandData playerBuildRecord;
 			
 			// get their build record
@@ -97,21 +99,24 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 				playerBuildRecord = pData.getPlayersBuildRecordForUndo(p);
 			}catch(NoCommandHistoryException e) {
 				this.plugin.getServer().broadcastMessage("You have no build record");
+				this.plugin.getServer().broadcastMessage(e.getMessage());
 				return false;
 			}
-			this.plugin.getServer().broadcastMessage("111111111111111111111");
 			
 			// restore blocks			
-			List<Block> blocksToChange = playerBuildRecord.blocksAffected;
-			List<Block> blocksAffectedDuringUndo = new ArrayList<Block>();
+			List<BlockRecord> blocksToChange = playerBuildRecord.blocksAffected;
+			List<BlockRecord> blocksAffectedDuringUndo = new ArrayList<BlockRecord>();
 			World world = p.getWorld();
-			this.plugin.getServer().broadcastMessage("222222222222222222222222");
-			for (Block b: blocksToChange) {				
-				Block t = world.getBlockAt(b.getX(), b.getY(), b.getZ());
-				t.setType(b.getType());
-				blocksAffectedDuringUndo.add(t);
+			for (BlockRecord b: blocksToChange) {		
+				Block t = world.getBlockAt(b.x, b.y, b.z);
+				blocksAffectedDuringUndo.add(new BlockRecord(t.getType(), t.getX(), t.getY(), t.getZ()));
+				try {			
+					t.setType(b.material);
+				}catch(Exception e) {
+					plugin.getServer().broadcastMessage(e.toString());
+					plugin.getServer().broadcastMessage("Failed to update Blocks :(");
+				}				
 			}			
-			this.plugin.getServer().broadcastMessage("33333333333333333");
 			
 			// update redo stack
 			BuildCommandData toStoreInRedo = new BuildCommandData(blocksAffectedDuringUndo, blocksAffectedDuringUndo.size());
@@ -120,16 +125,42 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 		}else if(cmd.getName().equalsIgnoreCase("mredo")) {
 			// TODO: Implement this
 			// get data from redoStack
+			PreviousBuildsData pData = PreviousBuildsData.getInstance();
+			BuildCommandData playerBuildRecord;
+			
+			try {
+				playerBuildRecord = pData.getPlayersBuildRecordForRedo(p);
+			}catch (NoCommandHistoryException e) {
+				plugin.getServer().broadcastMessage("You have no build record for redo");
+				this.plugin.getServer().broadcastMessage(e.getMessage());
+				return false;
+			}
+			
+			
+			List<BlockRecord> blocksToChange = playerBuildRecord.blocksAffected;
+			List<BlockRecord> blocksAffectedDuringRedo = new ArrayList<BlockRecord>();
+			World world = p.getWorld();
+			for (BlockRecord b: blocksToChange) {		
+				Block t = world.getBlockAt(b.x, b.y, b.z);
+				blocksAffectedDuringRedo.add(new BlockRecord(t.getType(), t.getX(), t.getY(), t.getZ()));
+				try {			
+					t.setType(b.material);
+				}catch(Exception e) {
+					plugin.getServer().broadcastMessage(e.toString());
+					plugin.getServer().broadcastMessage("Failed to update Blocks :(");
+				}				
+			}		
 			
 			// restore block
-			
-			// update undo stack
+			BuildCommandData toStoreInUndo = new BuildCommandData(blocksAffectedDuringRedo, blocksAffectedDuringRedo.size());
+			pData.addToUndoStack(p, toStoreInUndo);
+			return true;
 		}
 		return false;
 	}
 	
-	public List<Block> buildHollow(int[] dimensions, Location startLoc, Location endLoc, GameCommand gComm, Material m) {	
-		List<Block> blocksAffected = new ArrayList<Block>();
+	public List<BlockRecord> buildHollow(int[] dimensions, Location startLoc, Location endLoc, GameCommand gComm, Material m) {	
+		List<BlockRecord> blocksAffected = new ArrayList<BlockRecord>();
 		// bottom Wall
 		blocksAffected.addAll(gComm.updateBlocks(startLoc, new Location(endLoc.getWorld(), endLoc.getX(), startLoc.getY(), endLoc.getZ()), m));
 		
