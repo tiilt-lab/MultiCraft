@@ -10,4 +10,8 @@ public class BuildCommandData {
 		this.blocksAffected = blocks;
 		this.numberOfBlocksAffected = num;
 	}
+	
+	public BuildCommandData() {
+		
+	}
 }

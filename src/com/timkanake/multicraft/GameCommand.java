@@ -45,19 +45,32 @@ public class GameCommand {
 		return CommandWords.getInstance().commands.contains(com);
 	}
 	
-	public void execute() {
+	public boolean execute() {
 		if(! commandSupported(commandName) || ! playerIsOnline(issuer)) {
-			return;
+			return false;
 		}
 		if(commandName.equals("build")) {
-			executeBuild();
+			return executeBuild();
 		}else if(commandName.equals("move")) {
-			executeMove();
+			return executeMove();
+		}else if(commandName.equals("undo")) {
+			return executeUndo();
+		}else if(commandName.equals("redo")) {
+			return executeRedo();
 		}
+		return false;
+	}
+	
+	public boolean executeUndo() {
+		return Commands.undo(this.issuer, this.plugin);
+	}
+	
+	public boolean executeRedo() {
+		return Commands.redo(this.issuer, this.plugin);
 	}
 	
 	@SuppressWarnings("deprecation")
-	public void executeBuild() {
+	public boolean executeBuild() {
 		JSONArray dimAr = (JSONArray) args.get("dimensions");
 		int[] dimensions = new int[3];
 		dimensions[0] = ((Long) dimAr.get(0)).intValue();
@@ -73,7 +86,7 @@ public class GameCommand {
 			// makePyramid(new BlockVector3(playerLoc.getX(), playerLoc.getY(), playerLoc.getZ()), material, size, hollow, playerLoc.getWorld());
 			PyramidBuilder tempBuilder = new PyramidBuilder(this.plugin);
 			tempBuilder.makePyramid(new BlockVector3(l.getX(), l.getY(), l.getZ()), m, dimensions[0], true, issuer.getWorld());
-			return;
+			return true;
 		}
 		int[] buildCoordinates = CoordinateCalculations.getBuildCoordinates(l, dimensions);
 		Location l2 = new Location(l.getWorld(), buildCoordinates[0], buildCoordinates[1], buildCoordinates[2]);
@@ -84,6 +97,7 @@ public class GameCommand {
 		}else {
 			updateBlocks(l, l2, m);
 		}
+		return true;
 	}
 	
 	public List<BlockRecord>  updateBlocks(Location pos1, Location pos2, Material m) {
@@ -108,7 +122,6 @@ public class GameCommand {
 		return blocksAffected;
 	}
 	
-	
 	public void buildHollow(int[] dimensions, Location startLoc, Location endLoc, GameCommand gComm, Material m) {		
 		// bottom Wall
 		gComm.updateBlocks(startLoc, new Location(endLoc.getWorld(), endLoc.getX(), startLoc.getY(), endLoc.getZ()), m);
@@ -129,9 +142,7 @@ public class GameCommand {
 		// left wall
 		gComm.updateBlocks(startLoc, new Location(endLoc.getWorld(), startLoc.getX(), endLoc.getY(), endLoc.getZ()), m);
 	}
-	
-	
-	
+
 	private BlockRecord updateBlock(World world, int x, int y, int z, Material blockType, byte blockData) {
 		Block thisBlock = world.getBlockAt(x,y,z);
 		return updateBlock(thisBlock, blockType, blockData);
@@ -149,11 +160,12 @@ public class GameCommand {
 		return toReturn;
 	}
 	
-	public void executeMove() {
+	public boolean executeMove() {
 		int distanceToMove = ((Long) args.get("dimensions")).intValue();
 		Location pLoc = issuer.getLocation();
 		Location newLoc = pLoc.add(distanceToMove, 0, 0);
 		issuer.teleport(newLoc);
+		return true;
 	}
 
 	public Player getPlayerFromUUID(String uuid) {

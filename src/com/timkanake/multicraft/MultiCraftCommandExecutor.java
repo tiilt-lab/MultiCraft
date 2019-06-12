@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Set;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -92,73 +91,9 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 			pData.appendBuildRecord(p, affectedBlocksData);
 			return true;
 		}else if(cmd.getName().equalsIgnoreCase("mundo")) {
-			PreviousBuildsData pData = PreviousBuildsData.getInstance();
-			BuildCommandData playerBuildRecord;
-			
-			// get the player's build record
-			try {
-				playerBuildRecord = pData.getPlayersBuildRecordForUndo(p);
-			}catch(NoCommandHistoryException e) {
-				// TODO: Customize message to be displayed to the player only
-				this.plugin.getServer().broadcastMessage("You have no build record");
-				this.plugin.getServer().broadcastMessage(e.getMessage());
-				return false;
-			}
-			
-			// restore blocks			
-			List<BlockRecord> blocksToChange = playerBuildRecord.blocksAffected;
-			List<BlockRecord> blocksAffectedDuringUndo = new ArrayList<BlockRecord>();
-			World world = p.getWorld();
-			for (BlockRecord b: blocksToChange) {		
-				Block t = world.getBlockAt(b.x, b.y, b.z);
-				blocksAffectedDuringUndo.add(new BlockRecord(t.getType(), t.getX(), t.getY(), t.getZ()));
-				try {			
-					t.setType(b.material);
-				}catch(Exception e) {
-					// TODO: Handle this
-					plugin.getServer().broadcastMessage(e.toString());
-					plugin.getServer().broadcastMessage("Failed to update Blocks :(");
-				}				
-			}			
-			
-			// update redo stack
-			BuildCommandData toStoreInRedo = new BuildCommandData(blocksAffectedDuringUndo, blocksAffectedDuringUndo.size());
-			pData.addToRedoStack(p, toStoreInRedo);	
-			return true;
+			return Commands.undo(p, this.plugin);
 		}else if(cmd.getName().equalsIgnoreCase("mredo")) {
-			// get data from redoStack
-			PreviousBuildsData pData = PreviousBuildsData.getInstance();
-			BuildCommandData playerBuildRecord;
-			
-			try {
-				playerBuildRecord = pData.getPlayersBuildRecordForRedo(p);
-			}catch (NoCommandHistoryException e) {
-				// TODO: Customize message to be displayed to the player only
-				plugin.getServer().broadcastMessage("You have no build record for redo");
-				this.plugin.getServer().broadcastMessage(e.getMessage());
-				return false;
-			}
-			
-			
-			List<BlockRecord> blocksToChange = playerBuildRecord.blocksAffected;
-			List<BlockRecord> blocksAffectedDuringRedo = new ArrayList<BlockRecord>();
-			World world = p.getWorld();
-			for (BlockRecord b: blocksToChange) {		
-				Block t = world.getBlockAt(b.x, b.y, b.z);
-				blocksAffectedDuringRedo.add(new BlockRecord(t.getType(), t.getX(), t.getY(), t.getZ()));
-				try {			
-					t.setType(b.material);
-				}catch(Exception e) {
-					// TODO: Handle This
-					plugin.getServer().broadcastMessage(e.toString());
-					plugin.getServer().broadcastMessage("Failed to update Blocks :(");
-				}				
-			}		
-			
-			// restore blocks
-			BuildCommandData toStoreInUndo = new BuildCommandData(blocksAffectedDuringRedo, blocksAffectedDuringRedo.size());
-			pData.addToUndoStack(p, toStoreInUndo);
-			return true;
+			return Commands.redo(p, this.plugin);
 		}
 		return false;
 	}
