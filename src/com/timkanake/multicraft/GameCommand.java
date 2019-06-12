@@ -11,8 +11,6 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-
-import com.timkanake.multicraft.CoordinateCalculations;
 import com.timkanake.multicraft.PyramidBuilder.BlockVector3;
 import com.timkanake.multicraft.PyramidBuilder;
 
@@ -77,30 +75,38 @@ public class GameCommand {
 		dimensions[1] = ((Long) dimAr.get(1)).intValue();
 		dimensions[2] = ((Long) dimAr.get(2)).intValue();
 		
+		//TODO: Update so that the location is at the cursor
 		Location l = issuer.getLocation();
+		
+		
 		int id = ((Long) args.get("block_code")).intValue();
 		Material m = Material.getMaterial(id);
+		
+		
 		// TODO: Clean up this logic
 		if (args.containsKey("roof") && (Boolean) args.get("roof")) {
-			// build a roof
-			// makePyramid(new BlockVector3(playerLoc.getX(), playerLoc.getY(), playerLoc.getZ()), material, size, hollow, playerLoc.getWorld());
 			PyramidBuilder tempBuilder = new PyramidBuilder(this.plugin);
 			tempBuilder.makePyramid(new BlockVector3(l.getX(), l.getY(), l.getZ()), m, dimensions[0], true, issuer.getWorld());
 			return true;
 		}
-		int[] buildCoordinates = CoordinateCalculations.getBuildCoordinates(l, dimensions);
-		Location l2 = new Location(l.getWorld(), buildCoordinates[0], buildCoordinates[1], buildCoordinates[2]);
 		
+		boolean isHollow = (args.containsKey("hollow") && (Boolean) args.get("hollow")) ? true : false;
 		
-		if(args.containsKey("hollow") && (Boolean) args.get("hollow")) {
-			buildHollow(dimensions, l, l2, this, m);
-		}else {
-			updateBlocks(l, l2, m);
-		}
+		List<BlockRecord> blocksAffected = Commands.buildStructure(l, dimensions, m, isHollow);
+//		int[] buildCoordinates = CoordinateCalculations.getBuildCoordinates(l, dimensions);
+//		Location l2 = new Location(l.getWorld(), buildCoordinates[0], buildCoordinates[1], buildCoordinates[2]);
+//		
+//		
+//		if(args.containsKey("hollow") && (Boolean) args.get("hollow")) {
+//			buildHollow(dimensions, l, l2, this, m);
+//		}else {
+//			updateBlocks(l, l2, m);
+//		}
+		Commands.updateUndoAndRedoStacks(blocksAffected, this.issuer);
 		return true;
 	}
 	
-	public List<BlockRecord>  updateBlocks(Location pos1, Location pos2, Material m) {
+	public static List<BlockRecord>  updateBlocks(Location pos1, Location pos2, Material m) {
 		int minX, maxX, minY, maxY, minZ, maxZ;
 		World world = pos1.getWorld();
 		minX = pos1.getBlockX() < pos2.getBlockX() ? pos1.getBlockX() : pos2.getBlockX();
@@ -124,38 +130,37 @@ public class GameCommand {
 	
 	public void buildHollow(int[] dimensions, Location startLoc, Location endLoc, GameCommand gComm, Material m) {		
 		// bottom Wall
-		gComm.updateBlocks(startLoc, new Location(endLoc.getWorld(), endLoc.getX(), startLoc.getY(), endLoc.getZ()), m);
+		updateBlocks(startLoc, new Location(endLoc.getWorld(), endLoc.getX(), startLoc.getY(), endLoc.getZ()), m);
 		
 		// top wall
-		gComm.updateBlocks(new Location(startLoc.getWorld(), startLoc.getX(), endLoc.getY(), startLoc.getZ()), 
+		updateBlocks(new Location(startLoc.getWorld(), startLoc.getX(), endLoc.getY(), startLoc.getZ()), 
 				endLoc, m);
 		
 		// back wall
-		gComm.updateBlocks(new Location(startLoc.getWorld(), startLoc.getX(), startLoc.getY(), endLoc.getZ()), endLoc, m);
+		updateBlocks(new Location(startLoc.getWorld(), startLoc.getX(), startLoc.getY(), endLoc.getZ()), endLoc, m);
 		
 		// front wall
-		gComm.updateBlocks(startLoc, new Location(endLoc.getWorld(), endLoc.getX(), endLoc.getY(), startLoc.getZ()), m);
+		updateBlocks(startLoc, new Location(endLoc.getWorld(), endLoc.getX(), endLoc.getY(), startLoc.getZ()), m);
 
 		// right wall
-		gComm.updateBlocks(new Location(startLoc.getWorld(), endLoc.getX(), startLoc.getY(), startLoc.getZ()), endLoc, m);
+		updateBlocks(new Location(startLoc.getWorld(), endLoc.getX(), startLoc.getY(), startLoc.getZ()), endLoc, m);
 		
 		// left wall
-		gComm.updateBlocks(startLoc, new Location(endLoc.getWorld(), startLoc.getX(), endLoc.getY(), endLoc.getZ()), m);
+		updateBlocks(startLoc, new Location(endLoc.getWorld(), startLoc.getX(), endLoc.getY(), endLoc.getZ()), m);
 	}
 
-	private BlockRecord updateBlock(World world, int x, int y, int z, Material blockType, byte blockData) {
+	private static BlockRecord updateBlock(World world, int x, int y, int z, Material blockType, byte blockData) {
 		Block thisBlock = world.getBlockAt(x,y,z);
 		return updateBlock(thisBlock, blockType, blockData);
 		
 	}
 
-	private BlockRecord updateBlock(Block block, Material m, byte blockData) {
+	private static BlockRecord updateBlock(Block block, Material m, byte blockData) {
 		BlockRecord toReturn = new BlockRecord(block.getType(), block.getX(), block.getY(), block.getZ());
 		try {			
 			block.setType(m);
 		}catch(Exception e) {
-			plugin.getServer().broadcastMessage(e.toString());
-			plugin.getServer().broadcastMessage("Failed to update Blocks :(");
+			// TODO: Handle this mess
 		}
 		return toReturn;
 	}

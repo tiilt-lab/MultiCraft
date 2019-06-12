@@ -49,15 +49,9 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 				}
 			}
 			
-			// get the coordinates of the farthest corner of the structure bounding box
-			int[] buildCoordinates = CoordinateCalculations.getBuildCoordinates(startLocation, dimensions);
-			Location endLoc = new Location(startLocation.getWorld(), buildCoordinates[0], buildCoordinates[1], buildCoordinates[2]);
-			
 			
 			// TODO: Get the material
-			
 			int materialId = 1;
-			
 			if(args.length > 3) {
 				try {
 					materialId = Integer.parseInt(args[3]);
@@ -73,22 +67,11 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 			
 			Material material = Material.getMaterial(materialId);
 			
-			
-			// The logic below handles the command and storage of data for undo and redo
-			GameCommand gComm = new GameCommand(this.plugin);
 			List<BlockRecord> blocksAffected = new ArrayList<BlockRecord>();
+			blocksAffected = Commands.buildStructure(startLocation,  dimensions, material, args.length > 4);
 			
-			// handle hollow flag
-			if(args.length > 4)
-				blocksAffected = buildHollow(dimensions, startLocation,  endLoc, gComm, material);
-			else
-				blocksAffected = gComm.updateBlocks(startLocation, endLoc, material);
+			Commands.updateUndoAndRedoStacks(blocksAffected, p);
 			
-			
-			BuildCommandData affectedBlocksData = new BuildCommandData(blocksAffected, blocksAffected.size());
-			PreviousBuildsData pData = PreviousBuildsData.getInstance();
-			pData.clearPlayerRedo(p);
-			pData.appendBuildRecord(p, affectedBlocksData);
 			return true;
 		}else if(cmd.getName().equalsIgnoreCase("mundo")) {
 			return Commands.undo(p, this.plugin);
@@ -97,30 +80,4 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 		}
 		return false;
 	}
-	
-	public List<BlockRecord> buildHollow(int[] dimensions, Location startLoc, Location endLoc, GameCommand gComm, Material m) {	
-		List<BlockRecord> blocksAffected = new ArrayList<BlockRecord>();
-		// bottom Wall
-		blocksAffected.addAll(gComm.updateBlocks(startLoc, new Location(endLoc.getWorld(), endLoc.getX(), startLoc.getY(), endLoc.getZ()), m));
-		
-		// top wall
-		blocksAffected.addAll(gComm.updateBlocks(new Location(startLoc.getWorld(), startLoc.getX(), endLoc.getY(), startLoc.getZ()), 
-				endLoc, m));
-		
-		// back wall
-		blocksAffected.addAll(gComm.updateBlocks(new Location(startLoc.getWorld(), startLoc.getX(), startLoc.getY(), endLoc.getZ()), endLoc, m));
-		
-		// front wall
-		blocksAffected.addAll(gComm.updateBlocks(startLoc, new Location(endLoc.getWorld(), endLoc.getX(), endLoc.getY(), startLoc.getZ()), m));
-
-		// right wall
-		blocksAffected.addAll(gComm.updateBlocks(new Location(startLoc.getWorld(), endLoc.getX(), startLoc.getY(), startLoc.getZ()), endLoc, m));
-		
-		// left wall
-		blocksAffected.addAll(gComm.updateBlocks(startLoc, new Location(endLoc.getWorld(), startLoc.getX(), endLoc.getY(), endLoc.getZ()), m));
-		
-		return blocksAffected;
-	}
-	
-
 }
