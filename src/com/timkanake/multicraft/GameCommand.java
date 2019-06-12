@@ -1,6 +1,5 @@
 package com.timkanake.multicraft;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -16,6 +15,12 @@ import org.json.simple.JSONObject;
 import com.timkanake.multicraft.CoordinateCalculations;
 import com.timkanake.multicraft.PyramidBuilder.BlockVector3;
 import com.timkanake.multicraft.PyramidBuilder;
+
+
+/*
+ * An object representation of a game command for MultiCraft
+ */
+
 
 public class GameCommand {
 	String commandName;
@@ -79,7 +84,6 @@ public class GameCommand {
 		}else {
 			updateBlocks(l, l2, m);
 		}
-		
 	}
 	
 	public List<BlockRecord>  updateBlocks(Location pos1, Location pos2, Material m) {

@@ -26,15 +26,17 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		Player p = (Player) sender;
+		
 		if(cmd.getName().equalsIgnoreCase("mbuild")) {
 			// TODO: Give user feedback
 			if(args.length < 3)
 				return false;
 			
-			// parse args to dimensions
 			int[] dimensions = new int[] {Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2])};
 			
-			// Location playerLoc = p.getLocation();
+			// Alternative to start of building location, this will build the structure next to the player 
+			// Location playerLoc = p.getLocation(); 
+			
 			List<Block> blocks = p.getLineOfSight((Set<Material>) null, 6);
 			
 			
@@ -48,6 +50,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 				}
 			}
 			
+			// get the coordinates of the farthest corner of the structure bounding box
 			int[] buildCoordinates = CoordinateCalculations.getBuildCoordinates(startLocation, dimensions);
 			Location endLoc = new Location(startLocation.getWorld(), buildCoordinates[0], buildCoordinates[1], buildCoordinates[2]);
 			
@@ -57,14 +60,13 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 			int materialId = 1;
 			
 			if(args.length > 3) {
-				// TODO: Check if int or string
 				try {
 					materialId = Integer.parseInt(args[3]);
 				}catch(NumberFormatException e) {
 					try {
 						materialId = Materials.getId(args[3]);
 					}catch(MaterialDoesNotExistException f) {
-						// TODO: Give signal
+						// TODO: Give feedback to the user
 						materialId = 1;
 					}
 				}
@@ -72,32 +74,32 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 			
 			Material material = Material.getMaterial(materialId);
 			
+			
+			// The logic below handles the command and storage of data for undo and redo
 			GameCommand gComm = new GameCommand(this.plugin);
 			List<BlockRecord> blocksAffected = new ArrayList<BlockRecord>();
+			
+			// handle hollow flag
 			if(args.length > 4)
 				blocksAffected = buildHollow(dimensions, startLocation,  endLoc, gComm, material);
 			else
 				blocksAffected = gComm.updateBlocks(startLocation, endLoc, material);
 			
+			
 			BuildCommandData affectedBlocksData = new BuildCommandData(blocksAffected, blocksAffected.size());
 			PreviousBuildsData pData = PreviousBuildsData.getInstance();
 			pData.clearPlayerRedo(p);
 			pData.appendBuildRecord(p, affectedBlocksData);
-			
 			return true;
 		}else if(cmd.getName().equalsIgnoreCase("mundo")) {
-			
-			// do nothing for now
-			// TODO: Implement this
 			PreviousBuildsData pData = PreviousBuildsData.getInstance();
-			
-			
 			BuildCommandData playerBuildRecord;
 			
-			// get their build record
+			// get the player's build record
 			try {
 				playerBuildRecord = pData.getPlayersBuildRecordForUndo(p);
 			}catch(NoCommandHistoryException e) {
+				// TODO: Customize message to be displayed to the player only
 				this.plugin.getServer().broadcastMessage("You have no build record");
 				this.plugin.getServer().broadcastMessage(e.getMessage());
 				return false;
@@ -113,6 +115,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 				try {			
 					t.setType(b.material);
 				}catch(Exception e) {
+					// TODO: Handle this
 					plugin.getServer().broadcastMessage(e.toString());
 					plugin.getServer().broadcastMessage("Failed to update Blocks :(");
 				}				
@@ -123,7 +126,6 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 			pData.addToRedoStack(p, toStoreInRedo);	
 			return true;
 		}else if(cmd.getName().equalsIgnoreCase("mredo")) {
-			// TODO: Implement this
 			// get data from redoStack
 			PreviousBuildsData pData = PreviousBuildsData.getInstance();
 			BuildCommandData playerBuildRecord;
@@ -131,6 +133,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 			try {
 				playerBuildRecord = pData.getPlayersBuildRecordForRedo(p);
 			}catch (NoCommandHistoryException e) {
+				// TODO: Customize message to be displayed to the player only
 				plugin.getServer().broadcastMessage("You have no build record for redo");
 				this.plugin.getServer().broadcastMessage(e.getMessage());
 				return false;
@@ -146,12 +149,13 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 				try {			
 					t.setType(b.material);
 				}catch(Exception e) {
+					// TODO: Handle This
 					plugin.getServer().broadcastMessage(e.toString());
 					plugin.getServer().broadcastMessage("Failed to update Blocks :(");
 				}				
 			}		
 			
-			// restore block
+			// restore blocks
 			BuildCommandData toStoreInUndo = new BuildCommandData(blocksAffectedDuringRedo, blocksAffectedDuringRedo.size());
 			pData.addToUndoStack(p, toStoreInUndo);
 			return true;

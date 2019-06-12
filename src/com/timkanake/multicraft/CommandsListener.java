@@ -3,6 +3,12 @@ package com.timkanake.multicraft;
 
 import org.json.simple.JSONObject;
 
+
+/*
+ * Consistently checks if any command requests have been received from a client and are yet to be processed.
+ * If a command exists in the command queue instance, then the json string is retrieved and processed. 
+ * Once processed then a command json object is added to a queue for final processing.
+ */
 public class CommandsListener extends Thread{	
 	MultiCraft plugin;
 	

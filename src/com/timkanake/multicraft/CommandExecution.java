@@ -2,6 +2,9 @@ package com.timkanake.multicraft;
 
 import org.json.simple.JSONObject;
 
+/*
+ * Gets processed JSON objects from the commands queue and creates a game command which is then executed.
+ */
 public class CommandExecution extends Thread{
 	MultiCraft plugin;
 	
@@ -17,6 +20,7 @@ public class CommandExecution extends Thread{
 					GameCommand gComm = new GameCommand(o, plugin);
 					gComm.execute();
 				}catch(Exception e){
+					// TODO: Write message to issuer
 					plugin.getServer().broadcastMessage("Could not execute command");
 				}				
 			}
