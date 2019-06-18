@@ -5,7 +5,7 @@ public class MultiCraft extends JavaPlugin{
 	
 	@Override
 	public void onEnable() {
-		getLogger().info("MultiCraft without database has been enabled!");
+		getLogger().info("MultiCraft has been enabled!");
 		
 		// set up the executor for custom commands
 		

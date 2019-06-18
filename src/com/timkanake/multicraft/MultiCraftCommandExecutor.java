@@ -60,6 +60,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 						materialId = Materials.getId(args[3]);
 					}catch(MaterialDoesNotExistException f) {
 						// TODO: Give feedback to the user
+						p.sendMessage("The material you specified does not exists. Defaulting to stone.");
 						materialId = 1;
 					}
 				}

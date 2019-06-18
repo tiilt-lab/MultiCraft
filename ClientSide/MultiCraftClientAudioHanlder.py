@@ -112,6 +112,9 @@ def main():
         stream.stop_stream()
         stream.close()
         audio.terminate()
+    
+
+    
     # while True:
     #     input_s = input("Please enter a message to send: ")
     #     client_socket.send((CLIENT_NAME + " " + input_s).encode())

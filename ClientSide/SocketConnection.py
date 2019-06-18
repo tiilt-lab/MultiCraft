@@ -4,7 +4,6 @@ import threading
 
 
 def socket_conn():
-    print("in here")
     host = "127.0.0.1"
     port = 5000
     server_socket = socket.socket()
@@ -21,8 +20,6 @@ def socket_conn():
     conn.close()
 
 def main():
-    # threading.Thread(target=socket_conn).start()
     threading.Thread(target=MAH.tiilt_main).start()
-    
 
 main()

@@ -19,9 +19,7 @@ public class Commands {
 		try {
 			playerBuildRecord = pData.getPlayersBuildRecordForUndo(p);
 		}catch(NoCommandHistoryException e) {
-			// TODO: Customize message to be displayed to the player only
-			plugin.getServer().broadcastMessage("You have no build record");
-			plugin.getServer().broadcastMessage(e.getMessage());
+			p.sendMessage("You have no build record available.");
 			return false;
 		}
 		
@@ -35,14 +33,12 @@ public class Commands {
 			try {			
 				t.setType(b.material);
 			}catch(Exception e) {
-				// TODO: Handle this
-				plugin.getServer().broadcastMessage(e.toString());
-				plugin.getServer().broadcastMessage("Failed to update Blocks :(");
+				p.sendMessage("Failed to update blocks.");
 				return false;
 			}				
 		}			
 		
-		// update redo stack
+		// update re-do stack
 		BuildCommandData toStoreInRedo = new BuildCommandData(blocksAffectedDuringUndo, blocksAffectedDuringUndo.size());
 		pData.addToRedoStack(p, toStoreInRedo);
 		return true;
@@ -57,8 +53,7 @@ public class Commands {
 			playerBuildRecord = pData.getPlayersBuildRecordForRedo(p);
 		}catch (NoCommandHistoryException e) {
 			// TODO: Customize message to be displayed to the player only
-			plugin.getServer().broadcastMessage("You have no build record for redo");
-			plugin.getServer().broadcastMessage(e.getMessage());
+			p.sendMessage("You have no build record available for redo.");
 			return false;
 		}
 		
@@ -72,9 +67,8 @@ public class Commands {
 			try {			
 				t.setType(b.material);
 			}catch(Exception e) {
-				// TODO: Handle This
-				plugin.getServer().broadcastMessage(e.toString());
-				plugin.getServer().broadcastMessage("Failed to update Blocks :(");
+				p.sendMessage("Failed to update blocks.");
+				return false;
 			}				
 		}		
 		
@@ -163,7 +157,6 @@ public class Commands {
 	}
 
 	public static void updateUndoAndRedoStacks(List<BlockRecord> blocksAffected, Player p) {
-		// TODO Auto-generated method stub
 		BuildCommandData affectedBlocksData = new BuildCommandData(blocksAffected, blocksAffected.size());
 		PreviousBuildsData pData = PreviousBuildsData.getInstance();
 		pData.clearPlayerRedo(p);
