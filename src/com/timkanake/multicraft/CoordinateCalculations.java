@@ -86,39 +86,39 @@ public class CoordinateCalculations {
 		}
 		int dirInt = (int) ((angle + 8) / 22.5);
 		if(dirInt == 0)
-			return "west";
-		else if(dirInt == 1)
-			return "west northwest";
-		else if (dirInt == 2) // west
-			return "northwest";
-		else if(dirInt == 3)
-			return "north northwest";
-		else if(dirInt == 4)
-			return "north";
-		else if(dirInt == 5)
-			return "north northeast";
-		else if(dirInt == 6) // north
-			return "northeast";
-		else if(dirInt == 7)
-			return "east northeast";
-		else if(dirInt == 8)
-			return "east";
-		else if(dirInt == 9)
-			return "east southeast";
-		else if(dirInt == 10) // east
-			return "southeast";
-		else if(dirInt == 11)
-			return "south southeast";
-		else if(dirInt == 12)
 			return "south";
-		else if(dirInt == 13)
+		else if(dirInt == 1)
 			return "south southwest";
-		else if(dirInt == 14)
+		else if (dirInt == 2)
 			return "southwest";
+		else if(dirInt == 3)
+			return "north southwest";
+		else if(dirInt == 4)
+			return "west"; // west
+		else if(dirInt == 5)
+			return "west northwest";
+		else if(dirInt == 6)
+			return "northwest";
+		else if(dirInt == 7)
+			return "north northwest";
+		else if(dirInt == 8)
+			return "north"; //north 
+		else if(dirInt == 9)
+			return "north northeast";
+		else if(dirInt == 10)
+			return "northeast";
+		else if(dirInt == 11)
+			return "south northeast";
+		else if(dirInt == 12)
+			return "east"; //east
+		else if(dirInt == 13)
+			return "east southeast";
+		else if(dirInt == 14)
+			return "southeast";
 		else if(dirInt == 15)
-			return "west southwest";
+			return "south southeast";
 		else
-			return "west";
+			return "south"; // south
 	}
 
 }

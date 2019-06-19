@@ -23,9 +23,6 @@ def process_instruction(instruction_to_process):
 			break
 		else: 
 			return None
-		# elif word in commands_dict.keys():
-		# 	game_command.command = get_supported_word(word, commands_dict)
-		# 	break
 
 	if game_command.command is None:
 		game_command.is_valid = False
@@ -50,5 +47,3 @@ if __name__ == "__main__":
 	while True:
 		input_s = input("Please enter a message to interprete: ")
 		print(process_instruction(input_s))
-
-
