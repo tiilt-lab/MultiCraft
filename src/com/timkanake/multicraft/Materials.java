@@ -494,7 +494,7 @@ public class Materials {
 		 };
 	}
 	
-	public static class MaterialDoesNotExistException extends Exception {
+	public class MaterialDoesNotExistException extends Exception {
 		/**
 		 * 
 		 */

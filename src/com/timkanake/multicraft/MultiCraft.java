@@ -1,4 +1,5 @@
 package com.timkanake.multicraft;
+
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class MultiCraft extends JavaPlugin{
@@ -6,10 +7,9 @@ public class MultiCraft extends JavaPlugin{
 	@Override
 	public void onEnable() {
 		getLogger().info("MultiCraft has been enabled!");
-		
 		// set up the executor for custom commands
-		
 		MultiCraftCommandExecutor mExec = new MultiCraftCommandExecutor(this);
+		
 		this.getCommand("mbuild").setExecutor(mExec);
 		this.getCommand("pyramid").setExecutor(new PyramidBuilder(this));
 		this.getCommand("mundo").setExecutor(mExec);

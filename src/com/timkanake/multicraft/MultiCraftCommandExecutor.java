@@ -1,5 +1,4 @@
 package com.timkanake.multicraft;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -27,7 +26,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 		Player p = (Player) sender;
 		
 		if(cmd.getName().equalsIgnoreCase("mbuild")) {
-			// TODO: Give user feedback
+			// TODO: Give user feedback if there's an error in command format
 			if(args.length < 3)
 				return false;
 			
@@ -40,6 +39,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 			
 			
 			Material tempMaterial = null;
+			
 			// get Start Location, defaults to the block in front of the player
 			Location startLocation = blocks.get(0).getLocation();
 			for(Block b : blocks) {
@@ -49,9 +49,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 				}
 			}
 			
-			
-			// TODO: Get the material
-			int materialId = 1;
+			int materialId = 1;			
 			if(args.length > 3) {
 				try {
 					materialId = Integer.parseInt(args[3]);
