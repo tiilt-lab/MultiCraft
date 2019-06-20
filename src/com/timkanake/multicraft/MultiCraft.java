@@ -11,6 +11,7 @@ public class MultiCraft extends JavaPlugin{
 		MultiCraftCommandExecutor mExec = new MultiCraftCommandExecutor(this);
 		
 		this.getCommand("mbuild").setExecutor(mExec);
+		this.getCommand("mmbuild").setExecutor(mExec);
 		this.getCommand("pyramid").setExecutor(new PyramidBuilder(this));
 		this.getCommand("mundo").setExecutor(mExec);
 		this.getCommand("mredo").setExecutor(mExec);
