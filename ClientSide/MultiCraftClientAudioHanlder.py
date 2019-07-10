@@ -19,11 +19,11 @@ TRANSCRIPTS_QUEUE = Queue(maxsize=30)
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
 RATE = 44100
-HOST = "127.0.0.1"
+HOST = "10.0.0.223"
 PORT = 5001
 
 client_socket = socket.socket()
-CLIENT_NAME = "" # input("Please enter your screen name: ")
+CLIENT_NAME = "dbbfcee1-4f09-44c2-b877-528bebe5d55f" # input("Please enter your screen name: ")
 
 # Create an instance of AudioSource
 audio_source = AudioSource(q, True, True)
@@ -84,40 +84,38 @@ def pyaudio_callback(in_data, frame_count, time_info, status):
     return (None, pyaudio.paContinue)
 
 def main():
-    # instantiate pyaudio
-    audio = pyaudio.PyAudio()
+    # # instantiate pyaudio
+    # audio = pyaudio.PyAudio()
 
-    # open stream using callback
-    stream = audio.open(
-        format=FORMAT,
-        channels=CHANNELS,
-        rate=RATE,
-        input=True,
-        frames_per_buffer=CHUNK,
-        stream_callback=pyaudio_callback,
-        start=False
-    )
+    # # open stream using callback
+    # stream = audio.open(
+    #     format=FORMAT,
+    #     channels=CHANNELS,
+    #     rate=RATE,
+    #     input=True,
+    #     frames_per_buffer=CHUNK,
+    #     stream_callback=pyaudio_callback,
+    #     start=False
+    # )
 
-    print("Enter CTRL+C to end recording...")
-    stream.start_stream()
+    # print("Enter CTRL+C to end recording...")
+    # stream.start_stream()
 
-    try:
-        recognize_thread = Thread(target=recognize_using_weboscket, args=())
-        recognize_thread.start()
-        while True:
-            pass
-    except KeyboardInterrupt:
-        # stop recording
-        audio_source.completed_recording()
-        stream.stop_stream()
-        stream.close()
-        audio.terminate()
+    # try:
+    #     recognize_thread = Thread(target=recognize_using_weboscket, args=())
+    #     recognize_thread.start()
+    #     while True:
+    #         pass
+    # except KeyboardInterrupt:
+    #     # stop recording
+    #     audio_source.completed_recording()
+    #     stream.stop_stream()
+    #     stream.close()
+    #     audio.terminate()
     
-
-    
-    # while True:
-    #     input_s = input("Please enter a message to send: ")
-    #     client_socket.send((CLIENT_NAME + " " + input_s).encode())
+    while True:
+        input_s = input("Please enter a message to send: ")
+        client_socket.send((CLIENT_NAME + " " + input_s).encode())
 
 def tiilt_main():
     client_socket.connect((HOST, PORT))

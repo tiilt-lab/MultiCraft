@@ -17,7 +17,7 @@ try:
     print("Connected")
 except Exception as e:
     print(e)
-    print("Sending strings socket connection error")
+    print("Socket connection error")
     sys.exit()
 
 def start_server():
@@ -30,13 +30,10 @@ def start_server():
         soc.bind(("0.0.0.0", port))
     except Exception as e:
         print(e)
-        # print("Bind failed. Error : " + str(sys.exc_info()))
         sys.exit()
 
-    soc.listen(1) # queue up to 5 requests
+    soc.listen(1) # queue up to 1 requests
     print("Socket now listening")
-
-    # infinite loop- do not reset for every requests
 
     connection, address = soc.accept()
     print('Connection accepted...')
@@ -47,6 +44,11 @@ def start_server():
     except:
         print("Thread did not start.")
         traceback.print_exc()
+
+
+    # To queue up multiple clients, use this instead of the lines above, also change the number
+    # of clients that the server is listening to
+
 
     # while True:
     #     connection, address = soc.accept()
@@ -61,7 +63,7 @@ def start_server():
 
     soc.close()
 
-# def client_thread(connection, ip, port):
+
 def client_thread(connection, ip, port):
     is_active = True
 
@@ -73,17 +75,22 @@ def client_thread(connection, ip, port):
         else:
             if len(client_input.split(' ')) > 1:
                 client_transcript = client_input.split(' ', 1)[1]
-                print(client_transcript)
+                # print(client_transcript)
                 args = process_instruction(client_transcript)
                 if args is not None:
-                    print(args)
+                    # print(args)
                     args['client_name'] = client_input.split(' ')[0]
                     print("sending " + json.dumps(args))
                     sending_socket.send((json.dumps(args) + "\n").encode())
 
+        
+
+        # For testing purposes, replace the empty string in the client input
+        # with the players uuid
+
 
         # comm_str = input("Please enter a command: ")
-        # client_input = ("dbbfcee1-4f09-44c2-b877-528bebe5d55f " + comm_str).encode()
+        # client_input = ("" + comm_str).encode()
 
         # client_transcript = client_input.decode().split(' ', 1)[1]
         # if len(client_transcript) > 0:
@@ -94,9 +101,6 @@ def client_thread(connection, ip, port):
         #     print("sending " + json.dumps(args))
         #     sending_socket.send((json.dumps(args) + "\n").encode())
 
-def process_input(input_str):
-    print("Processing the input received from client")
-    return "Hello " + str(input_str).lower()
 
 if __name__ == "__main__":
     start_server()

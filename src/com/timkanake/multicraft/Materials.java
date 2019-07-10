@@ -494,8 +494,12 @@ public class Materials {
 		 };
 	}
 	
+<<<<<<< HEAD
 	@SuppressWarnings("serial")
 	public class MaterialDoesNotExistException extends Exception {
+=======
+	public static class MaterialDoesNotExistException extends Exception {
+>>>>>>> ac4fe1174a10c7270b00f48223931cf112774844
 		/**
 		 * 
 		 */

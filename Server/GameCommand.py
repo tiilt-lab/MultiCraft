@@ -45,9 +45,9 @@ class GameCommand:
 				self.args['direction'] = 'forward'
 			self.is_valid = True
 
-		def get_pen_args(self):
-				self.args['pen'] = True
-				self.is_valid = True
+	def get_pen_args(self):
+			self.args['pen'] = True
+			self.is_valid = True
 
 	def get_build_args(self):
 		dimensions = []

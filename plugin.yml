@@ -3,7 +3,7 @@ main: com.timkanake.multicraft.MultiCraft
 version: 1.0 (alpha)
 commands:
   mbuild:
-    description: MultiCraft Build Command
+    description: MultiCraft Build Command (From Player Position)
     usage: /<command> x-coord(int) y-coord(int) z-coord(int) material-code(int) hollow-flag(int)
   pyramid:
     description: Build a Square pyramid
@@ -17,3 +17,6 @@ commands:
   mredo:
     description: MultiCraft Redo Command
     usage: /<command>
+  mmbuild:
+    description: MultiCraft Build Command (From Cursor Position)
+    usage: /<command> z-coord(int) y-coord(int) x-coord(int) material-code(int) hollow-flag(int)

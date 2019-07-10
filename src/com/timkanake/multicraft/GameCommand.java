@@ -93,15 +93,6 @@ public class GameCommand {
 		boolean isHollow = (args.containsKey("hollow") && (Boolean) args.get("hollow")) ? true : false;
 		
 		List<BlockRecord> blocksAffected = Commands.buildStructure(l, dimensions, m, isHollow);
-//		int[] buildCoordinates = CoordinateCalculations.getBuildCoordinates(l, dimensions);
-//		Location l2 = new Location(l.getWorld(), buildCoordinates[0], buildCoordinates[1], buildCoordinates[2]);
-//		
-//		
-//		if(args.containsKey("hollow") && (Boolean) args.get("hollow")) {
-//			buildHollow(dimensions, l, l2, this, m);
-//		}else {
-//			updateBlocks(l, l2, m);
-//		}
 		Commands.updateUndoAndRedoStacks(blocksAffected, this.issuer);
 		return true;
 	}
@@ -168,7 +159,29 @@ public class GameCommand {
 	public boolean executeMove() {
 		int distanceToMove = ((Long) args.get("dimensions")).intValue();
 		Location pLoc = issuer.getLocation();
-		Location newLoc = pLoc.add(distanceToMove, 0, 0);
+		
+		
+		double rotation = this.issuer.getLocation().getYaw();
+		String directionFacedByPlayer = CoordinateCalculations.getSpecificDirection((int) rotation);
+		Location newLoc = pLoc.clone();
+		
+		switch (directionFacedByPlayer) {
+		  case ("north") : //negative z
+		      newLoc.add(0, 0, distanceToMove * -1);
+		      break;
+		  case ("east") : // positive x
+		      newLoc.add(distanceToMove, 0, 0);
+		      break;
+		  case ("south") : //positive z
+		      newLoc.add(0, 0, distanceToMove);
+		      break;
+		  case ("west") : //negative x
+		      newLoc.add(distanceToMove * -1, 0, 0);
+		      break;
+		}
+		
+		this.issuer.sendMessage(CoordinateCalculations.getSpecificDirection((int) rotation));
+		
 		issuer.teleport(newLoc);
 		return true;
 	}
