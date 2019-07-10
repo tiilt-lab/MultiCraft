@@ -494,6 +494,7 @@ public class Materials {
 		 };
 	}
 	
+	@SuppressWarnings("serial")
 	public class MaterialDoesNotExistException extends Exception {
 		/**
 		 * 
