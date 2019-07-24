@@ -30,24 +30,8 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 			if(args.length < 3)
 				return false;
 			
-			int[] dimensions = new int[] {Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2])};
-			
-			// Alternative to start of building location, this will build the structure next to the player 
+			int[] dimensions = new int[] {Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2])}; 
 			Location startLocation = p.getLocation(); 
-			
-//			List<Block> blocks = p.getLineOfSight((Set<Material>) null, 6);
-//			
-//			
-//			Material tempMaterial = null;
-//			
-//			// get Start Location, defaults to the block in front of the player
-//			Location startLocation = blocks.get(0).getLocation();
-//			for(Block b : blocks) {
-//				tempMaterial = b.getType();
-//				if(! tempMaterial.equals(Material.AIR)) {
-//					startLocation = b.getLocation().add(0, 1, 0);
-//				}
-//			}
 			
 			int materialId = 1;			
 			if(args.length > 3) {
@@ -57,7 +41,6 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 					try {
 						materialId = Materials.getId(args[3]);
 					}catch(MaterialDoesNotExistException f) {
-						// TODO: Give feedback to the user
 						p.sendMessage("The material you specified does not exists. Defaulting to stone.");
 						materialId = 1;
 					}
@@ -78,9 +61,6 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 				return false;
 			
 			int[] dimensions = new int[] {Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2])};
-			
-			// Alternative to start of building location, this will build the structure next to the player 
-			// Location playerLoc = p.getLocation(); 
 			
 			List<Block> blocks = p.getLineOfSight((Set<Material>) null, 6);
 			
@@ -104,7 +84,6 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 					try {
 						materialId = Materials.getId(args[3]);
 					}catch(MaterialDoesNotExistException f) {
-						// TODO: Give feedback to the user
 						p.sendMessage("The material you specified does not exists. Defaulting to stone.");
 						materialId = 1;
 					}
