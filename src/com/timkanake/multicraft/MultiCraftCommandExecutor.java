@@ -9,7 +9,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
 import com.timkanake.multicraft.Materials.MaterialDoesNotExistException;
 
 public class MultiCraftCommandExecutor implements CommandExecutor{
@@ -103,6 +102,60 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 		}else if(cmd.getName().equalsIgnoreCase("mredo")) {
 			return Commands.redo(p, this.plugin);
 		}
+//		}else if(cmd.getName().equalsIgnoreCase("rbuild")) {
+//			RegionBuild rBuild = RegionBuild.getInstance();
+//			rBuild.startRegionBuildForPlayer(p);
+//			
+//			p.sendMessage("Please select the first position by pointing at it with a cursor and issueing the command"
+//					+ " /loc1, then select the second position by pointing at it with the cursor and issuing command"
+//					+ " /loc2. If the region is in the air, the part coordinates will be set as your position");
+//		}else if(cmd.getName().equalsIgnoreCase("loc1")) {
+//			RegionBuild rBuild = RegionBuild.getInstance();
+//			List<Block> blocks = p.getLineOfSight((Set<Material>) null, 6);
+//			Location startLocation = null;
+//			Material tempMaterial = null;
+//			
+//			for(Block b : blocks) {
+//				tempMaterial = b.getType();
+//				if(! tempMaterial.equals(Material.AIR)) {
+//					startLocation = b.getLocation().add(0, 1, 0);
+//				}
+//			}
+//			
+//			if(startLocation == null)
+//				startLocation = p.getLocation();
+//			
+//			
+//			rBuild.markStartPosition(p, startLocation);
+//		}else if(cmd.getName().equalsIgnoreCase("loc2")) {
+//			RegionBuild rBuild = RegionBuild.getInstance();
+//			List<Block> blocks = p.getLineOfSight((Set<Material>) null, 6);
+//			Location endLocation = null;
+//			Material tempMaterial = null;
+//			
+//			for(Block b : blocks) {
+//				tempMaterial = b.getType();
+//				if(! tempMaterial.equals(Material.AIR)) {
+//					endLocation = b.getLocation().add(0, 1, 0);
+//				}
+//			}
+//			
+//			if(endLocation == null)
+//				endLocation = p.getLocation();
+//			
+//			
+//			boolean succeeded = rBuild.markEndPosition(p, endLocation);
+//			
+//			if(! succeeded) {
+//				p.sendMessage("You cannot marka an end location without beginning a valid region"
+//						+ " build session");
+//				return false;
+//			}
+//			return true;
+//		}else if(cmd.getName().equalsIgnoreCase("rrbuild")) {
+//			RegionBuild rBuild = RegionBuild.getInstance();
+//			
+//		}
 		return false;
 	}
 }
