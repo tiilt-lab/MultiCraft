@@ -24,6 +24,8 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		Player p = (Player) sender;
 		
+		// TODO: Check if you can make this a switch case
+		
 		if(cmd.getName().equalsIgnoreCase("mbuild")) {
 			// TODO: Give user feedback if there's an error in command format
 			if(args.length < 3)
@@ -101,61 +103,71 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 			return Commands.undo(p, this.plugin);
 		}else if(cmd.getName().equalsIgnoreCase("mredo")) {
 			return Commands.redo(p, this.plugin);
+		}else if(cmd.getName().equalsIgnoreCase("rbuild")) {
+			RegionBuild rBuild = RegionBuild.getInstance();
+			rBuild.startRegionBuildForPlayer(p);
+			
+			p.sendMessage("Please select the first position by pointing at it with a cursor and issueing the command"
+					+ " /loc1, then select the second position by pointing at it with the cursor and issuing command"
+					+ " /loc2. If the region is in the air, the part coordinates will be set as your position");
+		}else if(cmd.getName().equalsIgnoreCase("loc1")) {
+			RegionBuild rBuild = RegionBuild.getInstance();
+			List<Block> blocks = p.getLineOfSight((Set<Material>) null, 6);
+			Location startLocation = null;
+			Material tempMaterial = null;
+			
+			for(Block b : blocks) {
+				tempMaterial = b.getType();
+				if(! tempMaterial.equals(Material.AIR)) {
+					startLocation = b.getLocation().add(0, 1, 0);
+				}
+			}
+			
+			if(startLocation == null)
+				startLocation = p.getLocation();
+			
+			rBuild.markStartPosition(p, startLocation);
+			
+			p.sendMessage("The first position has been marked");
+			
+			return true;
+		}else if(cmd.getName().equalsIgnoreCase("loc2")) {
+			RegionBuild rBuild = RegionBuild.getInstance();
+			List<Block> blocks = p.getLineOfSight((Set<Material>) null, 6);
+			Location endLocation = null;
+			Material tempMaterial = null;
+			
+			for(Block b : blocks) {
+				tempMaterial = b.getType();
+				if(! tempMaterial.equals(Material.AIR)) {
+					endLocation = b.getLocation().add(0, 1, 0);
+				}
+			}
+			
+			if(endLocation == null)
+				endLocation = p.getLocation();
+			
+			
+			boolean succeeded = rBuild.markEndPosition(p, endLocation);
+			
+			if(! succeeded) {
+				p.sendMessage("You cannot mark an end location without beginning a valid region"
+						+ " build session");
+				return false;
+			}
+			
+			p.sendMessage("The second position has been marked");
+			
+			return true;
+		}else if(cmd.getName().equalsIgnoreCase("rrbuild")) {
+			RegionBuild rBuild = RegionBuild.getInstance();
+			
+			Location loc1 = rBuild.getStartLocation(p);
+			Location loc2 = rBuild.getEndLocation(p);
+			
+			Commands.updateBlocks(loc1,loc2, Material.getMaterial(1));
+			p.sendMessage("Structure has been constructed in the region marked");
 		}
-//		}else if(cmd.getName().equalsIgnoreCase("rbuild")) {
-//			RegionBuild rBuild = RegionBuild.getInstance();
-//			rBuild.startRegionBuildForPlayer(p);
-//			
-//			p.sendMessage("Please select the first position by pointing at it with a cursor and issueing the command"
-//					+ " /loc1, then select the second position by pointing at it with the cursor and issuing command"
-//					+ " /loc2. If the region is in the air, the part coordinates will be set as your position");
-//		}else if(cmd.getName().equalsIgnoreCase("loc1")) {
-//			RegionBuild rBuild = RegionBuild.getInstance();
-//			List<Block> blocks = p.getLineOfSight((Set<Material>) null, 6);
-//			Location startLocation = null;
-//			Material tempMaterial = null;
-//			
-//			for(Block b : blocks) {
-//				tempMaterial = b.getType();
-//				if(! tempMaterial.equals(Material.AIR)) {
-//					startLocation = b.getLocation().add(0, 1, 0);
-//				}
-//			}
-//			
-//			if(startLocation == null)
-//				startLocation = p.getLocation();
-//			
-//			
-//			rBuild.markStartPosition(p, startLocation);
-//		}else if(cmd.getName().equalsIgnoreCase("loc2")) {
-//			RegionBuild rBuild = RegionBuild.getInstance();
-//			List<Block> blocks = p.getLineOfSight((Set<Material>) null, 6);
-//			Location endLocation = null;
-//			Material tempMaterial = null;
-//			
-//			for(Block b : blocks) {
-//				tempMaterial = b.getType();
-//				if(! tempMaterial.equals(Material.AIR)) {
-//					endLocation = b.getLocation().add(0, 1, 0);
-//				}
-//			}
-//			
-//			if(endLocation == null)
-//				endLocation = p.getLocation();
-//			
-//			
-//			boolean succeeded = rBuild.markEndPosition(p, endLocation);
-//			
-//			if(! succeeded) {
-//				p.sendMessage("You cannot marka an end location without beginning a valid region"
-//						+ " build session");
-//				return false;
-//			}
-//			return true;
-//		}else if(cmd.getName().equalsIgnoreCase("rrbuild")) {
-//			RegionBuild rBuild = RegionBuild.getInstance();
-//			
-//		}
 		return false;
 	}
 }

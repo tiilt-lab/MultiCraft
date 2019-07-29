@@ -20,3 +20,15 @@ commands:
   mmbuild:
     description: MultiCraft Build Command (From Cursor Position)
     usage: /<command> z-coord(int) y-coord(int) x-coord(int) material-code(int) hollow-flag(int)
+  rbuild:
+    description: Initiates a region build
+    usage: /<command>
+  loc1:
+    description: Marks the first location in the selection of a region
+    usage: /<command>
+  loc2:
+    description: Marks the second location in the selection of a region
+    usage: /<command>
+  rrbuild:
+    description: Builds a structure from loc1 to loc2 (Currently solid and made of stone)
+    usage: /<command>

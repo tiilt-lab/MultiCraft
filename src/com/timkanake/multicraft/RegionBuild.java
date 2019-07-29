@@ -20,6 +20,7 @@ public class RegionBuild {
 	private RegionBuild() {
 	}
 	
+	
 	public void startRegionBuildForPlayer(Player p) {
 		RegionCoordinates r = new RegionCoordinates();
 		playerRegionSelections.put(p, r);
@@ -49,6 +50,26 @@ public class RegionBuild {
 		return true;
 		
 	}
+	
+	public Location getStartLocation(Player p) {
+		if(! playerRegionSelections.containsKey(p)) {
+			// TODO: Throw Exception
+			return null;
+		}
+		
+		RegionCoordinates rCoords = playerRegionSelections.get(p);
+		return rCoords.startLocation;
+	}
+	
+	public Location getEndLocation(Player p) {
+		if(! playerRegionSelections.containsKey(p)) {
+			// TODO: Throw Exception
+			return null;
+		}
+		
+		RegionCoordinates rCoords = playerRegionSelections.get(p);
+		return rCoords.endLocation;
+	}
 
 	
 	private class RegionCoordinates{
@@ -60,9 +81,9 @@ public class RegionBuild {
 			endLocation = null;
 		}
 		
-		public boolean hasBothCoordinates() {
-			return startLocation != null && endLocation != null;
-		}
+//		public boolean hasBothCoordinates() {
+//			return startLocation != null && endLocation != null;
+//		}
 		
 		public void setStartLocation(Location loc) {
 			startLocation = loc;

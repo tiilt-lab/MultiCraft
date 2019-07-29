@@ -15,10 +15,10 @@ public class MultiCraft extends JavaPlugin{
 		this.getCommand("pyramid").setExecutor(new PyramidBuilder(this));
 		this.getCommand("mundo").setExecutor(mExec);
 		this.getCommand("mredo").setExecutor(mExec);
-//		this.getCommand("rbuild").setExecutor(mExec);
-//		this.getCommand("loc1").setExecutor(mExec);
-//		this.getCommand("loc2").setExecutor(mExec);
-//		this.getCommand("rrbuild").setExecutor(mExec);
+		this.getCommand("rbuild").setExecutor(mExec);
+		this.getCommand("loc1").setExecutor(mExec);
+		this.getCommand("loc2").setExecutor(mExec);
+		this.getCommand("rrbuild").setExecutor(mExec);
 		
 		// start threads to handle client commands
 		new SpeechToTextServer(this).start();
