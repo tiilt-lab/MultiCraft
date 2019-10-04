@@ -1,5 +1,5 @@
 name: MultiCraft
-main: com.timkanake.multicraft.MultiCraft
+main: com.multicraft.MultiCraft
 version: 1.0 (alpha)
 commands:
   mbuild:
