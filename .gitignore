@@ -1,2 +1,4 @@
 serverScripts/
 *.cfg
+ExternalApp/build/
+ExternalApp/dist/

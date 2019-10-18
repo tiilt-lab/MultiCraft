@@ -15,7 +15,7 @@ def process_command(input_s):
 
 
 def move_mouse(coord):
-    pyautogui.move(coord[0], coord[1], 1, pyautogui.easeInOutQuad)
+    pyautogui.moveTo(coord[0], coord[1])
     return 'moving... X: ' + str(coord[0]).ljust(4) + ' Y: ' + str(coord[1]).ljust(4)
 
 
@@ -32,13 +32,11 @@ def read_coord_string(coord_string):
 
 if __name__ == "__main__":
     print("now accepting commands, enter stop to quit...")
-        
-    while True:
+
+
+    input_s = input("please enter a movement to simulate: ")
+    while not input_s == 'stop':
+        process_command(input_s)
         input_s = input("please enter a movement to simulate: ")
-        if input_s == 'stop':
-            break
     
-        print(process_command(input_s))
-        time.sleep(1)
-    
-    print("no longer accepting commands.\n")
+    print("no longer accepting commands.")
