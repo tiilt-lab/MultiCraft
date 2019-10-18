@@ -14,5 +14,4 @@ public class BlockRecord {
 		this.y = y;
 		this.z = z;
 	}
-
 }
