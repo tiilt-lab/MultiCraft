@@ -61,7 +61,6 @@ namespace Interaction_Streams_101
             {
                 try
                 {
-                    System.Diagnostics.Process.Start("CMD.exe");
                     using (Process mirror = new Process())
                     {
                         string path = Directory.GetCurrentDirectory();

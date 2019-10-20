@@ -75,7 +75,6 @@
     <Compile Include="CsvFileWriter.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TrackRunner.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
