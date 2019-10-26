@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.CompilerServices;
+using System.Threading;
 using Tobii.Interaction;
 
 using ReadWriteCsv;
@@ -37,56 +37,50 @@ namespace Interaction_Streams_101
             // 2. Create stream. 
             var gazePointDataStream = host.Streams.CreateGazePointDataStream();
 
-            // Give the option to run live tracking instead of writing to csv
-            Console.WriteLine("store/track?");
-            string mode = Console.ReadLine();
-
             // 3. Get the gaze data!
-            if (mode.ToLower().Equals("store"))
+            try
             {
-                using (CsvFileWriter writer = new CsvFileWriter("TobiiData.csv"))
-                {
-                    gazePointDataStream.GazePoint((x, y, ts) =>
+                using (Process mirror = new Process())
+                {        
+                    string path = Directory.GetCurrentDirectory();
+                    path = path.Substring(0, path.Length - 9);
+
+                    mirror.StartInfo.FileName = path + "\\MouseMovement\\MouseMovement.exe";
+                    mirror.StartInfo.RedirectStandardInput = true;
+                    mirror.StartInfo.RedirectStandardOutput = true;
+                    mirror.StartInfo.UseShellExecute = false;
+
+                    mirror.Start();
+                    StreamWriter mirrorIn = mirror.StandardInput;
+
+                    double updateWindow = 30;
+                    double prevUpdate = 0;
+
+                    using (CsvFileWriter writer = new CsvFileWriter("TobiiData.csv"))
                     {
-                        CsvRow row = new CsvRow();
-                        row.Add(String.Format("{0},{1},{2}", ts, x, y));
-                        writer.WriteRow(row);
-                        
-                    });
-
-                    Console.WriteLine("writing gaze data to TobiiData.csv...");
-                }
-            }
-            else if (mode.ToLower().Equals("track"))
-            {
-                try
-                {
-                    using (Process mirror = new Process())
-                    {
-                        string path = Directory.GetCurrentDirectory();
-                        path = path.Substring(0, path.Length - 9);
-
-                        mirror.StartInfo.FileName = path + "\\MouseMovement\\MouseMovement.exe";
-                        mirror.StartInfo.RedirectStandardInput = true;
-                        mirror.StartInfo.RedirectStandardOutput = true;
-                        mirror.StartInfo.UseShellExecute = false;
-
-                        mirror.Start();
-                        StreamWriter mirrorIn = mirror.StandardInput;
-
                         gazePointDataStream.GazePoint((x, y, ts) =>
                         {
-                            mirrorIn.WriteLine("move " + ((int) x).ToString() + " " + ((int) y).ToString());
+                            if (ts - prevUpdate > updateWindow)
+                            {
+                                Console.WriteLine(ts-prevUpdate);
+                                mirrorIn.WriteLine("move " + ((int)x).ToString() + " " + ((int)y).ToString());
+                                prevUpdate = ts;
+                            }
+
+                            CsvRow row = new CsvRow();
+                            row.Add(String.Format("{0},{1},{2}", ts, x, y));
+                            //writer.WriteRow(row);
                         });
 
-                        mirror.WaitForExit();
+                        Console.WriteLine("writing gaze data to TobiiData.csv...");
                     }
 
+                    mirror.WaitForExit();
                 }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.Message);
-                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
             }
 
             Console.WriteLine("press any key to end...");

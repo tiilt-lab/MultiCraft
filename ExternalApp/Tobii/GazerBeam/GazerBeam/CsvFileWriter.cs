@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq.Expressions;
 using System.Text;
 namespace ReadWriteCsv
 {
@@ -50,6 +51,7 @@ namespace ReadWriteCsv
             }
             row.LineText = builder.ToString();
             WriteLine(row.LineText);
+            
         }
     }
 
