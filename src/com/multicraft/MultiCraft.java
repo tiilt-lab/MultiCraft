@@ -19,6 +19,7 @@ public class MultiCraft extends JavaPlugin{
 		this.getCommand("loc1").setExecutor(mExec);
 		this.getCommand("loc2").setExecutor(mExec);
 		this.getCommand("rrbuild").setExecutor(mExec);
+		//this.getCommand("eyebuild").setExecutor();
 		
 		// start threads to handle client commands
 		new SpeechToTextServer(this).start();

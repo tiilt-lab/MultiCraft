@@ -27,60 +27,33 @@ namespace Interaction_Streams_101
     /// </summary>
     public class Program
     {
+        private static Host _host;
+        private static GazePointDataStream _gazePointDataStream = null;
+
         public static void Main(string[] args)
         {
             // Everything starts with initializing Host, which manages connection to the 
             // Tobii Engine and provides all the Tobii Core SDK functionality.
             // NOTE: Make sure that Tobii.EyeX.exe is running
-            var host = new Host();
+            _host = new Host();
 
             // 2. Create stream. 
-            var gazePointDataStream = host.Streams.CreateGazePointDataStream();
+            _gazePointDataStream = _host.Streams.CreateGazePointDataStream();
 
             // 3. Get the gaze data!
-            try
+            Thread mirrorThread = new Thread(new ThreadStart(MirrorFunction));
+            mirrorThread.Start();
+            
+            using (CsvFileWriter writer = new CsvFileWriter("TobiiData.csv"))
             {
-                using (Process mirror = new Process())
-                {        
-                    string path = Directory.GetCurrentDirectory();
-                    path = path.Substring(0, path.Length - 9);
+               _gazePointDataStream.GazePoint((x, y, ts) =>
+               {
+                   CsvRow row = new CsvRow();
+                   row.Add(String.Format("{0},{1},{2}", ts, x, y));
+                   //writer.WriteRow(row);
+               });
 
-                    mirror.StartInfo.FileName = path + "\\MouseMovement\\MouseMovement.exe";
-                    mirror.StartInfo.RedirectStandardInput = true;
-                    mirror.StartInfo.RedirectStandardOutput = true;
-                    mirror.StartInfo.UseShellExecute = false;
-
-                    mirror.Start();
-                    StreamWriter mirrorIn = mirror.StandardInput;
-
-                    double updateWindow = 30;
-                    double prevUpdate = 0;
-
-                    using (CsvFileWriter writer = new CsvFileWriter("TobiiData.csv"))
-                    {
-                        gazePointDataStream.GazePoint((x, y, ts) =>
-                        {
-                            if (ts - prevUpdate > updateWindow)
-                            {
-                                Console.WriteLine(ts-prevUpdate);
-                                mirrorIn.WriteLine("move " + ((int)x).ToString() + " " + ((int)y).ToString());
-                                prevUpdate = ts;
-                            }
-
-                            CsvRow row = new CsvRow();
-                            row.Add(String.Format("{0},{1},{2}", ts, x, y));
-                            //writer.WriteRow(row);
-                        });
-
-                        Console.WriteLine("writing gaze data to TobiiData.csv...");
-                    }
-
-                    mirror.WaitForExit();
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
+               Console.WriteLine("writing gaze data to TobiiData.csv...");
             }
 
             Console.WriteLine("press any key to end...");
@@ -88,7 +61,39 @@ namespace Interaction_Streams_101
 
 
             //4. Close the connection to the Tobii Engine before exit.
-            host.DisableConnection();
+            _host.DisableConnection();
+        }
+
+        private static void MirrorFunction()
+        {
+            Console.WriteLine("starting mirror...");
+            using (Process mirror = new Process())
+            {
+                string path = Directory.GetCurrentDirectory();
+                path = path.Substring(0, path.Length - 9);
+
+                mirror.StartInfo.FileName = path + "\\MouseMovement\\MouseMovement.exe";
+                mirror.StartInfo.RedirectStandardInput = true;
+                mirror.StartInfo.RedirectStandardOutput = true;
+                mirror.StartInfo.UseShellExecute = false;
+
+                mirror.Start();
+                StreamWriter mirrorIn = mirror.StandardInput;
+
+                double updateWindow = 30;
+                double prevUpdate = 0;
+
+                _gazePointDataStream.GazePoint((x, y, ts) =>
+                {
+                    if (ts - prevUpdate > updateWindow)
+                    {
+                        Console.WriteLine(ts - prevUpdate);
+                        Console.WriteLine("{0} {1}", x, y);
+                        mirrorIn.WriteLine("moving to " + ((int) x).ToString() + " " + ((int) y).ToString());
+                        prevUpdate = ts;
+                    }
+                });
+            }
         }
     }
 }

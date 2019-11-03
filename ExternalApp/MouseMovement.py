@@ -33,7 +33,6 @@ def read_coord_string(coord_string):
 if __name__ == "__main__":
     print("now accepting commands, enter stop to quit...")
 
-
     input_s = input("please enter a movement to simulate: ")
     while not input_s == 'stop':
         process_command(input_s)

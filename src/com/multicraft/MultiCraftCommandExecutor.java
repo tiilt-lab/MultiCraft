@@ -11,6 +11,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import com.multicraft.Materials.MaterialDoesNotExistException;
 
+import javax.swing.plaf.synth.Region;
+
 public class MultiCraftCommandExecutor implements CommandExecutor{
 	private final MultiCraft plugin;
 	
@@ -161,12 +163,16 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 			return true;
 		}else if(cmd.getName().equalsIgnoreCase("rrbuild")) {
 			RegionBuild rBuild = RegionBuild.getInstance();
-			
+
 			Location loc1 = rBuild.getStartLocation(p);
 			Location loc2 = rBuild.getEndLocation(p);
-			
-			Commands.updateBlocks(loc1,loc2, Material.getMaterial(1));
+
+			Commands.updateBlocks(loc1, loc2, Material.getMaterial(1));
 			p.sendMessage("Structure has been constructed in the region marked");
+		}else if(cmd.getName().equalsIgnoreCase("eyebuild")) {
+			RegionBuild rBuild = RegionBuild.getInstance();
+
+
 		}
 		return false;
 	}
