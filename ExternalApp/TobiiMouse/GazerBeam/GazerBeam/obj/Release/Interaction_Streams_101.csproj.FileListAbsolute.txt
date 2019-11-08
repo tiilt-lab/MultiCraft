@@ -1,0 +1,10 @@
+C:\Users\admin\Desktop\CoreSDK-master\samples\Streams\Interaction_Streams_101\bin\Release\Tobii.EyeX.Client.dll
+C:\Users\admin\Desktop\CoreSDK-master\samples\Streams\Interaction_Streams_101\bin\Release\Interaction_Streams_101.exe.config
+C:\Users\admin\Desktop\CoreSDK-master\samples\Streams\Interaction_Streams_101\bin\Release\Interaction_Streams_101.exe
+C:\Users\admin\Desktop\CoreSDK-master\samples\Streams\Interaction_Streams_101\bin\Release\Interaction_Streams_101.pdb
+C:\Users\admin\Desktop\CoreSDK-master\samples\Streams\Interaction_Streams_101\bin\Release\Tobii.Interaction.Model.dll
+C:\Users\admin\Desktop\CoreSDK-master\samples\Streams\Interaction_Streams_101\bin\Release\Tobii.Interaction.Net.dll
+C:\Users\admin\Desktop\CoreSDK-master\samples\Streams\Interaction_Streams_101\obj\Release\Interaction_Streams_101.csprojResolveAssemblyReference.cache
+C:\Users\admin\Desktop\CoreSDK-master\samples\Streams\Interaction_Streams_101\obj\Release\Interaction_Streams_101.csproj.CoreCompileInputs.cache
+C:\Users\admin\Desktop\CoreSDK-master\samples\Streams\Interaction_Streams_101\obj\Release\Interaction_Streams_101.exe
+C:\Users\admin\Desktop\CoreSDK-master\samples\Streams\Interaction_Streams_101\obj\Release\Interaction_Streams_101.pdb
