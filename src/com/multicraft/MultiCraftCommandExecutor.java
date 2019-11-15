@@ -1,5 +1,11 @@
 package com.multicraft;
+
+import java.io.IOException;
+import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.bukkit.Location;
@@ -170,9 +176,49 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 			Commands.updateBlocks(loc1, loc2, Material.getMaterial(1));
 			p.sendMessage("Structure has been constructed in the region marked");
 		}else if(cmd.getName().equalsIgnoreCase("eyebuild")) {
-			RegionBuild rBuild = RegionBuild.getInstance();
+			if(args.length < 3)
+				return false;
 
+			try {
+				File fpath = new File(MultiCraftCommandExecutor.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+				String spath = fpath.getPath();
+				spath = spath.substring(0, spath.indexOf(fpath.getName())) + "Tobii" + File.separator + "Interaction_Streams_101.exe";
 
+				Runtime run = Runtime.getRuntime();
+				Process proc = run.exec(spath);
+
+				Thread.sleep(3000);
+				proc.destroy();
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			int[] dimensions = new int[] {Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2])};
+			Location startLocation = p.getTargetBlock((Set<Material>) null, 20).getLocation();
+
+			int materialId = 1;
+			if(args.length > 3) {
+				try {
+					materialId = Integer.parseInt(args[3]);
+				}catch(NumberFormatException e) {
+					try {
+						materialId = Materials.getId(args[3]);
+					}catch(MaterialDoesNotExistException f) {
+						p.sendMessage("The material you specified does not exists. Defaulting to stone.");
+						materialId = 1;
+					}
+				}
+			}
+
+			Material material = Material.getMaterial(materialId);
+
+			List<BlockRecord> blocksAffected = new ArrayList<BlockRecord>();
+			blocksAffected = Commands.buildStructure(startLocation,  dimensions, material, args.length > 4);
+
+			Commands.updateUndoAndRedoStacks(blocksAffected, p);
+
+			return true;
 		}
 		return false;
 	}
