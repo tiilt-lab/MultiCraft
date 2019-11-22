@@ -5,8 +5,9 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
+import java.util.*;
 import jdk.nashorn.internal.runtime.PropertyAccess;
+import org.apache.logging.log4j.core.helpers.Integers;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -21,6 +22,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class MultiCraftCommandExecutor implements CommandExecutor{
 	private final MultiCraft plugin;
+	private Hashtable<String, String[]> names;
 	
 	public MultiCraftCommandExecutor(MultiCraft plugin) {
 		this.plugin = plugin;
@@ -210,7 +212,37 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 			}.runTaskLater(this.plugin, 200);
 
 			return true;
+		} else if (cmd.getName().equalsIgnoreCase("mstore")) {
+			if (args.length < 7) {
+				sender.sendMessage("Not enough parameters");
+				return false;
+			} else {
+				String[] temp = {args[1], args[2], args[3], args[4], args[5], args[6]};
+				names.put(args[0], temp);
+				return true;
+			}
+		} else if (cmd.getName().equalsIgnoreCase("mclone")) {
+			if (args.length < 4) {
+				sender.sendMessage("Not enough parameters");
+				return false;
+			} else {
+				String[] c = names.get(args[0]);
+				if (c == null) {
+					sender.sendMessage("Name doesn't exist.");
+					return false;
+				}
+				String command = "clone";
+				for (String i: c) {
+					command = command + " " + i;
+				}
+				for (int i = 1; i <= 3; i++) {
+					command = command + " " + args[i];
+				}
+				Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), command);
+				return true;
+			}
 		}
+		//add marc's work
 		return false;
 	}
 }
