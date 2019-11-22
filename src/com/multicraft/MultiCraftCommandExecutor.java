@@ -1,13 +1,13 @@
 package com.multicraft;
 
-import java.io.IOException;
 import java.io.File;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import jdk.nashorn.internal.runtime.PropertyAccess;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -16,8 +16,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import com.multicraft.Materials.MaterialDoesNotExistException;
+import org.bukkit.scheduler.BukkitRunnable;
 
-import javax.swing.plaf.synth.Region;
 
 public class MultiCraftCommandExecutor implements CommandExecutor{
 	private final MultiCraft plugin;
@@ -179,44 +179,35 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 			if(args.length < 3)
 				return false;
 
-			try {
-				File fpath = new File(MultiCraftCommandExecutor.class.getProtectionDomain().getCodeSource().getLocation().getPath());
-				String spath = fpath.getPath();
-				spath = spath.substring(0, spath.indexOf(fpath.getName())) + "Tobii" + File.separator + "Interaction_Streams_101.exe";
+			ProcessBuilder processBuilder = new ProcessBuilder();
 
-				Runtime run = Runtime.getRuntime();
-				Process proc = run.exec(spath);
+			File fpath = new File(MultiCraftCommandExecutor.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+			final String spath = fpath.getPath().substring(0, fpath.getPath().indexOf(fpath.getName())) + "Tobii" + File.separator + "Interaction_Streams_101.exe";
+			processBuilder.command(spath);
 
-				Thread.sleep(3000);
-				proc.destroy();
+			new BukkitRunnable() {
+				@Override
+				public void run(){
+					p.sendMessage("Tracking eyes...");
 
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
-			int[] dimensions = new int[] {Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2])};
-			Location startLocation = p.getTargetBlock((Set<Material>) null, 20).getLocation();
-
-			int materialId = 1;
-			if(args.length > 3) {
-				try {
-					materialId = Integer.parseInt(args[3]);
-				}catch(NumberFormatException e) {
 					try {
-						materialId = Materials.getId(args[3]);
-					}catch(MaterialDoesNotExistException f) {
-						p.sendMessage("The material you specified does not exists. Defaulting to stone.");
-						materialId = 1;
+						Runtime.getRuntime().exec(spath);
+					} catch (Exception e) {
+						e.printStackTrace();
 					}
 				}
-			}
+			}.runTaskAsynchronously(this.plugin);
 
-			Material material = Material.getMaterial(materialId);
+			new BukkitRunnable() {
+				@Override
+				public void run() {
+					p.sendMessage("Building Structure...");
+					String mmbuild_args = " " + args[0] + " " + args[1] + " " + args[2];
+					if(args.length > 3) mmbuild_args += " " + args[3];
 
-			List<BlockRecord> blocksAffected = new ArrayList<BlockRecord>();
-			blocksAffected = Commands.buildStructure(startLocation,  dimensions, material, args.length > 4);
-
-			Commands.updateUndoAndRedoStacks(blocksAffected, p);
+					Bukkit.getPlayer(p.getUniqueId()).performCommand("mmbuild" + mmbuild_args);
+				}
+			}.runTaskLater(this.plugin, 200);
 
 			return true;
 		}

@@ -1,7 +1,9 @@
 ﻿using System;
-using System.IO.Compression;
+using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
-using System.Windows.Input;
+using System.Threading;
+using System.Windows.Forms;
 using Tobii.Interaction;
 using Tobii.Interaction.Framework;
 
@@ -9,6 +11,9 @@ namespace Interaction_Streams_101
 {
     public class Program
     {
+        [DllImport("user32.dll")]
+        public static extern bool GetCursorPos(out POINT pos);
+
         [DllImport("user32.dll")]
         private static extern int SetCursorPos(int x, int y);
 
@@ -22,26 +27,53 @@ namespace Interaction_Streams_101
             // 2. Create stream. 
             var gazePointDataStream = host.Streams.CreateGazePointDataStream();
 
-            // 3. Get the gaze data. 
-            double updateWindow = 30;
-            double prevUpdate = 0;
+            // 3. Get the gaze data.   
             Console.WriteLine("starting mirror...");
-            
-            gazePointDataStream.GazePoint((x, y, ts) => {
-                Console.WriteLine("({0}, {1})", x, y);
-                if (ts - prevUpdate > updateWindow)
+
+            int screenH = Screen.PrimaryScreen.Bounds.Height;
+            int screenW = Screen.PrimaryScreen.Bounds.Width;
+
+            Stopwatch d = new Stopwatch();
+            d.Start();
+
+            gazePointDataStream.GazePoint((x, y, _) =>
+            {   
+                if (d.Elapsed > TimeSpan.FromMilliseconds(15))
                 {
-                    SetCursorPos((int)x, (int)y);
-                    prevUpdate = ts;
+                    POINT pos;
+                    if (GetCursorPos(out pos))
+                    {
+                        int dispX = (int) x - screenW / 2;
+                        if (Math.Abs(dispX) < 100) dispX = 0;
+                        int dispY = (int) y - screenH / 2;
+                        if (Math.Abs(dispY) < 100) dispY = 0;
+
+                        SetCursorPos(pos.X + dispX, pos.Y + dispY);
+                        Console.WriteLine("moving x={0}, y={1}", dispX, dispY);
+                    }
+
+                    d.Reset();
+                    d.Start();
                 }
             });
 
-            Console.WriteLine("press any key to quit...");
-            Console.ReadKey();
-
             //4. Close connection to the Tobii Engine before exit.
+            Thread.Sleep(10000);
             Console.WriteLine("stopping mirror...");
             host.DisableConnection();
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct POINT
+        {
+            public int X;
+            public int Y;
+
+            public POINT(int x, int y)
+            {
+                this.X = x;
+                this.Y = y;
+            }
         }
     }
 }
