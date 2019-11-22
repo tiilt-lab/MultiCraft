@@ -32,3 +32,10 @@ commands:
   rrbuild:
     description: Builds a structure from loc1 to loc2 (Currently solid and made of stone)
     usage: /<command>
+  mstore:
+    description: Stores a structure's first corner block and opposite corner block by it's given name.
+    usage: /<command> name(string) x1-coord(int) y1-coord(int) z1-coord(int) x2-coord(int) y2-coord(int) z2-coord(int)
+  mclone:
+    description: Uses the Minecraft command clone by applying the first corner block and opposite corner block that was
+    saved by mstore.
+    usage: /<command> name(string) x-coord(int) y-coord(int) z-coord(int)
