@@ -18,6 +18,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import com.multicraft.Materials.MaterialDoesNotExistException;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 
 public class MultiCraftCommandExecutor implements CommandExecutor{
@@ -191,6 +192,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 				@Override
 				public void run(){
 					p.sendMessage("Tracking eyes...");
+					p.sendMessage("Building Structure in 10 seconds...");
 
 					try {
 						Runtime.getRuntime().exec(spath);

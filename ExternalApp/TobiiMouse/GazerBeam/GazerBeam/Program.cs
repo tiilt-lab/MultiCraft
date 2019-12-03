@@ -38,18 +38,18 @@ namespace Interaction_Streams_101
 
             gazePointDataStream.GazePoint((x, y, _) =>
             {   
-                if (d.Elapsed > TimeSpan.FromMilliseconds(15))
+                if (d.Elapsed > TimeSpan.FromMilliseconds(33))
                 {
                     POINT pos;
                     if (GetCursorPos(out pos))
                     {
-                        int dispX = (int) x - screenW / 2;
+                        int dispX = ((int) x - screenW / 2) / 2;
                         if (Math.Abs(dispX) < 100) dispX = 0;
-                        int dispY = (int) y - screenH / 2;
-                        if (Math.Abs(dispY) < 100) dispY = 0;
+                        int dispY = ((int) y - screenH / 2) / 2;
+                        if (Math.Abs(dispY) < 57) dispY = 0;
 
-                        SetCursorPos(pos.X + dispX, pos.Y + dispY);
                         Console.WriteLine("moving x={0}, y={1}", dispX, dispY);
+                        SetCursorPos(pos.X + dispX, pos.Y + dispY);
                     }
 
                     d.Reset();
@@ -57,7 +57,7 @@ namespace Interaction_Streams_101
                 }
             });
 
-            //4. Close connection to the Tobii Engine before exit.
+            //4. Wait 10s and close connection to the Tobii Engine before exit.
             Thread.Sleep(10000);
             Console.WriteLine("stopping mirror...");
             host.DisableConnection();
