@@ -34,4 +34,7 @@ commands:
     usage: /<command>
   eyebuild:
     description: Multicraft Build Command (From Player Gaze)
+    usage: /<command> x-dim(int) y-dim(int) z-dim(int) material-code(int)
+  eyetrack:
+    description: Multicraft eyetracking Command
     usage: /<command>

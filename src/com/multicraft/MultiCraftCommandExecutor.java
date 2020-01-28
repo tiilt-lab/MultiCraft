@@ -24,6 +24,7 @@ import org.bukkit.scheduler.BukkitTask;
 public class MultiCraftCommandExecutor implements CommandExecutor{
 	private final MultiCraft plugin;
 	private Hashtable<String, String[]> names;
+	private BukkitTask eyeTrackRunnable;
 	
 	public MultiCraftCommandExecutor(MultiCraft plugin) {
 		this.plugin = plugin;
@@ -182,11 +183,11 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 			if(args.length < 3)
 				return false;
 
-			ProcessBuilder processBuilder = new ProcessBuilder();
+			ProcessBuilder eyeTrack = new ProcessBuilder();
 
 			File fpath = new File(MultiCraftCommandExecutor.class.getProtectionDomain().getCodeSource().getLocation().getPath());
 			final String spath = fpath.getPath().substring(0, fpath.getPath().indexOf(fpath.getName())) + "Tobii" + File.separator + "Interaction_Streams_101.exe";
-			processBuilder.command(spath);
+			eyeTrack.command(spath);
 
 			new BukkitRunnable() {
 				@Override
@@ -214,7 +215,32 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 			}.runTaskLater(this.plugin, 200);
 
 			return true;
-		} else if (cmd.getName().equalsIgnoreCase("mstore")) {
+		}else if(cmd.getName().equalsIgnoreCase("eyetrack")) {
+			if(args.length != 1)
+				return false;
+			else if(args[0].equalsIgnoreCase("on")) {
+				ProcessBuilder eyeTrack = new ProcessBuilder();
+
+				File fpath = new File(MultiCraftCommandExecutor.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+				final String spath = fpath.getPath().substring(0, fpath.getPath().indexOf(fpath.getName())) + "Tobii" + File.separator + "Interaction_Streams_101.exe";
+				eyeTrack.command(spath);
+
+				eyeTrackRunnable = new BukkitRunnable() {
+					@Override
+					public void run(){
+						try {
+							Runtime.getRuntime().exec(spath);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}.runTaskTimerAsynchronously(this.plugin, 0, 200);
+			}
+			else if(args[0].equalsIgnoreCase("off")) {
+				eyeTrackRunnable.cancel();
+			}
+			return true;
+		}else if (cmd.getName().equalsIgnoreCase("mstore")) {
 			if (args.length < 7) {
 				sender.sendMessage("Not enough parameters");
 				return false;
