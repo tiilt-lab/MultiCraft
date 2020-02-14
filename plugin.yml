@@ -33,8 +33,14 @@ commands:
     description: Builds a structure from loc1 to loc2 (Currently solid and made of stone)
     usage: /<command>
   eyebuild:
-    description: Multicraft Build Command (From Player Gaze)
-    usage: /<command> x-dim(int) y-dim(int) z-dim(int) material-code(int)
+    description: MultiCraft Build Command (From Player Gaze)
+    usage: /<command> x-size(int) y-size(int) z-size(int) material-code(int)
   eyetrack:
-    description: Multicraft eyetracking Command
+    description: MultiCraft Eyetracking Command
+    usage: /<command> mode(string)
+  mstore:
+    description: MultiCraft Structure Storage Command
+    usage: /<command>
+  mclone:
+    description: MultiCraft Structure Cloning Command
     usage: /<command>

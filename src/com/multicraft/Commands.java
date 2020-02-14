@@ -13,7 +13,7 @@ public class Commands {
 	
 	public static boolean undo(Player p, MultiCraft plugin) {
 		PreviousBuildsData pData = PreviousBuildsData.getInstance();
-		BuildCommandData playerBuildRecord = new BuildCommandData();
+		BuildCommandData playerBuildRecord;
 		
 		// get the player's build record
 		try {
