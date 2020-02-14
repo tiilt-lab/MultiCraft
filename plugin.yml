@@ -32,3 +32,9 @@ commands:
   rrbuild:
     description: Builds a structure from loc1 to loc2 (Currently solid and made of stone)
     usage: /<command>
+  eyebuild:
+    description: Multicraft Build Command (From Player Gaze)
+    usage: /<command> x-dim(int) y-dim(int) z-dim(int) material-code(int)
+  eyetrack:
+    description: Multicraft eyetracking Command
+    usage: /<command>

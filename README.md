@@ -16,6 +16,24 @@ A project aimed at providing a voice and gaze interaction interface for Minecraf
 3. Change the export destination to your server's plugins folder.
 4. Finish.
 
+# IntelliJ
+## Development Environemnt Setup
+1. Clone repository using GitHub Desktop or Bash.
+2. Open folder using IntelliJ.
+3. Ensure Project SDK is 1.8 (File > Project Structure > Project SDK).
+4. Project should build without errors.
+
+## Exporting jar plugin file
+1. Open Project Artifacts (File > Project Structure > Artifacts).
+2. Add a new artifact (Add > JAR > From modules with dependencies...).
+3. Under Output Layout, add the plugin.yml file (Add > File > plugin.yml).
+4. Output layout should contain craftbukkit.jar and 'json-simple.jar' along with  'MultiCraft' compile output and plugin.yml.
+5. Change output directory to plugins folder in the folder where you are running your sever.
+6. Ensure Main Class is com.multicraft.MultiCraft.
+7. Click Apply and OK.
+8. Build jar file (Build > Build Artifacts... > MultiCraft.jar > Build).
+9. You should find MultiCraft.jar file in your server's plugins folder.
+
 # Setting up a Minecraft Server
 Visit https://bukkit.gamepedia.com/Setting_up_a_server for detailed instructions.
 

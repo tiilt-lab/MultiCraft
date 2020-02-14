@@ -1,7 +1,14 @@
 package com.multicraft;
+
+import java.io.File;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.*;
+import jdk.nashorn.internal.runtime.PropertyAccess;
+import org.apache.logging.log4j.core.helpers.Integers;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -10,9 +17,14 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import com.multicraft.Materials.MaterialDoesNotExistException;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
+
 
 public class MultiCraftCommandExecutor implements CommandExecutor{
 	private final MultiCraft plugin;
+	private Hashtable<String, String[]> names;
+	private BukkitTask eyeTrackRunnable;
 	
 	public MultiCraftCommandExecutor(MultiCraft plugin) {
 		this.plugin = plugin;
@@ -161,13 +173,104 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 			return true;
 		}else if(cmd.getName().equalsIgnoreCase("rrbuild")) {
 			RegionBuild rBuild = RegionBuild.getInstance();
-			
+
 			Location loc1 = rBuild.getStartLocation(p);
 			Location loc2 = rBuild.getEndLocation(p);
-			
-			Commands.updateBlocks(loc1,loc2, Material.getMaterial(1));
+
+			Commands.updateBlocks(loc1, loc2, Material.getMaterial(1));
 			p.sendMessage("Structure has been constructed in the region marked");
+		}else if(cmd.getName().equalsIgnoreCase("eyebuild")) {
+			if(args.length < 3)
+				return false;
+
+			ProcessBuilder eyeTrack = new ProcessBuilder();
+
+			File fpath = new File(MultiCraftCommandExecutor.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+			final String spath = fpath.getPath().substring(0, fpath.getPath().indexOf(fpath.getName())) + "Tobii" + File.separator + "Interaction_Streams_101.exe";
+			eyeTrack.command(spath);
+
+			new BukkitRunnable() {
+				@Override
+				public void run(){
+					p.sendMessage("Tracking eyes...");
+					p.sendMessage("Building Structure in 10 seconds...");
+
+					try {
+						Runtime.getRuntime().exec(spath);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}.runTaskAsynchronously(this.plugin);
+
+			new BukkitRunnable() {
+				@Override
+				public void run() {
+					p.sendMessage("Building Structure...");
+					String mmbuild_args = " " + args[0] + " " + args[1] + " " + args[2];
+					if(args.length > 3) mmbuild_args += " " + args[3];
+
+					Bukkit.getPlayer(p.getUniqueId()).performCommand("mmbuild" + mmbuild_args);
+				}
+			}.runTaskLater(this.plugin, 200);
+
+			return true;
+		}else if(cmd.getName().equalsIgnoreCase("eyetrack")) {
+			if(args.length != 1)
+				return false;
+			else if(args[0].equalsIgnoreCase("on")) {
+				ProcessBuilder eyeTrack = new ProcessBuilder();
+
+				File fpath = new File(MultiCraftCommandExecutor.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+				final String spath = fpath.getPath().substring(0, fpath.getPath().indexOf(fpath.getName())) + "Tobii" + File.separator + "Interaction_Streams_101.exe";
+				eyeTrack.command(spath);
+
+				eyeTrackRunnable = new BukkitRunnable() {
+					@Override
+					public void run(){
+						try {
+							Runtime.getRuntime().exec(spath);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}.runTaskTimerAsynchronously(this.plugin, 0, 200);
+			}
+			else if(args[0].equalsIgnoreCase("off")) {
+				eyeTrackRunnable.cancel();
+			}
+			return true;
+		}else if (cmd.getName().equalsIgnoreCase("mstore")) {
+			if (args.length < 7) {
+				sender.sendMessage("Not enough parameters");
+				return false;
+			} else {
+				String[] temp = {args[1], args[2], args[3], args[4], args[5], args[6]};
+				names.put(args[0], temp);
+				return true;
+			}
+		} else if (cmd.getName().equalsIgnoreCase("mclone")) {
+			if (args.length < 4) {
+				sender.sendMessage("Not enough parameters");
+				return false;
+			} else {
+				String[] c = names.get(args[0]);
+				if (c == null) {
+					sender.sendMessage("Name doesn't exist.");
+					return false;
+				}
+				String command = "clone";
+				for (String i: c) {
+					command = command + " " + i;
+				}
+				for (int i = 1; i <= 3; i++) {
+					command = command + " " + args[i];
+				}
+				Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), command);
+				return true;
+			}
 		}
+		//add marc's work
 		return false;
 	}
 }
