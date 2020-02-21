@@ -1,6 +1,8 @@
 package com.multicraft;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 import org.bukkit.Bukkit;
@@ -211,13 +213,88 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 				return true;
 			}
 			case "mstore": {
+				if(args.length != 1)
+					break;
+
+				final Location[] locations = {null, null};
+
+				p.sendMessage("Tracking cursor...");
+				p.sendMessage("Please find a corner of structure.");
+				new BukkitRunnable() {
+					@Override
+					public void run() {
+						List<Block> blocks = p.getLineOfSight((Set<Material>) null, 6);
+
+						for (Block b : blocks)
+							if (!b.getType().equals(Material.AIR))
+								locations[0] = b.getLocation();
+
+						p.sendMessage("The first position has been marked.");
+						p.sendMessage("Please find the opposite corner of the structure.");
+					}
+				}.runTaskLater(this.plugin, 100);
+
+				new BukkitRunnable() {
+					@Override
+					public void run() {
+						List<Block> blocks = p.getLineOfSight((Set<Material>) null, 6);
+
+						for (Block b : blocks)
+							if (!b.getType().equals(Material.AIR))
+								locations[1] = b.getLocation();
+
+						p.sendMessage("The second position has been marked.");
+						p.sendMessage("Storing " + args[0] + " to StructureData.csv.");
+
+						List<String> entry = Arrays.asList(args[0],
+								Integer.toString((int)locations[0].getX()), Integer.toString((int)locations[0].getY()),
+								Integer.toString((int)locations[0].getZ()), Integer.toString((int)locations[1].getX()),
+								Integer.toString((int)locations[1].getY()), Integer.toString((int)locations[1].getZ()));
+
+
+						structureData.add(entry);
+
+						csvManager.writeCSV(jarLocation + "StructureData.csv", structureData);
+					}
+				}.runTaskLater(this.plugin, 300);
+				return true;
 			}
 			case "mclone": {
+				if(args.length != 1)
+					break;
+
+				structureData = csvManager.readCSV(jarLocation + "StructureData.csv");
+				int cloneIndex = -1;
+				for(int i = 0; i < structureData.size(); i++) {
+					if(structureData.get(i).get(0).equalsIgnoreCase(args[0])) {
+						cloneIndex = i;
+						break;
+					}
+				}
+
+				List<Block> blocks = p.getLineOfSight((Set<Material>) null, 6);
+				Location startLocation = blocks.get(0).getLocation();
+				for (Block b : blocks)
+					if (!b.getType().equals(Material.AIR))
+						startLocation = b.getLocation();
+
+				if(cloneIndex == -1) {
+					p.sendMessage("No saved structures named " + args[0]);
+					break;
+				}
+
+				List<String> cloneData = structureData.get(cloneIndex);
+				Bukkit.getPlayer(p.getUniqueId()).performCommand("clone " + cloneData.get(1) + " " + cloneData.get(2) + " "
+																			+ cloneData.get(3) + " " + cloneData.get(4) + " "
+																			+ cloneData.get(5) + " " + cloneData.get(6) + " "
+																			+ (int)startLocation.getX() + " " + (int)(startLocation.getY() + 1) + " "
+																			+ (int)startLocation.getZ() + " masked");
+				return true;
 			}
 			default:
-				p.sendMessage("No MultiCraft commands executed.");
 				break;
 		}
+		p.sendMessage("No MultiCraft commands executed.");
 		return false;
 	}
 }
