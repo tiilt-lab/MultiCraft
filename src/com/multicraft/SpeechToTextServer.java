@@ -33,6 +33,7 @@ public class SpeechToTextServer extends Thread{
 			try {
 				socket = serverSocket.accept();
 			}catch(IOException e) {
+				e.printStackTrace();
 			}
 			new EchoThread(socket, plugin).start();
 		}

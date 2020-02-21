@@ -40,7 +40,7 @@ commands:
     usage: /<command> mode(string)
   mstore:
     description: MultiCraft Structure Storage Command
-    usage: /<command>
+    usage: /<command> name(string)
   mclone:
     description: MultiCraft Structure Cloning Command
-    usage: /<command>
+    usage: /<command> name(string)
