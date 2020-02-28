@@ -2,7 +2,6 @@ package com.multicraft;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 import org.bukkit.Bukkit;
@@ -21,6 +20,7 @@ import com.multicraft.Materials.MaterialDoesNotExistException;
 public class MultiCraftCommandExecutor implements CommandExecutor{
 	private final MultiCraft plugin;
 	private String jarLocation;
+	private boolean eyeTracking;
 	private String eyeTrackExecutable;
 	private BukkitTask eyeTrackRunnable;
 	private CSVReadWrite csvManager;
@@ -30,6 +30,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 		this.plugin = plugin;
 		File filePath = new File(MultiCraftCommandExecutor.class.getProtectionDomain().getCodeSource().getLocation().getPath());
 		jarLocation = filePath.getPath().substring(0, filePath.getPath().indexOf(filePath.getName()));
+		eyeTracking = false;
 		eyeTrackExecutable = "Tobii" + File.separator + "Interaction_Streams_101.exe";
 		csvManager = new CSVReadWrite();
 		structureData = csvManager.readCSV(jarLocation + "StructureData.csv");
@@ -181,10 +182,10 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 					@Override
 					public void run() {
 						p.sendMessage("Building Structure...");
-						String mmbuild_args = " " + args[0] + " " + args[1] + " " + args[2];
+						String mmbuild_args = args[0] + " " + args[1] + " " + args[2];
 						if (args.length > 3) mmbuild_args += " " + args[3];
 
-						Bukkit.getPlayer(p.getUniqueId()).performCommand("mmbuild" + mmbuild_args);
+						Bukkit.getPlayer(p.getUniqueId()).performCommand("mmbuild " + mmbuild_args);
 					}
 				}.runTaskLater(this.plugin, 200);
 
@@ -193,7 +194,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 			case "eyetrack": {
 				if (args.length != 1)
 					break;
-				else if (args[0].equalsIgnoreCase("on")) {
+				else if (args[0].equalsIgnoreCase("on") && !eyeTracking) {
 					ProcessBuilder eyeTrack = new ProcessBuilder();
 					final String spath = jarLocation + eyeTrackExecutable;
 					eyeTrack.command(spath);
@@ -208,55 +209,34 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 							}
 						}
 					}.runTaskTimerAsynchronously(this.plugin, 0, 200);
-				} else if (args[0].equalsIgnoreCase("off"))
+					eyeTracking = true;
+				} else if (args[0].equalsIgnoreCase("off")) {
 					eyeTrackRunnable.cancel();
+					eyeTracking = false;
+				}
 				return true;
 			}
 			case "mstore": {
 				if(args.length != 1)
 					break;
 
-				final Location[] locations = {null, null};
+				List<BlockRecord> playerBuildData;
+				try { playerBuildData = PreviousBuildsData.getInstance().getPlayersBuildRecordForUndo(p).blocksAffected; }
+				catch(NoCommandHistoryException e) {
+					p.sendMessage("Previous build not found.");
+					break;
+				}
 
-				p.sendMessage("Tracking cursor...");
-				p.sendMessage("Please find a corner of structure.");
-				new BukkitRunnable() {
-					@Override
-					public void run() {
-						List<Block> blocks = p.getLineOfSight((Set<Material>) null, 6);
+				BlockRecord first = playerBuildData.get(0);
+				BlockRecord last = playerBuildData.get(playerBuildData.size() - 1);
 
-						for (Block b : blocks)
-							if (!b.getType().equals(Material.AIR))
-								locations[0] = b.getLocation();
+				List<String> entry = Arrays.asList(args[0], Integer.toString(Math.abs(last.x - first.x) + 1),
+						Integer.toString(Math.abs(last.y - first.y) + 1), Integer.toString(Math.abs(last.z - first.z) + 1),
+						Integer.toString(p.getWorld().getBlockAt(first.x, first.y, first.z).getType().getId()));
 
-						p.sendMessage("The first position has been marked.");
-						p.sendMessage("Please find the opposite corner of the structure.");
-					}
-				}.runTaskLater(this.plugin, 100);
-
-				new BukkitRunnable() {
-					@Override
-					public void run() {
-						List<Block> blocks = p.getLineOfSight((Set<Material>) null, 6);
-
-						for (Block b : blocks)
-							if (!b.getType().equals(Material.AIR))
-								locations[1] = b.getLocation();
-
-						p.sendMessage("The second position has been marked.");
-						p.sendMessage("Storing " + args[0] + " to StructureData.csv.");
-
-						List<String> entry = Arrays.asList(args[0],
-								Integer.toString((int)locations[0].getX()), Integer.toString((int)locations[0].getY()),
-								Integer.toString((int)locations[0].getZ()), Integer.toString((int)locations[1].getX()),
-								Integer.toString((int)locations[1].getY()), Integer.toString((int)locations[1].getZ()));
-
-
-						structureData.add(entry);
-
-						csvManager.writeCSV(jarLocation + "StructureData.csv", structureData);
-					}
-				}.runTaskLater(this.plugin, 300);
+				structureData.add(entry);
+				csvManager.writeCSV(jarLocation + "StructureData.csv", structureData);
+				p.sendMessage("Saved " + args[0] + ".");
 				return true;
 			}
 			case "mclone": {
@@ -272,23 +252,15 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 					}
 				}
 
-				List<Block> blocks = p.getLineOfSight((Set<Material>) null, 6);
-				Location startLocation = blocks.get(0).getLocation();
-				for (Block b : blocks)
-					if (!b.getType().equals(Material.AIR))
-						startLocation = b.getLocation();
-
-				if(cloneIndex == -1) {
-					p.sendMessage("No saved structures named " + args[0]);
+				if(cloneIndex == -1){
+					p.sendMessage(args[0] + " was not found.");
 					break;
 				}
 
-				List<String> cloneData = structureData.get(cloneIndex);
-				Bukkit.getPlayer(p.getUniqueId()).performCommand("clone " + cloneData.get(1) + " " + cloneData.get(2) + " "
-																			+ cloneData.get(3) + " " + cloneData.get(4) + " "
-																			+ cloneData.get(5) + " " + cloneData.get(6) + " "
-																			+ (int)startLocation.getX() + " " + (int)(startLocation.getY() + 1) + " "
-																			+ (int)startLocation.getZ() + " masked");
+				List<String> buildData = structureData.get(cloneIndex);
+				String mmbuild_args = buildData.get(1) + " " + buildData.get(2) + " " + buildData.get(3) + " " + buildData.get(4);
+				Bukkit.getPlayer(p.getUniqueId()).performCommand("mmbuild " + mmbuild_args);
+				p.sendMessage(args[0] + " was cloned.");
 				return true;
 			}
 			default:
