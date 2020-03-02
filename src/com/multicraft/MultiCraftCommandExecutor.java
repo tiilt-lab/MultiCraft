@@ -1,13 +1,11 @@
 package com.multicraft;
 
 import java.io.File;
-import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -20,11 +18,11 @@ import com.multicraft.Materials.MaterialDoesNotExistException;
 public class MultiCraftCommandExecutor implements CommandExecutor{
 	private final MultiCraft plugin;
 	private String jarLocation;
+	public StructureData structureData;
 	private boolean eyeTracking;
 	private String eyeTrackExecutable;
 	private BukkitTask eyeTrackRunnable;
-	private CSVReadWrite csvManager;
-	private List<List<String>> structureData;
+
 	
 	public MultiCraftCommandExecutor(MultiCraft plugin) {
 		this.plugin = plugin;
@@ -32,8 +30,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 		jarLocation = filePath.getPath().substring(0, filePath.getPath().indexOf(filePath.getName()));
 		eyeTracking = false;
 		eyeTrackExecutable = "Tobii" + File.separator + "Interaction_Streams_101.exe";
-		csvManager = new CSVReadWrite();
-		structureData = csvManager.readCSV(jarLocation + "StructureData.csv");
+		structureData = new StructureData(jarLocation + "StructureData.csv");
 	}
 	
 	@SuppressWarnings("deprecation")
@@ -78,15 +75,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 				}
 
 				int[] dimensions = new int[]{Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2])};
-				List<Block> blocks = p.getLineOfSight((Set<Material>) null, 6);
-
-				// get Start Location, defaults to the block in front of the player
-				Location startLocation = blocks.get(0).getLocation();
-				for (Block b : blocks) {
-					if (!b.getType().equals(Material.AIR)) {
-						startLocation = b.getLocation().add(0, 1, 0);
-					}
-				}
+				Location startLocation = p.getTargetBlock((HashSet<Byte>) null, 16).getLocation().add(0, 1, 0);
 
 				int materialId = 1;
 				if (args.length > 3)
@@ -107,19 +96,14 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 				RegionBuild rBuild = RegionBuild.getInstance();
 				rBuild.startRegionBuildForPlayer(p);
 
-				p.sendMessage("Please select the first position by pointing at it with a cursor and issueing the command"
-						+ " /loc1, then select the second position by pointing at it with the cursor and issuing command"
-						+ " /loc2. If the region is in the air, the part coordinates will be set as your position");
-				break;
+				p.sendMessage("Please select the first position by pointing at it with a cursor and issuing the command"
+						+ " /rloc1, then select the second position by pointing at it with the cursor and issuing command"
+						+ " /rloc2. If the region is in the air, the part coordinates will be set as your position");
+				return true;
 			}
-			case "loc1": {
+			case "rloc1": {
 				RegionBuild rBuild = RegionBuild.getInstance();
-				List<Block> blocks = p.getLineOfSight((Set<Material>) null, 6);
-				Location startLocation = null;
-
-				for (Block b : blocks)
-					if (!b.getType().equals(Material.AIR))
-						startLocation = b.getLocation().add(0, 1, 0);
+				Location startLocation = p.getTargetBlock((HashSet<Byte>) null, 16).getLocation().add(0, 1, 0);
 
 				if (startLocation == null) startLocation = p.getLocation();
 				rBuild.markStartPosition(p, startLocation);
@@ -127,14 +111,9 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 				p.sendMessage("The first position has been marked.");
 				return true;
 			}
-			case "loc2": {
+			case "rloc2": {
 				RegionBuild rBuild = RegionBuild.getInstance();
-				List<Block> blocks = p.getLineOfSight((Set<Material>) null, 6);
-				Location endLocation = null;
-
-				for (Block b : blocks)
-					if (!b.getType().equals(Material.AIR))
-						endLocation = b.getLocation().add(0, 1, 0);
+				Location endLocation = p.getTargetBlock((HashSet<Byte>) null, 16).getLocation().add(0, 1, 0);
 
 				if (endLocation == null)
 					endLocation = p.getLocation();
@@ -158,8 +137,10 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 				return true;
 			}
 			case "eyebuild": {
-				if (args.length < 3)
+				if (args.length < 3) {
+					p.sendMessage("Not enough parameters.");
 					break;
+				}
 
 				ProcessBuilder eyeTrack = new ProcessBuilder();
 				final String spath = jarLocation + eyeTrackExecutable;
@@ -170,11 +151,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 					public void run() {
 						p.sendMessage("Tracking eyes...");
 						p.sendMessage("Building Structure in 10 seconds...");
-						try {
-							Runtime.getRuntime().exec(spath);
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
+						try { Runtime.getRuntime().exec(spath); } catch (Exception e) { e.printStackTrace(); }
 					}
 				}.runTaskAsynchronously(this.plugin);
 
@@ -182,8 +159,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 					@Override
 					public void run() {
 						p.sendMessage("Building Structure...");
-						String mmbuild_args = args[0] + " " + args[1] + " " + args[2];
-						if (args.length > 3) mmbuild_args += " " + args[3];
+						String mmbuild_args = String.join(" ", args);
 
 						Bukkit.getPlayer(p.getUniqueId()).performCommand("mmbuild " + mmbuild_args);
 					}
@@ -192,8 +168,10 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 				return true;
 			}
 			case "eyetrack": {
-				if (args.length != 1)
+				if (args.length != 1) {
+					p.sendMessage("Improper number of parameters.");
 					break;
+				}
 				else if (args[0].equalsIgnoreCase("on") && !eyeTracking) {
 					ProcessBuilder eyeTrack = new ProcessBuilder();
 					final String spath = jarLocation + eyeTrackExecutable;
@@ -204,63 +182,112 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 						public void run() {
 							try {
 								Runtime.getRuntime().exec(spath);
-							} catch (Exception e) {
-								e.printStackTrace();
+								eyeTracking = true;
 							}
+							catch (Exception e) { e.printStackTrace(); }
 						}
 					}.runTaskTimerAsynchronously(this.plugin, 0, 200);
-					eyeTracking = true;
+
 				} else if (args[0].equalsIgnoreCase("off")) {
 					eyeTrackRunnable.cancel();
 					eyeTracking = false;
 				}
 				return true;
 			}
-			case "mstore": {
-				if(args.length != 1)
+			case "msave": {
+				if(args.length != 1) {
+					p.sendMessage("Improper number of parameters.");
 					break;
+				}
 
 				List<BlockRecord> playerBuildData;
 				try { playerBuildData = PreviousBuildsData.getInstance().getPlayersBuildRecordForUndo(p).blocksAffected; }
 				catch(NoCommandHistoryException e) {
-					p.sendMessage("Previous build not found.");
+					p.sendMessage("No previous builds found.");
 					break;
 				}
 
 				BlockRecord first = playerBuildData.get(0);
 				BlockRecord last = playerBuildData.get(playerBuildData.size() - 1);
 
-				List<String> entry = Arrays.asList(args[0], Integer.toString(Math.abs(last.x - first.x) + 1),
-						Integer.toString(Math.abs(last.y - first.y) + 1), Integer.toString(Math.abs(last.z - first.z) + 1),
-						Integer.toString(p.getWorld().getBlockAt(first.x, first.y, first.z).getType().getId()));
+				String[] entry = {args[0],
+						Integer.toString(Math.abs(last.x - first.x) + 1),
+						Integer.toString(Math.abs(last.y - first.y) + 1),
+						Integer.toString(Math.abs(last.z - first.z) + 1),
+						Integer.toString(p.getWorld().getBlockAt(first.x, first.y, first.z).getType().getId())};
 
-				structureData.add(entry);
-				csvManager.writeCSV(jarLocation + "StructureData.csv", structureData);
+				boolean overwrite = structureData.setStructureData(entry);
 				p.sendMessage("Saved " + args[0] + ".");
+				if(overwrite) p.sendMessage("Warning: Overwrote " + args[0] + ".");
 				return true;
 			}
 			case "mclone": {
-				if(args.length != 1)
+				if(args.length != 1) {
+					p.sendMessage("Improper number of parameters");
 					break;
-
-				structureData = csvManager.readCSV(jarLocation + "StructureData.csv");
-				int cloneIndex = -1;
-				for(int i = 0; i < structureData.size(); i++) {
-					if(structureData.get(i).get(0).equalsIgnoreCase(args[0])) {
-						cloneIndex = i;
-						break;
-					}
 				}
 
-				if(cloneIndex == -1){
+				String[] buildData = structureData.getStructureData(args[0]);
+				if(buildData == null) {
 					p.sendMessage(args[0] + " was not found.");
 					break;
 				}
 
-				List<String> buildData = structureData.get(cloneIndex);
-				String mmbuild_args = buildData.get(1) + " " + buildData.get(2) + " " + buildData.get(3) + " " + buildData.get(4);
+				String mmbuild_args = String.join(" ", buildData);
 				Bukkit.getPlayer(p.getUniqueId()).performCommand("mmbuild " + mmbuild_args);
 				p.sendMessage(args[0] + " was cloned.");
+				return true;
+			}
+			case "copyloc1": {
+				if(!p.isOp()) {
+					p.sendMessage("This command requires op status.");
+					break;
+				}
+
+				Location startLocation = p.getTargetBlock((HashSet<Byte>) null, 32).getLocation();
+				if(p.getWorld().getBlockAt(startLocation).getType() == Material.AIR) {
+					p.sendMessage("Please find a closer position");
+					break;
+				}
+				structureData.setCopyLocation1(startLocation);
+				p.sendMessage("The first position has been marked.");
+				return true;
+			}
+			case "copyloc2": {
+				if(!p.isOp()) {
+					p.sendMessage("This command requires op status.");
+					break;
+				}
+
+				Location endLocation = p.getTargetBlock((HashSet<Byte>) null, 32).getLocation();
+				if(p.getWorld().getBlockAt(endLocation).getType() == Material.AIR) {
+					p.sendMessage("Please find a closer position");
+					break;
+				}
+				structureData.setCopyLocation2(endLocation);
+				p.sendMessage("The second position has been marked.");
+				return true;
+			}
+			case "mpaste": {
+				if(!p.isOp()) {
+					p.sendMessage("This command requires op status.");
+					break;
+				}
+
+				String copyArgs = structureData.getCopyArgs();
+				if(copyArgs == null) {
+					p.sendMessage("Please ensure both copy locations are marked.");
+					break;
+				}
+
+				Location pasteLocation = p.getTargetBlock((HashSet<Byte>) null, 16).getLocation();
+				if(p.getWorld().getBlockAt(pasteLocation).getType() == Material.AIR) {
+					p.sendMessage("Please find a closer position");
+					break;
+				}
+
+				String pasteArgs = pasteLocation.getX() + " " + (pasteLocation.getY() + 1) + " " + pasteLocation.getZ() + " ";
+				p.performCommand("clone " + copyArgs + pasteArgs + "masked");
 				return true;
 			}
 			default:
