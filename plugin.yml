@@ -3,44 +3,53 @@ main: com.multicraft.MultiCraft
 version: 1.0 (alpha)
 commands:
   mbuild:
-    description: MultiCraft Build Command (From Player Position)
-    usage: /<command> x-coord(int) y-coord(int) z-coord(int) material-code(int) hollow-flag(int)
+    description: (MultiCraft) build a structure to player position
+    usage: /<command> x(int) y(int) z(int) material(int) hollow(int)
   pyramid:
-    description: Build a Square pyramid
-    usage: /<command> size(int) material-code(int) hollow-flag(int)
+    description: (MultiCraft) build a square pyramid to player position
+    usage: /<command> size(int) material(int) hollow(int)
   ray:
-    description: Trace a ray for now
+    description: (MultiCraft) trace a ray of stone from player line of sight
     usage: /<command>
   mundo:
-    description: MultiCraft Undo Command
+    description: (MultiCraft) undo command
     usage: /<command>
   mredo:
-    description: MultiCraft Redo Command
+    description: (MultiCraft) redo command
     usage: /<command>
   mmbuild:
-    description: MultiCraft Build Command (From Cursor Position)
-    usage: /<command> z-coord(int) y-coord(int) x-coord(int) material-code(int) hollow-flag(int)
+    description: (MultiCraft) build a structure to cursor position
+    usage: /<command> x(int) y(int) z(int) material(int) hollow(int)
   rbuild:
-    description: Initiates a region build
+    description: (MultiCraft) initiates a region build
     usage: /<command>
-  loc1:
-    description: Marks the first location in the selection of a region
+  rloc1:
+    description: (MultiCraft) marks the first location in the selection of a region
     usage: /<command>
-  loc2:
-    description: Marks the second location in the selection of a region
+  rloc2:
+    description: (MultiCraft) marks the second location in the selection of a region
     usage: /<command>
   rrbuild:
-    description: Builds a structure from loc1 to loc2 (Currently solid and made of stone)
+    description: (MultiCraft) builds a structure from rloc1 to rloc2 (Currently solid and made of stone)
     usage: /<command>
   eyebuild:
-    description: MultiCraft Build Command (From Player Gaze)
-    usage: /<command> x-size(int) y-size(int) z-size(int) material-code(int)
+    description: (MultiCraft) build structure to gaze position
+    usage: /<command> x(int) y(int) z(int) material(int)
   eyetrack:
-    description: MultiCraft Eyetracking Command
+    description: (MultiCraft) enable or disable eyetracking
     usage: /<command> mode(string)
-  mstore:
-    description: MultiCraft Structure Storage Command
+  msave:
+    description: (MultiCraft) structure storage command
     usage: /<command> name(string)
   mclone:
-    description: MultiCraft Structure Cloning Command
+    description: (MultiCraft) structure cloning command
     usage: /<command> name(string)
+  copyloc1:
+    description: (MultiCraft) marks the first location for the selection of a copy
+    usage: /<command>
+  copyloc2:
+    description: (MultiCraft) marks the second location for the selection of a copy
+    usage: /<command>
+  mpaste:
+    description: (MultiCraft) copies the region from copyloc1 to copyloc2 to cursor position
+    usage: /<command>
