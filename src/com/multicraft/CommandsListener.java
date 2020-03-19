@@ -18,6 +18,7 @@ public class CommandsListener extends Thread{
 		while(true) {
 			if(! CommandsQueue.getInstance().commands.isEmpty()){
 				String str = "[" + CommandsQueue.getInstance().commands.remove() + "]";
+				System.out.println(str);
 				JSONObject jsonObject = (JSONObject) JSONParsing.JSONFromString(str);
 				CommandsQueue.getInstance().commandsQ.add(jsonObject);
 			}

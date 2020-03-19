@@ -19,8 +19,8 @@ TRANSCRIPTS_QUEUE = Queue(maxsize=30)
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
 RATE = 44100
-HOST = "10.105.2.8"
-PORT = 25565
+HOST = "10.105.25.177"
+PORT = 5001
 
 client_socket = socket.socket()
 CLIENT_NAME = input("Please enter your screen name: ")

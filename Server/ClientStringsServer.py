@@ -56,19 +56,19 @@ def client_thread(connection, ip, port):
         # For testing purposes, you can force input from the
         # lines of code below.
 
-        # comm_str = input("Please enter a command: ")
-        # client_input = ("" + comm_str).encode()
+        comm_str = input("Please enter a command: ")
+        client_input = ("" + comm_str)
 
-        client_input = connection.recv(1024).decode()
-
+        # client_input = connection.recv(1024).decode()
+	
         if client_input is None:
             pass
         elif len(client_input.split(' ')) > 1:
             client_transcript = client_input.split(' ', 1)[1]
-            # print(client_transcript)
+            print(client_transcript)
             args = process_instruction(client_transcript)
             if args is not None:
-                # print(args)
+                print(args)
                 args['client_name'] = client_input.split(' ')[0]
                 print("sending " + json.dumps(args))
                 sending_socket.send((json.dumps(args) + "\n").encode())

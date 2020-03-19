@@ -21,7 +21,6 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 	public StructureData structureData;
 	private boolean eyeTracking;
 	private String eyeTrackExecutable;
-	private BukkitTask eyeTrackRunnable;
 
 	
 	public MultiCraftCommandExecutor(MultiCraft plugin) {
@@ -142,56 +141,56 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 					break;
 				}
 
-				ProcessBuilder eyeTrack = new ProcessBuilder();
-				final String spath = jarLocation + eyeTrackExecutable;
-				eyeTrack.command(spath);
-
 				new BukkitRunnable() {
 					@Override
 					public void run() {
-						p.sendMessage("Tracking eyes...");
-						p.sendMessage("Building Structure in 10 seconds...");
-						try { Runtime.getRuntime().exec(spath); } catch (Exception e) { e.printStackTrace(); }
+						Runtime run = Runtime.getRuntime();
+						String[] eyeTrackCommand = {jarLocation + eyeTrackExecutable, "-d"};
+						try {
+							p.sendMessage("Tracking eyes...");
+							Process eyeTrack = run.exec(eyeTrackCommand);
+
+							while (eyeTrack.isAlive()) { /* Wait for eye tracking executable to complete. */ }
+
+							Bukkit.getScheduler().runTask(plugin, () -> {
+								p.sendMessage("Building Structure...");
+								String mmbuild_args = String.join(" ", args);
+								Bukkit.getPlayer(p.getUniqueId()).performCommand("mmbuild " + mmbuild_args);
+							});
+
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
 					}
 				}.runTaskAsynchronously(this.plugin);
-
-				new BukkitRunnable() {
-					@Override
-					public void run() {
-						p.sendMessage("Building Structure...");
-						String mmbuild_args = String.join(" ", args);
-
-						Bukkit.getPlayer(p.getUniqueId()).performCommand("mmbuild " + mmbuild_args);
-					}
-				}.runTaskLater(this.plugin, 200);
 
 				return true;
 			}
 			case "eyetrack": {
-				if (args.length != 1) {
-					p.sendMessage("Improper number of parameters.");
-					break;
-				}
-				else if (args[0].equalsIgnoreCase("on") && !eyeTracking) {
-					ProcessBuilder eyeTrack = new ProcessBuilder();
-					final String spath = jarLocation + eyeTrackExecutable;
-					eyeTrack.command(spath);
-
-					eyeTrackRunnable = new BukkitRunnable() {
+				if (!eyeTracking) {
+					new BukkitRunnable() {
 						@Override
 						public void run() {
+							Runtime run = Runtime.getRuntime();
+							Process eyeTrack;
+							String eyeTrackCommand = jarLocation + eyeTrackExecutable;
 							try {
-								Runtime.getRuntime().exec(spath);
+								p.sendMessage("Tracking eyes, press . to end.");
+								eyeTrack = run.exec(eyeTrackCommand);
 								eyeTracking = true;
-							}
-							catch (Exception e) { e.printStackTrace(); }
-						}
-					}.runTaskTimerAsynchronously(this.plugin, 0, 200);
 
-				} else if (args[0].equalsIgnoreCase("off")) {
-					eyeTrackRunnable.cancel();
-					eyeTracking = false;
+								while (eyeTrack.isAlive()) { /* Wait for eye tracking executable to complete. */ }
+
+								p.sendMessage("No longer tracking eyes.");
+								eyeTracking = false;
+
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+					}.runTaskAsynchronously(this.plugin);
 				}
+
 				return true;
 			}
 			case "msave": {
