@@ -50,26 +50,22 @@ def start_server():
 
 
 def client_thread(connection, ip, port):
-    is_active = True
+    while True:
+        # For testing purposes, you can force input from the lines of code below.
+        # comm_str = input("Please enter a command: ")
+        # client_input = ("" + comm_str)
 
-    while is_active:
-        # For testing purposes, you can force input from the
-        # lines of code below.
-
-        comm_str = input("Please enter a command: ")
-        client_input = ("" + comm_str)
-
-        # client_input = connection.recv(1024).decode()
+        client_input = connection.recv(1024).decode()
 	
         if client_input is None:
             pass
         elif len(client_input.split(' ')) > 1:
-            client_transcript = client_input.split(' ', 1)[1]
-            print(client_transcript)
-            args = process_instruction(client_transcript)
+            client_transcript = client_input.split(' ', 2)
+            if client_transcript[1] != 'multicraft': continue
+            
+            args = process_instruction(client_transcript[2])
             if args is not None:
-                print(args)
-                args['client_name'] = client_input.split(' ')[0]
+                args['client_name'] = client_transcript[0]
                 print("sending " + json.dumps(args))
                 sending_socket.send((json.dumps(args) + "\n").encode())
 

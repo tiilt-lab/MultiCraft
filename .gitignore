@@ -1,5 +1,11 @@
 serverScripts/
+
+# ide specific folders
+.vscode/
+.idea/
+.settings/
+
 *.cfg
-ExternalApp/build/
-ExternalApp/dist/
+
+# jar-compilation specific files
 MultiCraft.jar_xml

@@ -48,5 +48,5 @@ def create_json(game_command):
 # FOR TESTING
 if __name__ == "__main__":
 	while True:
-		input_s = input("Please enter a message to interprete: ")
+		input_s = input("Please enter a message to interpret: ")
 		print(process_instruction(input_s))

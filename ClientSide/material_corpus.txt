@@ -1,0 +1,444 @@
+air
+stone
+grass
+dirt
+cobblestone
+oak wood plank
+oak sapling
+bedrock
+flowing water
+still water
+flowing lava
+still lava
+sand
+gravel
+gold ore
+iron ore
+coal ore
+oak wood
+oak leaves
+sponge
+glass
+lapis lazuli ore
+lapis lazuli block
+dispenser
+sandstone
+note block
+bed
+powered rail
+detector rail
+sticky piston
+cobweb
+dead shrub
+dead bush
+piston
+piston head
+white wool
+dandelion
+poppy
+brown mushroom
+red mushroom
+gold
+iron
+double stone slab
+stone slab
+bricks
+tnt
+bookshelf
+moss stone
+obsidian
+torch
+fire
+monster spawner
+oak wood stairs
+chest
+redstone wire
+redstone ore
+diamond ore
+diamond block
+crafting table
+wheat crops
+farmland
+furnace
+burning furnace
+standing sign block
+oak door block
+ladder
+rail
+cobblestone stairs
+wall-mounted sign block
+lever
+stone pressure plate
+redstone ore
+glowing redstone ore
+redstone torch
+stone button
+snow
+ice
+snow block
+cactus
+clay
+sugar canes
+jukebox
+oak fence
+pumpkin
+nether
+netherrack
+soul sand
+glowstone
+nether portal
+jack o'lantern
+cake block
+redstone repeater block
+white stained glass
+wooden trapdoor
+stone monster egg
+stone bricks
+brown mushroom block
+iron bars
+glass pane
+melon block
+pumpkin stem
+melon stem
+vines
+oak fence gate
+brick stairs
+mycelium
+lily pad
+nether brick
+nether brick fence
+nether brick stairs
+nether wart
+enchantment table
+brewing stand
+cauldron
+end portal
+end portal frame
+end stone
+dragon egg
+redstone lamp
+double oak wood slab
+oak wood slab
+cocoa
+sandstone stairs
+emerald ore
+ender
+ender chest
+tripwire hook
+tripwire
+emerald block
+spruce wood stairs
+command block
+beacon
+cobblestone wall
+flower pot
+carrots
+potatoes
+wooden button
+mob head
+anvil
+trapped chest
+weighted pressure plate
+redstone comparator
+daylight sensor
+nether quartz ore
+hopper
+quartz block
+quartz stairs
+activator rail
+dropper
+white hardened clay
+white stained glass pane
+acacia leaves
+acacia wood
+acacia wood stairs
+dark oak wood stairs
+slime block
+barrier
+iron trapdoor
+prismarine
+sea lantern
+hay bale
+white carpet
+hardened clay
+block of coal
+packed ice
+sunflower
+free-standing banner
+wall-mounted banner
+inverted daylight sensor
+red sandstone
+red sandstone stairs
+double red sandstone slab
+red sandstone slab
+spruce fence gate
+birch fence gate
+jungle fence gate
+dark oak fence gate
+acacia fence gate
+spruce fence
+birch fence
+jungle fence
+dark oak fence
+acacia fence
+spruce door block
+birch door block
+jungle door block
+acacia door block
+dark oak door block
+end rod
+chorus plant
+chorus flower
+purpur block
+purpur pillar
+purpur stairs
+purpur double slab
+purpur slab
+end stone bricks
+beetroot block
+grass path
+end gateway
+repeating command block
+chain command block
+frosted ice
+magma block
+nether wart block
+red nether brick
+bone block
+structure void
+observer
+white shulker box
+orange shulker box
+magenta shulker box
+light blue shulker box
+yellow shulker box
+lime shulker box
+pink shulker box
+gray shulker box
+light gray shulker box
+cyan shulker box
+purple shulker box
+blue shulker box
+brown shulker box
+green shulker box
+red shulker box
+black shulker box
+white glazed terracotta
+orange glazed terracotta
+magenta glazed terracotta
+light blue glazed terracotta
+yellow glazed terracotta
+lime glazed terracotta
+pink glazed terracotta
+gray glazed terracotta
+light gray glazed terracotta
+cyan glazed terracotta
+purple glazed terracotta
+blue glazed terracotta
+brown glazed terracotta
+green glazed terracotta
+red glazed terracotta
+black glazed terracotta
+white concrete
+white concrete powder
+structure block
+iron shovel
+iron pickaxe
+iron axe
+flint and steel
+apple
+bow
+arrow
+coal
+diamond
+iron ingot
+gold ingot
+iron sword
+wooden sword
+wooden shovel
+wooden pickaxe
+wooden axe
+stone sword
+stone shovel
+stone pickaxe
+stone axe
+diamond sword
+diamond shovel
+diamond pickaxe
+diamond axe
+stick
+bowl
+mushroom stew
+golden sword
+golden shovel
+golden pickaxe
+golden axe
+string
+feather
+gunpowder
+wooden hoe
+stone hoe
+iron hoe
+diamond hoe
+golden hoe
+wheat seeds
+wheat
+bread
+leather helmet
+leather tunic
+leather pants
+leather boots
+chainmail helmet
+chainmail chestplate
+chainmail leggings
+chainmail boots
+iron helmet
+iron chestplate
+iron leggings
+iron boots
+diamond helmet
+diamond chestplate
+diamond leggings
+diamond boots
+golden helmet
+golden chestplate
+golden leggings
+golden boots
+flint
+raw porkchop
+cooked porkchop
+painting
+golden apple
+sign
+oak door
+bucket
+water bucket
+lava bucket
+minecart
+saddle
+iron door
+redstone
+snowball
+oak boat
+leather
+milk bucket
+brick
+paper
+book
+slimeball
+minecart with chest
+minecart with furnace
+egg
+compass
+fishing rod
+clock
+glowstone dust
+raw fish
+cooked fish
+ink sack
+bone
+sugar
+cake
+redstone repeater
+cookie
+map
+shears
+melon
+pumpkin seeds
+melon seeds
+raw beef
+steak
+raw chicken
+cooked chicken
+rotten flesh
+ender pearl
+blaze rod
+ghast tear
+gold nugget
+potion
+glass bottle
+spider eye
+fermented spider eye
+blaze powder
+magma cream
+eye of ender
+glistering melon
+bottle o' enchanting
+fire charge
+book and quill
+written book
+emerald
+item frame
+carrot
+potato
+baked potato
+poisonous potato
+empty map
+golden carrot
+mob head 
+carrot on a stick
+nether star
+pumpkin pie
+firework rocket
+firework star
+enchanted book
+redstone comparator
+nether quartz
+minecart with tnt
+minecart with hopper
+prismarine shard
+prismarine crystals
+raw rabbit
+cooked rabbit
+rabbit stew
+rabbit's foot
+rabbit hide
+armor stand
+iron horse armor
+golden horse armor
+diamond horse armor
+lead
+name tag
+minecart with command block
+raw mutton
+cooked mutton
+banner
+end crystal
+spruce door
+birch door
+jungle door
+acacia door
+dark oak door
+chorus fruit
+popped chorus fruit
+beetroot
+beetroot seeds
+beetroot soup
+dragon's breath
+splash potion
+spectral arrow
+tipped arrow
+lingering potion
+shield
+elytra
+spruce boat
+birch boat
+jungle boat
+acacia boat
+dark oak boat
+totem of undying
+shulker shell
+iron nugget
+knowledge book
+thirteen disc
+cat disc
+blocks disc
+chirp disc
+far disc
+mall disc
+mellohi disc
+stal disc
+strad disc
+ward disc
+eleven disc
+wait disc

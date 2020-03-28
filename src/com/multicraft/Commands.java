@@ -9,6 +9,8 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
+import static java.lang.Math.*;
+
 public class Commands {	
 	
 	public static boolean undo(Player p, MultiCraft plugin) {
@@ -121,12 +123,12 @@ public class Commands {
 	public static List<BlockRecord>  updateBlocks(Location pos1, Location pos2, Material m) {
 		int minX, maxX, minY, maxY, minZ, maxZ;
 		World world = pos1.getWorld();
-		minX = pos1.getBlockX() < pos2.getBlockX() ? pos1.getBlockX() : pos2.getBlockX();
-		maxX = pos1.getBlockX() >= pos2.getBlockX() ? pos1.getBlockX() : pos2.getBlockX();
-		minY = pos1.getBlockY() < pos2.getBlockY() ? pos1.getBlockY() : pos2.getBlockY();
-		maxY = pos1.getBlockY() >= pos2.getBlockY() ? pos1.getBlockY() : pos2.getBlockY();
-		minZ = pos1.getBlockZ() < pos2.getBlockZ() ? pos1.getBlockZ() : pos2.getBlockZ();
-		maxZ = pos1.getBlockZ() >= pos2.getBlockZ() ? pos1.getBlockZ() : pos2.getBlockZ();
+		minX = min(pos1.getBlockX(), pos2.getBlockX());
+		maxX = max(pos1.getBlockX(), pos2.getBlockX());
+		minY = min(pos1.getBlockY(), pos2.getBlockY());
+		maxY = max(pos1.getBlockY(), pos2.getBlockY());
+		minZ = min(pos1.getBlockZ(), pos2.getBlockZ());
+		maxZ = max(pos1.getBlockZ(), pos2.getBlockZ());
 		
 		List<BlockRecord> blocksAffected = new ArrayList<BlockRecord>();
 
