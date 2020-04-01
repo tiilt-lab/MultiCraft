@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Net.Mime;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Tobii.Interaction;
@@ -11,7 +10,9 @@ namespace Interaction_Streams_101
     {
         // Global Variables
         private static Host _host;
-        private static bool _usingDwell;
+        private static bool _stopOnDwell;
+        private static bool _moveOnDwell;
+        private static bool _wKeyUp;
 
         // Windows API helper functions
         [DllImport("user32.dll")]
@@ -32,6 +33,13 @@ namespace Interaction_Streams_101
         [DllImport("user32.dll")]
         public static extern short GetKeyState(int vKey);
 
+        [DllImport("user32.dll")]
+        public static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, uint dwExtraInfo);
+        
+        private const int KEYEVENTF_EXTENDEDKEY = 0x0001;
+        private const int KEYEVENTF_KEYUP = 0x0002;
+        private const int VK_W = 0x57;
+
         public static void Main(string[] args)
         {
             // Everything starts with initializing Host, which manages connection to the 
@@ -42,32 +50,39 @@ namespace Interaction_Streams_101
             var dwell = new Stopwatch();
             bool moved;
 
-            if (args.Length > 0 && args[0].Equals("-d"))
+            if (args.Length > 0)
             {
-                // Console.WriteLine("using dwell");
-                _usingDwell = true;
+                if (args[0].Equals("-d"))
+                    _stopOnDwell = true;
+                else if (args[0].Equals("-m"))
+                    _moveOnDwell = true;
             }
 
             // Get the currently running MultiCraft window. If no window found, end the program.
             var minecraftWindow = FindWindow(null, "Minecraft 1.9");
-            if (!GetWindowRect(minecraftWindow, out var rect)) return;
+            if (!GetWindowRect(minecraftWindow, out var rect))
+                EndHostConnection();
             var windowWidth = rect.Right - rect.Left;
             var windowHeight = rect.Bottom - rect.Top;
 
-            // 2. Create stream. 
-            // Console.WriteLine("starting mirror...");
+            // Create stream. 
             var gazePointDataStream = _host.Streams.CreateGazePointDataStream();
             collect.Start();
 
-            // 3. Get the gaze data.  
+            // Get the gaze data.  
             gazePointDataStream.GazePoint((x, y, _) =>
             {
                 var eyePos = new Point((int)x, (int)y);
 
-                if (_usingDwell && dwell.IsRunning && dwell.Elapsed > TimeSpan.FromSeconds(3))
+                if (dwell.IsRunning && dwell.Elapsed > TimeSpan.FromSeconds(3))
                 {
-                    // Console.WriteLine("dwell completed.");
-                    EndHostConnection();
+                    if (_stopOnDwell)
+                        EndHostConnection();
+                    else if (_moveOnDwell && _wKeyUp)
+                    {
+                        _wKeyUp = false;
+                        keybd_event(VK_W, 0, KEYEVENTF_EXTENDEDKEY, 0);
+                    }
                 }
 
                 if (collect.Elapsed > TimeSpan.FromMilliseconds(16))
@@ -75,15 +90,16 @@ namespace Interaction_Streams_101
                     if (GetCursorPos(out var cursorPos) && ScreenToClient(minecraftWindow, ref eyePos))
                     {
                         moved = MoveCursor(eyePos, cursorPos, windowWidth, windowHeight);
-                        if (!moved && _usingDwell && !dwell.IsRunning)
-                        {
-                            // Console.WriteLine("dwell initiated.");
+                        if (!moved && !dwell.IsRunning)
                             dwell.Start();
-                        }
                         else if (moved && dwell.IsRunning)
                         {
-                            // Console.WriteLine("dwell reset.");
                             dwell.Reset();
+                            if (_moveOnDwell && !_wKeyUp)
+                            {
+                                _wKeyUp = true;
+                                keybd_event(VK_W, 0, KEYEVENTF_KEYUP, 0);
+                            }
                         }
                     }
                     collect.Reset();
@@ -91,39 +107,34 @@ namespace Interaction_Streams_101
                 }
             });
 
-            // Console.WriteLine("press . to stop");
             while (GetKeyState((int) Keys.OemPeriod) == 0)
             {
-                // 4. Wait for user to press . key to end.
+                // Wait for user to press . key to end.
             }
             EndHostConnection();
-
         }
 
         private static bool MoveCursor(Point eyePos, Point cursorPos,  int windowWidth, int windowHeight)
         {
+            // Get displacement from center of window
             var displaceX = eyePos.X - (windowWidth / 2);
             var displaceY = eyePos.Y - (windowHeight / 2);
 
-            // bounding boxes (adjust this for more or less sensitivity for dwell)
-            if (Math.Abs(displaceX) < 75) displaceX = 0;
-            if (displaceY < 50 && displaceY > -200) displaceY = 0;
+            // Set up bounding box for dwell
+            if (Math.Abs(displaceX) < windowWidth / 25) displaceX = 0;
+            if (displaceY < windowHeight / 20 && displaceY > -(windowHeight / 5)) displaceY = 0;
 
+            // If eyePos is within bounding box, don't move cursor
             if (displaceX == 0 && displaceY == 0)
                 return false;
 
-            // vertical sensitivity adjustment
-            if (displaceY < 0) displaceY /= 2;
-
-            // Console.WriteLine("moving x={0}, y={1}", displaceX, displaceY);
-            SetCursorPos(cursorPos.X + displaceX / 4, cursorPos.Y + displaceY / 3);
+            SetCursorPos(cursorPos.X + displaceX / 40, cursorPos.Y + displaceY / 30);
             return true;
         }
 
         private static void EndHostConnection()
         {
-            // 5. Close connection to the Tobii Engine before exit.
-            // Console.WriteLine("stopping mirror...");
+            // Close connection to the Tobii Engine before exit.
             _host.DisableConnection();
             Environment.Exit(0);
         }

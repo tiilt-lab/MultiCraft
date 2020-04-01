@@ -18,12 +18,15 @@ public class CommandExecution extends Thread{
 				try {
 					JSONObject o = CommandsQueue.getInstance().commandsQ.remove();
 					GameCommand gComm = new GameCommand(o, plugin);
-					// TODO: Check if return value is false and indicate message
-					boolean executed = gComm.execute();
+
+					if(! gComm.execute()) {
+						String issuer = o.get("client_name").toString();
+						plugin.getServer().getPlayer(java.util.UUID.fromString(issuer)).sendMessage("Command execution failed.");
+					}
 
 				}catch(Exception e){
 					// TODO: Write message to issuer
-					plugin.getServer().broadcastMessage("Could not execute command");
+					plugin.getServer().broadcastMessage("Could not execute command.");
 				}				
 			}
 		}

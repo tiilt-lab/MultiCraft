@@ -11,7 +11,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 import com.multicraft.Materials.MaterialDoesNotExistException;
 
 
@@ -22,7 +21,6 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 	private boolean eyeTracking;
 	private String eyeTrackExecutable;
 
-	
 	public MultiCraftCommandExecutor(MultiCraft plugin) {
 		this.plugin = plugin;
 		File filePath = new File(MultiCraftCommandExecutor.class.getProtectionDomain().getCodeSource().getLocation().getPath());
@@ -174,6 +172,9 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 							Runtime run = Runtime.getRuntime();
 							Process eyeTrack;
 							String eyeTrackCommand = jarLocation + eyeTrackExecutable;
+							if(args.length == 1 && args[0].equalsIgnoreCase("move"))
+								eyeTrackCommand += " -m";
+
 							try {
 								p.sendMessage("Tracking eyes, press . to end.");
 								eyeTrack = run.exec(eyeTrackCommand);

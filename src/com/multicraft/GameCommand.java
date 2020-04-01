@@ -12,30 +12,27 @@ import org.bukkit.entity.Player;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import com.multicraft.PyramidBuilder.BlockVector3;
-import com.multicraft.PyramidBuilder;
 
 /*
  * An object representation of a game command for MultiCraft
  */
 public class GameCommand {
-	String commandName;
-	Player issuer;
-	JSONObject args;
-	MultiCraft plugin;
+	private String commandName;
+	private Player issuer;
+	private JSONObject args;
+	private MultiCraft plugin;
 	
-	
-	public GameCommand(JSONObject argss, MultiCraft pl) {
+	public GameCommand(JSONObject argsJSON, MultiCraft pl) {
 		plugin = pl;
-		args = argss;
+		args = argsJSON;
 		commandName = (String) args.get("command");
-		issuer = (Player) Bukkit.getPlayer(UUID.fromString((String) args.get("client_name")));		
+		issuer = Bukkit.getServer().getPlayer(UUID.fromString(args.get("client_name").toString()));
 	}
 	
 	public GameCommand(MultiCraft pl) {
 		this.plugin = pl;
 	}
-	
-	
+
 	public boolean commandSupported(String com) {
 		return CommandWords.getInstance().commands.contains(com);
 	}
@@ -44,14 +41,15 @@ public class GameCommand {
 		if(! commandSupported(commandName) || ! playerIsOnline(issuer)) {
 			return false;
 		}
-		if(commandName.equals("build")) {
-			return executeBuild();
-		}else if(commandName.equals("move")) {
-			return executeMove();
-		}else if(commandName.equals("undo")) {
-			return executeUndo();
-		}else if(commandName.equals("redo")) {
-			return executeRedo();
+		switch (commandName) {
+			case "build":
+				return executeBuild();
+			case "move":
+				return executeMove();
+			case "undo":
+				return executeUndo();
+			case "redo":
+				return executeRedo();
 		}
 		return false;
 	}
@@ -71,15 +69,13 @@ public class GameCommand {
 		dimensions[0] = ((Long) dimAr.get(0)).intValue();
 		dimensions[1] = ((Long) dimAr.get(1)).intValue();
 		dimensions[2] = ((Long) dimAr.get(2)).intValue();
-		
+
 		//TODO: Update so that the location is at the cursor
 		Location l = issuer.getLocation();
 		
-		
 		int id = ((Long) args.get("block_code")).intValue();
 		Material m = Material.getMaterial(id);
-		
-		
+
 		// TODO: Clean up this logic
 		if (args.containsKey("roof") && (Boolean) args.get("roof")) {
 			PyramidBuilder tempBuilder = new PyramidBuilder(this.plugin);
@@ -87,7 +83,7 @@ public class GameCommand {
 			return true;
 		}
 		
-		boolean isHollow = (args.containsKey("hollow") && (Boolean) args.get("hollow")) ? true : false;
+		boolean isHollow = args.containsKey("hollow") && (Boolean) args.get("hollow");
 		
 		List<BlockRecord> blocksAffected = Commands.buildStructure(l, dimensions, m, isHollow);
 		Commands.updateUndoAndRedoStacks(blocksAffected, this.issuer);
@@ -95,34 +91,30 @@ public class GameCommand {
 	}
 	
 	public static List<BlockRecord>  updateBlocks(Location pos1, Location pos2, Material m) {
-		int minX, maxX, minY, maxY, minZ, maxZ;
 		World world = pos1.getWorld();
-		minX = pos1.getBlockX() < pos2.getBlockX() ? pos1.getBlockX() : pos2.getBlockX();
-		maxX = pos1.getBlockX() >= pos2.getBlockX() ? pos1.getBlockX() : pos2.getBlockX();
-		minY = pos1.getBlockY() < pos2.getBlockY() ? pos1.getBlockY() : pos2.getBlockY();
-		maxY = pos1.getBlockY() >= pos2.getBlockY() ? pos1.getBlockY() : pos2.getBlockY();
-		minZ = pos1.getBlockZ() < pos2.getBlockZ() ? pos1.getBlockZ() : pos2.getBlockZ();
-		maxZ = pos1.getBlockZ() >= pos2.getBlockZ() ? pos1.getBlockZ() : pos2.getBlockZ();
+		int minX = Math.min(pos1.getBlockX(), pos2.getBlockX());
+		int maxX = Math.max(pos1.getBlockX(), pos2.getBlockX());
+		int minY = Math.min(pos1.getBlockY(), pos2.getBlockY());
+		int maxY = Math.max(pos1.getBlockY(), pos2.getBlockY());
+		int minZ = Math.min(pos1.getBlockZ(), pos2.getBlockZ());
+		int maxZ = Math.max(pos1.getBlockZ(), pos2.getBlockZ());
 		
-		List<BlockRecord> blocksAffected = new ArrayList<BlockRecord>();
+		List<BlockRecord> blocksAffected = new ArrayList<>();
 
-		for (int x = minX; x <= maxX; ++x) {
-			for (int z = minZ; z <= maxZ; ++z) {
-				for (int y = minY; y <= maxY; ++y) {
+		for (int x = minX; x <= maxX; ++x)
+			for (int z = minZ; z <= maxZ; ++z)
+				for (int y = minY; y <= maxY; ++y)
 					blocksAffected.add(updateBlock(world, x, y, z, m,(byte) 0));
-				}
-			}
-		}
+
 		return blocksAffected;
 	}
 	
 	public void buildHollow(int[] dimensions, Location startLoc, Location endLoc, GameCommand gComm, Material m) {		
 		// bottom Wall
 		updateBlocks(startLoc, new Location(endLoc.getWorld(), endLoc.getX(), startLoc.getY(), endLoc.getZ()), m);
-		
+
 		// top wall
-		updateBlocks(new Location(startLoc.getWorld(), startLoc.getX(), endLoc.getY(), startLoc.getZ()), 
-				endLoc, m);
+		updateBlocks(new Location(startLoc.getWorld(), startLoc.getX(), endLoc.getY(), startLoc.getZ()), endLoc, m);
 		
 		// back wall
 		updateBlocks(new Location(startLoc.getWorld(), startLoc.getX(), startLoc.getY(), endLoc.getZ()), endLoc, m);
@@ -138,17 +130,16 @@ public class GameCommand {
 	}
 
 	private static BlockRecord updateBlock(World world, int x, int y, int z, Material blockType, byte blockData) {
-		Block thisBlock = world.getBlockAt(x,y,z);
+		Block thisBlock = world.getBlockAt(x, y, z);
 		return updateBlock(thisBlock, blockType, blockData);
-		
 	}
 
 	private static BlockRecord updateBlock(Block block, Material m, byte blockData) {
 		BlockRecord toReturn = new BlockRecord(block.getType(), block.getX(), block.getY(), block.getZ());
-		try {			
-			block.setType(m);
-		}catch(Exception e) {
-			// TODO: Handle this mess
+		try { block.setType(m); }
+		catch(Exception e) {
+			// TODO: Handle this mess. At the moment, it updates block async, which raises an error every time. This is an illegal fix :(
+			block.getState().update();
 		}
 		return toReturn;
 	}
@@ -178,14 +169,9 @@ public class GameCommand {
 		}
 		
 		this.issuer.sendMessage(CoordinateCalculations.getSpecificDirection((int) rotation));
-		
-		issuer.teleport(newLoc);
-		return true;
-	}
+		Bukkit.getScheduler().runTask(plugin, () -> issuer.teleport(newLoc));
 
-	public Player getPlayerFromUUID(String uuid) {
-		UUID id = UUID.fromString(uuid);
-		return (Player) Bukkit.getOfflinePlayer(id);
+		return true;
 	}
 	
 	public boolean playerIsOnline(Player p) {

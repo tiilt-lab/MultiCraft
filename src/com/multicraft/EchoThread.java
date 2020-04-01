@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
+
 import com.multicraft.CommandsQueue;
 
 public class EchoThread extends Thread{
@@ -34,9 +35,10 @@ public class EchoThread extends Thread{
                     return;
                 } else {
                 	CommandsQueue.getInstance().commands.add(line);
-                	
-                	// TODO: Broadcast this message to the issuer and not the whole server
-                	plugin.getServer().broadcastMessage(line);
+
+                    String clientNameField = "\"client_name\": \"";
+                    int start = line.indexOf(clientNameField) + clientNameField.length();
+                    plugin.getServer().getPlayer(java.util.UUID.fromString(line.substring(start, start + 36))).sendMessage(line);
                 }
             } catch (IOException e) {
                 e.printStackTrace();

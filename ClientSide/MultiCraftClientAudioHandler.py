@@ -19,7 +19,7 @@ TRANSCRIPTS_QUEUE = Queue(maxsize=30)
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
 RATE = 44100
-HOST = socket.gethostbyname(socket.gethostname) # input("Please enter your host ip: ")
+HOST = socket.gethostbyname(socket.gethostname()) # input("Please enter your host ip: ")
 PORT = 5001 # input("Please enter your desired port: ")
 
 client_socket = socket.socket()
@@ -125,7 +125,7 @@ def main():
     else:
         # if speech to text was not initialized, enter testing mode
         while True:
-            input_s = input("Please enter a message to send: ")
+            input_s = input("Please type out a message to send: ")
             client_socket.send((CLIENT_NAME + " " + input_s).encode())
 
 if __name__ == "__main__":
