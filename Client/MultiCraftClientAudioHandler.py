@@ -124,6 +124,8 @@ def main():
                 pass
         except KeyboardInterrupt:
             # stop recording
+            print("Recording stopped")
+            print("To start another recording, type: python MultiCraftClientAudioHandler.py")
             stream.stop_stream()
             stream.close()
             audio.terminate()
