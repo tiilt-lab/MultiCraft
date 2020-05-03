@@ -4,7 +4,9 @@ __NOTE:__ These instructions assume you already have anaconda or miniconda insta
 
 __MINICONDA3 FOR WINDOWS__: https://repo.anaconda.com/miniconda/Miniconda3-latest-Windows-x86_64.exe
 
-After installing anaconda and opening the Miniconda3 Prompt, follow the instructions. These commands are also automated in ```setup.bat```
+__OTHER MINICONDA3 INSTALLATIONS__: https://docs.conda.io/en/latest/miniconda.html
+
+After installing anaconda and opening the Miniconda3 Prompt (or after installing and initializing your prompt), follow the instructions. These commands are also automated in `setup.bat` for those on Windows machines.
 
 Setup a new conda environment with python
 ```
@@ -25,8 +27,8 @@ python -m spacy download en_core_web_sm
 pip install nltk
 pip install word2number
 ```
-To run the MultiCraft Server, look in the MultiCraftServer folder and run the ```run.bat``` file.
-In order to use voice commands, run the following commands in two different  the root tiiltMultiCraft folder. Startup can also be automated through the ```start.bat``` file in the root tiiltMultiCraft folder.
+To run the MultiCraft Server, look in the MultiCraftServer folder and run the `run.bat` file.
+In order to use voice commands, run the following commands in two different terminals the root tiiltMultiCraft folder. Startup can also be automated through the `start.bat` file in the root tiiltMultiCraft folder for those on Windows machines.
 
 Wait for the MultiCraft Server to start, then start the Speech Server
 ```
@@ -38,4 +40,4 @@ Wait for the Speech Server to connect, then start the Speech Client in a new win
 conda activate tiilt-multi
 python Client\MultiCraftClientAudioHandler.py
 ```
-After the Speech Client connects, you can then enter your Minecraft Java __Full__ UUID when prompted (enter your Minecraft username here if you don't know: https://mcuuid.net/).
+After the Speech Client connects, you can then enter your Minecraft Java __Full__ UUID when prompted (enter your Minecraft username here if you don't know: https://mcuuid.net/). Make sure you're playing with Minecraft Java 1.9.

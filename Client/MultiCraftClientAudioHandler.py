@@ -1,4 +1,4 @@
-# Adapted by: Timothy Mwiti (From https://github.com/watson-developer-cloud/python-sdk/blob/master/examples/microphone-speech-to-text.py)
+# Adapted by: Kevin Mendoza Tudares (From https://github.com/watson-developer-cloud/python-sdk/blob/master/examples/microphone-speech-to-text.py)
 from __future__ import print_function
 
 import json
@@ -26,13 +26,13 @@ HOST = socket.gethostbyname(socket.gethostname())
 PORT = 5001
 
 client_socket = socket.socket()
-CLIENT_NAME = input("Please enter your Minecraft UUID: ")
+CLIENT_NAME = input("Please enter your Minecraft Java Full UUID: ")
 
 # Create an instance of AudioSource
 audio_source = AudioSource(q, True, True)
 
 # initialize speech to text service
-using_voice = input("Are you using voice? ")
+using_voice = input("Are you using voice [yes/no]? ")
 if using_voice.lower() == 'yes':
     f = open('./client_credentials.json')
     credentials = json.load(f)
