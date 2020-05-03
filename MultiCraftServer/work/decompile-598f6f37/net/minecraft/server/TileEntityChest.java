@@ -1,0 +1,405 @@
+package net.minecraft.server;
+
+import java.util.Iterator;
+import java.util.List;
+
+public class TileEntityChest extends TileEntityLootable implements ITickable, IInventory {
+
+    private ItemStack[] items = new ItemStack[27];
+    public boolean a;
+    public TileEntityChest f;
+    public TileEntityChest g;
+    public TileEntityChest h;
+    public TileEntityChest i;
+    public float j;
+    public float k;
+    public int l;
+    private int p;
+    private BlockChest.Type q;
+    private String r;
+
+    public TileEntityChest() {}
+
+    public TileEntityChest(BlockChest.Type blockchest_type) {
+        this.q = blockchest_type;
+    }
+
+    public int getSize() {
+        return 27;
+    }
+
+    public ItemStack getItem(int i) {
+        this.d((EntityHuman) null);
+        return this.items[i];
+    }
+
+    public ItemStack splitStack(int i, int j) {
+        this.d((EntityHuman) null);
+        ItemStack itemstack = ContainerUtil.a(this.items, i, j);
+
+        if (itemstack != null) {
+            this.update();
+        }
+
+        return itemstack;
+    }
+
+    public ItemStack splitWithoutUpdate(int i) {
+        this.d((EntityHuman) null);
+        return ContainerUtil.a(this.items, i);
+    }
+
+    public void setItem(int i, ItemStack itemstack) {
+        this.d((EntityHuman) null);
+        this.items[i] = itemstack;
+        if (itemstack != null && itemstack.count > this.getMaxStackSize()) {
+            itemstack.count = this.getMaxStackSize();
+        }
+
+        this.update();
+    }
+
+    public String getName() {
+        return this.hasCustomName() ? this.r : "container.chest";
+    }
+
+    public boolean hasCustomName() {
+        return this.r != null && !this.r.isEmpty();
+    }
+
+    public void a(String s) {
+        this.r = s;
+    }
+
+    public void a(NBTTagCompound nbttagcompound) {
+        super.a(nbttagcompound);
+        this.items = new ItemStack[this.getSize()];
+        if (nbttagcompound.hasKeyOfType("CustomName", 8)) {
+            this.r = nbttagcompound.getString("CustomName");
+        }
+
+        if (!this.c(nbttagcompound)) {
+            NBTTagList nbttaglist = nbttagcompound.getList("Items", 10);
+
+            for (int i = 0; i < nbttaglist.size(); ++i) {
+                NBTTagCompound nbttagcompound1 = nbttaglist.get(i);
+                int j = nbttagcompound1.getByte("Slot") & 255;
+
+                if (j >= 0 && j < this.items.length) {
+                    this.items[j] = ItemStack.createStack(nbttagcompound1);
+                }
+            }
+        }
+
+    }
+
+    public void save(NBTTagCompound nbttagcompound) {
+        super.save(nbttagcompound);
+        if (!this.d(nbttagcompound)) {
+            NBTTagList nbttaglist = new NBTTagList();
+
+            for (int i = 0; i < this.items.length; ++i) {
+                if (this.items[i] != null) {
+                    NBTTagCompound nbttagcompound1 = new NBTTagCompound();
+
+                    nbttagcompound1.setByte("Slot", (byte) i);
+                    this.items[i].save(nbttagcompound1);
+                    nbttaglist.add(nbttagcompound1);
+                }
+            }
+
+            nbttagcompound.set("Items", nbttaglist);
+        }
+
+        if (this.hasCustomName()) {
+            nbttagcompound.setString("CustomName", this.r);
+        }
+
+    }
+
+    public int getMaxStackSize() {
+        return 64;
+    }
+
+    public boolean a(EntityHuman entityhuman) {
+        return this.world.getTileEntity(this.position) != this ? false : entityhuman.e((double) this.position.getX() + 0.5D, (double) this.position.getY() + 0.5D, (double) this.position.getZ() + 0.5D) <= 64.0D;
+    }
+
+    public void invalidateBlockCache() {
+        super.invalidateBlockCache();
+        this.a = false;
+    }
+
+    private void a(TileEntityChest tileentitychest, EnumDirection enumdirection) {
+        if (tileentitychest.x()) {
+            this.a = false;
+        } else if (this.a) {
+            switch (TileEntityChest.SyntheticClass_1.a[enumdirection.ordinal()]) {
+            case 1:
+                if (this.f != tileentitychest) {
+                    this.a = false;
+                }
+                break;
+
+            case 2:
+                if (this.i != tileentitychest) {
+                    this.a = false;
+                }
+                break;
+
+            case 3:
+                if (this.g != tileentitychest) {
+                    this.a = false;
+                }
+                break;
+
+            case 4:
+                if (this.h != tileentitychest) {
+                    this.a = false;
+                }
+            }
+        }
+
+    }
+
+    public void m() {
+        if (!this.a) {
+            this.a = true;
+            this.h = this.a(EnumDirection.WEST);
+            this.g = this.a(EnumDirection.EAST);
+            this.f = this.a(EnumDirection.NORTH);
+            this.i = this.a(EnumDirection.SOUTH);
+        }
+    }
+
+    protected TileEntityChest a(EnumDirection enumdirection) {
+        BlockPosition blockposition = this.position.shift(enumdirection);
+
+        if (this.b(blockposition)) {
+            TileEntity tileentity = this.world.getTileEntity(blockposition);
+
+            if (tileentity instanceof TileEntityChest) {
+                TileEntityChest tileentitychest = (TileEntityChest) tileentity;
+
+                tileentitychest.a(this, enumdirection.opposite());
+                return tileentitychest;
+            }
+        }
+
+        return null;
+    }
+
+    private boolean b(BlockPosition blockposition) {
+        if (this.world == null) {
+            return false;
+        } else {
+            Block block = this.world.getType(blockposition).getBlock();
+
+            return block instanceof BlockChest && ((BlockChest) block).g == this.o();
+        }
+    }
+
+    public void c() {
+        this.m();
+        int i = this.position.getX();
+        int j = this.position.getY();
+        int k = this.position.getZ();
+
+        ++this.p;
+        float f;
+
+        if (!this.world.isClientSide && this.l != 0 && (this.p + i + j + k) % 200 == 0) {
+            this.l = 0;
+            f = 5.0F;
+            List list = this.world.a(EntityHuman.class, new AxisAlignedBB((double) ((float) i - f), (double) ((float) j - f), (double) ((float) k - f), (double) ((float) (i + 1) + f), (double) ((float) (j + 1) + f), (double) ((float) (k + 1) + f)));
+            Iterator iterator = list.iterator();
+
+            while (iterator.hasNext()) {
+                EntityHuman entityhuman = (EntityHuman) iterator.next();
+
+                if (entityhuman.activeContainer instanceof ContainerChest) {
+                    IInventory iinventory = ((ContainerChest) entityhuman.activeContainer).e();
+
+                    if (iinventory == this || iinventory instanceof InventoryLargeChest && ((InventoryLargeChest) iinventory).a((IInventory) this)) {
+                        ++this.l;
+                    }
+                }
+            }
+        }
+
+        this.k = this.j;
+        f = 0.1F;
+        double d0;
+
+        if (this.l > 0 && this.j == 0.0F && this.f == null && this.h == null) {
+            double d1 = (double) i + 0.5D;
+
+            d0 = (double) k + 0.5D;
+            if (this.i != null) {
+                d0 += 0.5D;
+            }
+
+            if (this.g != null) {
+                d1 += 0.5D;
+            }
+
+            this.world.a((EntityHuman) null, d1, (double) j + 0.5D, d0, SoundEffects.X, SoundCategory.BLOCKS, 0.5F, this.world.random.nextFloat() * 0.1F + 0.9F);
+        }
+
+        if (this.l == 0 && this.j > 0.0F || this.l > 0 && this.j < 1.0F) {
+            float f1 = this.j;
+
+            if (this.l > 0) {
+                this.j += f;
+            } else {
+                this.j -= f;
+            }
+
+            if (this.j > 1.0F) {
+                this.j = 1.0F;
+            }
+
+            float f2 = 0.5F;
+
+            if (this.j < f2 && f1 >= f2 && this.f == null && this.h == null) {
+                d0 = (double) i + 0.5D;
+                double d2 = (double) k + 0.5D;
+
+                if (this.i != null) {
+                    d2 += 0.5D;
+                }
+
+                if (this.g != null) {
+                    d0 += 0.5D;
+                }
+
+                this.world.a((EntityHuman) null, d0, (double) j + 0.5D, d2, SoundEffects.V, SoundCategory.BLOCKS, 0.5F, this.world.random.nextFloat() * 0.1F + 0.9F);
+            }
+
+            if (this.j < 0.0F) {
+                this.j = 0.0F;
+            }
+        }
+
+    }
+
+    public boolean c(int i, int j) {
+        if (i == 1) {
+            this.l = j;
+            return true;
+        } else {
+            return super.c(i, j);
+        }
+    }
+
+    public void startOpen(EntityHuman entityhuman) {
+        if (!entityhuman.isSpectator()) {
+            if (this.l < 0) {
+                this.l = 0;
+            }
+
+            ++this.l;
+            this.world.playBlockAction(this.position, this.getBlock(), 1, this.l);
+            this.world.applyPhysics(this.position, this.getBlock());
+            this.world.applyPhysics(this.position.down(), this.getBlock());
+        }
+
+    }
+
+    public void closeContainer(EntityHuman entityhuman) {
+        if (!entityhuman.isSpectator() && this.getBlock() instanceof BlockChest) {
+            --this.l;
+            this.world.playBlockAction(this.position, this.getBlock(), 1, this.l);
+            this.world.applyPhysics(this.position, this.getBlock());
+            this.world.applyPhysics(this.position.down(), this.getBlock());
+        }
+
+    }
+
+    public boolean b(int i, ItemStack itemstack) {
+        return true;
+    }
+
+    public void y() {
+        super.y();
+        this.invalidateBlockCache();
+        this.m();
+    }
+
+    public BlockChest.Type o() {
+        if (this.q == null) {
+            if (this.world == null || !(this.getBlock() instanceof BlockChest)) {
+                return BlockChest.Type.BASIC;
+            }
+
+            this.q = ((BlockChest) this.getBlock()).g;
+        }
+
+        return this.q;
+    }
+
+    public String getContainerName() {
+        return "minecraft:chest";
+    }
+
+    public Container createContainer(PlayerInventory playerinventory, EntityHuman entityhuman) {
+        this.d(entityhuman);
+        return new ContainerChest(playerinventory, this, entityhuman);
+    }
+
+    public int getProperty(int i) {
+        return 0;
+    }
+
+    public void setProperty(int i, int j) {}
+
+    public int g() {
+        return 0;
+    }
+
+    public void l() {
+        this.d((EntityHuman) null);
+
+        for (int i = 0; i < this.items.length; ++i) {
+            this.items[i] = null;
+        }
+
+    }
+
+    public void a(MinecraftKey minecraftkey, long i) {
+        this.m = minecraftkey;
+        this.n = i;
+    }
+
+    static class SyntheticClass_1 {
+
+        static final int[] a = new int[EnumDirection.values().length];
+
+        static {
+            try {
+                TileEntityChest.SyntheticClass_1.a[EnumDirection.NORTH.ordinal()] = 1;
+            } catch (NoSuchFieldError nosuchfielderror) {
+                ;
+            }
+
+            try {
+                TileEntityChest.SyntheticClass_1.a[EnumDirection.SOUTH.ordinal()] = 2;
+            } catch (NoSuchFieldError nosuchfielderror1) {
+                ;
+            }
+
+            try {
+                TileEntityChest.SyntheticClass_1.a[EnumDirection.EAST.ordinal()] = 3;
+            } catch (NoSuchFieldError nosuchfielderror2) {
+                ;
+            }
+
+            try {
+                TileEntityChest.SyntheticClass_1.a[EnumDirection.WEST.ordinal()] = 4;
+            } catch (NoSuchFieldError nosuchfielderror3) {
+                ;
+            }
+
+        }
+    }
+}

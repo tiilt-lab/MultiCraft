@@ -1,6 +1,8 @@
 package com.multicraft;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import org.bukkit.Bukkit;
@@ -9,6 +11,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import com.multicraft.PyramidBuilder.BlockVector3;
@@ -21,12 +24,16 @@ public class GameCommand {
 	private Player issuer;
 	private JSONObject args;
 	private MultiCraft plugin;
+	private String eyeTrackLocation;
 	
 	public GameCommand(JSONObject argsJSON, MultiCraft pl) {
 		plugin = pl;
 		args = argsJSON;
 		commandName = (String) args.get("command");
 		issuer = Bukkit.getServer().getPlayer(UUID.fromString(args.get("client_name").toString()));
+
+		File filePath = new File(GameCommand.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+		eyeTrackLocation = filePath.getPath().substring(0, filePath.getPath().indexOf(filePath.getName())) + "Tobii" + File.separator + "Interaction_Streams_101.exe";
 	}
 	
 	public GameCommand(MultiCraft pl) {
@@ -50,6 +57,8 @@ public class GameCommand {
 				return executeUndo();
 			case "redo":
 				return executeRedo();
+			case "track":
+				return executeTrack();
 		}
 		return false;
 	}
@@ -61,6 +70,37 @@ public class GameCommand {
 	public boolean executeRedo() {
 		return Commands.redo(this.issuer, this.plugin);
 	}
+
+	public boolean executeTrack() {
+		if (args.containsKey("move") && (Boolean) args.get("move"))
+				return issuer.performCommand("eyetrack move");
+		else if (args.containsKey("build") && (Boolean) args.get("build")) {
+			new BukkitRunnable() {
+				@Override
+				public void run() {
+					Runtime run = Runtime.getRuntime();
+					String[] eyeTrackCommand = {eyeTrackLocation, "-d"};
+					try {
+						issuer.sendMessage("Tracking eyes...");
+						Process eyeTrack = run.exec(eyeTrackCommand);
+
+						while (eyeTrack.isAlive()) { /* Wait for eye tracking executable to complete. */ }
+
+						Bukkit.getScheduler().runTask(plugin, () -> {
+							issuer.sendMessage("Building Structure...");
+							executeBuild();
+						});
+
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}.runTaskAsynchronously(this.plugin);
+			return true;
+		}
+		else
+			return issuer.performCommand("eyetrack");
+	}
 	
 	@SuppressWarnings("deprecation")
 	public boolean executeBuild() {
@@ -69,12 +109,11 @@ public class GameCommand {
 		dimensions[0] = ((Long) dimAr.get(0)).intValue();
 		dimensions[1] = ((Long) dimAr.get(1)).intValue();
 		dimensions[2] = ((Long) dimAr.get(2)).intValue();
-
-		//TODO: Update so that the location is at the cursor
-		Location l = issuer.getLocation();
 		
 		int id = ((Long) args.get("block_code")).intValue();
 		Material m = Material.getMaterial(id);
+
+		Location l = issuer.getTargetBlock((HashSet<Byte>) null, 16).getLocation().add(0, 1, 0);
 
 		// TODO: Clean up this logic
 		if (args.containsKey("roof") && (Boolean) args.get("roof")) {
@@ -82,7 +121,7 @@ public class GameCommand {
 			tempBuilder.makePyramid(new BlockVector3(l.getX(), l.getY(), l.getZ()), m, dimensions[0], true, issuer.getWorld());
 			return true;
 		}
-		
+
 		boolean isHollow = args.containsKey("hollow") && (Boolean) args.get("hollow");
 		
 		List<BlockRecord> blocksAffected = Commands.buildStructure(l, dimensions, m, isHollow);

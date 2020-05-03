@@ -19,3 +19,4 @@ C:\Users\Kevin\Documents\GitHub\tiiltMultiCraft\ExternalApp\TobiiMouse\GazerBeam
 C:\Users\Kevin\Documents\GitHub\tiiltMultiCraft\ExternalApp\TobiiMouse\GazerBeam\GazerBeam\obj\Debug\GazerBeam.csproj.CopyComplete
 C:\Users\Kevin\Documents\GitHub\tiiltMultiCraft\ExternalApp\TobiiMouse\GazerBeam\GazerBeam\obj\Debug\Interaction_Streams_101.exe
 C:\Users\Kevin\Documents\GitHub\tiiltMultiCraft\ExternalApp\TobiiMouse\GazerBeam\GazerBeam\obj\Debug\Interaction_Streams_101.pdb
+C:\Users\Kevin\Documents\GitHub\tiiltMultiCraft\ExternalApp\TobiiMouse\GazerBeam\GazerBeam\obj\Debug\GazerBeam.csprojAssemblyReference.cache

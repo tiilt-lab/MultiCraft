@@ -19,14 +19,14 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 	private String jarLocation;
 	public StructureData structureData;
 	private boolean eyeTracking;
-	private String eyeTrackExecutable;
+	private String eyeTrackLocation;
 
 	public MultiCraftCommandExecutor(MultiCraft plugin) {
 		this.plugin = plugin;
 		File filePath = new File(MultiCraftCommandExecutor.class.getProtectionDomain().getCodeSource().getLocation().getPath());
 		jarLocation = filePath.getPath().substring(0, filePath.getPath().indexOf(filePath.getName()));
 		eyeTracking = false;
-		eyeTrackExecutable = "Tobii" + File.separator + "Interaction_Streams_101.exe";
+		eyeTrackLocation = jarLocation + "Tobii" + File.separator + "Interaction_Streams_101.exe";
 		structureData = new StructureData(jarLocation + "StructureData.csv");
 	}
 	
@@ -143,7 +143,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 					@Override
 					public void run() {
 						Runtime run = Runtime.getRuntime();
-						String[] eyeTrackCommand = {jarLocation + eyeTrackExecutable, "-d"};
+						String[] eyeTrackCommand = {eyeTrackLocation, "-d"};
 						try {
 							p.sendMessage("Tracking eyes...");
 							Process eyeTrack = run.exec(eyeTrackCommand);
@@ -171,7 +171,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 						public void run() {
 							Runtime run = Runtime.getRuntime();
 							Process eyeTrack;
-							String eyeTrackCommand = jarLocation + eyeTrackExecutable;
+							String eyeTrackCommand = eyeTrackLocation;
 							if(args.length == 1 && args[0].equalsIgnoreCase("move"))
 								eyeTrackCommand += " -m";
 

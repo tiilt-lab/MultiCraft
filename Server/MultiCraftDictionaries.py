@@ -4,7 +4,7 @@ from nltk.corpus import wordnet as wn
 materials = ['stone', 'gold', 'golden', 'brick', 'lava', 'water', 'stair']
 
 # List of the commands supported
-supported_commands = ['move', 'turn', 'build', 'save', 'go', 'tilt', 'pen', 'undo']
+supported_commands = ['move', 'turn', 'build', 'save', 'go', 'tilt', 'pen', 'undo', 'track']
 
 # List of the directions for movement supported
 directions = ['left', 'right', 'back', 'forward', 'up', 'down']

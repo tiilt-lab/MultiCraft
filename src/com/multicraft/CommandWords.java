@@ -7,7 +7,7 @@ public class CommandWords {
 	private static CommandWords instance = null;
 	HashSet<String> commands = new HashSet<>();
 	private CommandWords() {
-		String[] comms = {"build", "move", "redo", "undo", "duplicate", "save", "teleport"};
+		String[] comms = {"build", "move", "redo", "undo", "duplicate", "save", "teleport", "track"};
 		commands.addAll(Arrays.asList(comms));
 	}
 	

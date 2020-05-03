@@ -21,9 +21,10 @@ class GameCommand:
 			return self.get_tilt_args()
 		elif self.command == 'turn':
 			return self.get_turn_args()
-		elif self.command == 'pen':
-			pass
-		#return self.get_pen_args()
+		# elif self.command == 'pen':
+		# 	pass #return self.get_pen_args()
+		elif self.command == 'track':
+			return self.get_track_args()
 		elif self.command == 'undo':
 			return self.get_undo_args()
 		else:
@@ -40,10 +41,6 @@ class GameCommand:
 			if 'direction' not in self.args.keys():
 				self.args['direction'] = 'forward'
 			self.is_valid = True
-
-	def get_pen_args(self):
-		self.args['pen'] = True
-		self.is_valid = True
 
 	def get_build_args(self):
 		dimensions = []
@@ -106,6 +103,19 @@ class GameCommand:
 			if 'dimensions' not in self.args.keys():
 				self.args['dimensions'] = 90
 			self.is_valid = True
+
+	def get_pen_args(self):
+		self.args['pen'] = True
+		self.is_valid = True
+
+	def get_track_args(self):
+		for word_token in self.command_token:
+			if word_token.text == 'build':
+				self.args['build'] = True
+				return self.get_build_args()
+			if word_token.text == 'move':
+				self.args['move'] = True
+		self.is_valid = True
 
 	def get_undo_args(self):
 		self.is_valid = True

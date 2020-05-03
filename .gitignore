@@ -1,9 +1,11 @@
 serverScripts/
 
-# ide specific folders
+# ide specific folders and files
 .vscode/
 .idea/
 .settings/
+.classpath
+.project
 
 *.cfg
 

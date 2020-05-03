@@ -9,7 +9,7 @@
   </component>
   <component name="FacetManager">
     <facet type="Python" name="Python">
-      <configuration sdkName="" />
+      <configuration sdkName="Python 3.7" />
     </facet>
   </component>
   <component name="NewModuleRootManager">
@@ -38,5 +38,6 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="Python 3.7 interpreter library" level="application" />
   </component>
 </module>

@@ -1,8 +1,12 @@
 # tiiltMultiCraft
-A project aimed at providing a voice and gaze interaction interface for Minecraft
+A project aimed at providing a voice and gaze interaction interface for Minecraft. This project is still under active development.
 
-# Eclipse
-## Development Environment Setup
+## Gameplay Setup
+Please read [manual_setup.md](manual_setup.md) for more detailed information. This project works best if you install Miniconda3 (Miniconda for Python 3.X) to run the Python side. You can click here for the [Windows Installation](https://repo.anaconda.com/miniconda/Miniconda3-latest-Windows-x86_64.exe), or here for the rest: https://docs.conda.io/en/latest/miniconda.html. Once you install Miniconda3, be sure to initialize it to run in in your terminal or use the Anaconda Prompt. Currently, there are only automated setup and start scripts for Windows (`setup.bat` and `start.bat`).
+
+## Development Setup
+### Eclipse
+#### Development Environment Setup
 1. Create a new Java Project with the name MultiCraft
 2. Set JRE to 1.8
 3. Replace the src folder in the project folder with the src folder from the repository
@@ -10,20 +14,20 @@ A project aimed at providing a voice and gaze interaction interface for Minecraf
 5. Copy the plugin yml file to the project folder on the same level as the src folder.
 6. Refresh the project and everything should work fine. 
 
-## Exporting jar plugin file
+#### Exporting jar plugin file
 1. Go to export -> jar file.
 2. Uncheck everything on the right other than the plugin.yml file.
 3. Change the export destination to your server's plugins folder.
 4. Finish.
 
-# IntelliJ
-## Development Environemnt Setup
+### IntelliJ
+#### Development Environemnt Setup
 1. Clone repository using GitHub Desktop or Bash.
 2. Open folder using IntelliJ.
 3. Ensure Project SDK is 1.8 (File > Project Structure > Project SDK).
 4. Project should build without errors.
 
-## Exporting jar plugin file
+#### Exporting jar plugin file
 1. Open Project Artifacts (File > Project Structure > Artifacts).
 2. Add a new artifact (Add > JAR > From modules with dependencies...).
 3. Under Output Layout, add the plugin.yml file (Add > File > plugin.yml).
