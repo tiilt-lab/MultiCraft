@@ -32,8 +32,8 @@ CLIENT_NAME = input("Please enter your Minecraft Java Full UUID: ")
 audio_source = AudioSource(q, True, True)
 
 # initialize speech to text service
-using_voice = input("Are you using voice [yes/no]? ")
-if using_voice.lower() == 'yes':
+using_voice = input("Are you using voice [yes/no]? ").lower() == 'yes'
+if using_voice:
     f = open('./client_credentials.json')
     credentials = json.load(f)
 
