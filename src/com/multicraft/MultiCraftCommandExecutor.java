@@ -14,20 +14,21 @@ import org.bukkit.scheduler.BukkitRunnable;
 import com.multicraft.Materials.MaterialDoesNotExistException;
 
 
-public class MultiCraftCommandExecutor implements CommandExecutor{
+public class MultiCraftCommandExecutor implements CommandExecutor {
 	private final MultiCraft plugin;
-	private String jarLocation;
-	public StructureData structureData;
+	private final String jarLocation;
+	private final String eyeTrackLocation;
 	private boolean eyeTracking;
-	private String eyeTrackLocation;
+	private final CopyHandler copyHandler;
+
 
 	public MultiCraftCommandExecutor(MultiCraft plugin) {
 		this.plugin = plugin;
 		File filePath = new File(MultiCraftCommandExecutor.class.getProtectionDomain().getCodeSource().getLocation().getPath());
 		jarLocation = filePath.getPath().substring(0, filePath.getPath().indexOf(filePath.getName()));
-		eyeTracking = false;
 		eyeTrackLocation = jarLocation + "Tobii" + File.separator + "Interaction_Streams_101.exe";
-		structureData = new StructureData(jarLocation + "StructureData.csv");
+		eyeTracking = false;
+		copyHandler = new CopyHandler();
 	}
 	
 	@SuppressWarnings("deprecation")
@@ -60,7 +61,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 					}
 
 				Material material = Material.getMaterial(materialId);
-				List<BlockRecord> blocksAffected = Commands.buildStructure(startLocation, dimensions, material, args.length > 4);
+				List<BlockRecord> blocksAffected = Commands.buildStructure(startLocation, dimensions, material, args.length > 4, plugin);
 				Commands.updateUndoAndRedoStacks(blocksAffected, p);
 
 				return true;
@@ -84,7 +85,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 					}
 
 				Material material = Material.getMaterial(materialId);
-				List<BlockRecord> blocksAffected = Commands.buildStructure(startLocation, dimensions, material, args.length > 4);
+				List<BlockRecord> blocksAffected = Commands.buildStructure(startLocation, dimensions, material, args.length > 4, plugin);
 				Commands.updateUndoAndRedoStacks(blocksAffected, p);
 
 				return true;
@@ -128,7 +129,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 
 				Location loc1 = rBuild.getStartLocation(p);
 				Location loc2 = rBuild.getEndLocation(p);
-				Commands.updateBlocks(loc1, loc2, Material.getMaterial(1));
+				Commands.updateBlocks(loc1, loc2, Material.getMaterial(1), plugin);
 
 				p.sendMessage("Structure has been constructed in the region marked.");
 				return true;
@@ -194,11 +195,13 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 
 				return true;
 			}
-			case "msave": {
+			case "mstore": {
 				if(args.length != 1) {
 					p.sendMessage("Improper number of parameters.");
 					break;
 				}
+
+				StructureData playerStructureData = new StructureData(jarLocation + p.getUniqueId() + "StructureData.csv");
 
 				List<BlockRecord> playerBuildData;
 				try { playerBuildData = PreviousBuildsData.getInstance().getPlayersBuildRecordForUndo(p).blocksAffected; }
@@ -216,9 +219,11 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 						Integer.toString(Math.abs(last.z - first.z) + 1),
 						Integer.toString(p.getWorld().getBlockAt(first.x, first.y, first.z).getType().getId())};
 
-				boolean overwrite = structureData.setStructureData(entry);
+				boolean overwrite = playerStructureData.setStructureData(entry);
 				p.sendMessage("Saved " + args[0] + ".");
 				if(overwrite) p.sendMessage("Warning: Overwrote " + args[0] + ".");
+				playerStructureData.saveStructureData();
+
 				return true;
 			}
 			case "mclone": {
@@ -227,7 +232,9 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 					break;
 				}
 
-				String[] buildData = structureData.getStructureData(args[0]);
+				StructureData playerStructureData = new StructureData(jarLocation + p.getUniqueId() + "StructureData.csv");
+
+				String[] buildData = playerStructureData.getStructureData(args[0]);
 				if(buildData == null) {
 					p.sendMessage(args[0] + " was not found.");
 					break;
@@ -249,7 +256,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 					p.sendMessage("Please find a closer position");
 					break;
 				}
-				structureData.setCopyLocation1(startLocation);
+				copyHandler.setCopyLoc1(p, startLocation);
 				p.sendMessage("The first position has been marked.");
 				return true;
 			}
@@ -264,7 +271,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 					p.sendMessage("Please find a closer position");
 					break;
 				}
-				structureData.setCopyLocation2(endLocation);
+				copyHandler.setCopyLoc2(p, endLocation);
 				p.sendMessage("The second position has been marked.");
 				return true;
 			}
@@ -274,7 +281,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor{
 					break;
 				}
 
-				String copyArgs = structureData.getCopyArgs();
+				String copyArgs = copyHandler.getCopyArgs(p);
 				if(copyArgs == null) {
 					p.sendMessage("Please ensure both copy locations are marked.");
 					break;

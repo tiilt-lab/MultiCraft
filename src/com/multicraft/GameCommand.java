@@ -1,16 +1,13 @@
 package com.multicraft;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -20,30 +17,35 @@ import com.multicraft.PyramidBuilder.BlockVector3;
  * An object representation of a game command for MultiCraft
  */
 public class GameCommand {
+	private final MultiCraft plugin;
 	private String commandName;
 	private Player issuer;
 	private JSONObject args;
-	private MultiCraft plugin;
 	private String eyeTrackLocation;
 	
-	public GameCommand(JSONObject argsJSON, MultiCraft pl) {
-		plugin = pl;
+	public GameCommand(JSONObject argsJSON, MultiCraft plugin) {
+		this.plugin = plugin;
 		args = argsJSON;
 		commandName = (String) args.get("command");
 		issuer = Bukkit.getServer().getPlayer(UUID.fromString(args.get("client_name").toString()));
 
 		File filePath = new File(GameCommand.class.getProtectionDomain().getCodeSource().getLocation().getPath());
-		eyeTrackLocation = filePath.getPath().substring(0, filePath.getPath().indexOf(filePath.getName())) + "Tobii" + File.separator + "Interaction_Streams_101.exe";
+		String jarLocation = filePath.getPath().substring(0, filePath.getPath().indexOf(filePath.getName()));
+		eyeTrackLocation = jarLocation + "Tobii" + File.separator + "Interaction_Streams_101.exe";
 	}
 	
-	public GameCommand(MultiCraft pl) {
-		this.plugin = pl;
+	public GameCommand(MultiCraft plugin) {
+		this.plugin = plugin;
 	}
 
 	public boolean commandSupported(String com) {
 		return CommandWords.getInstance().commands.contains(com);
 	}
-	
+
+	public boolean playerIsOnline(Player p) {
+		return Bukkit.getOnlinePlayers().contains(p);
+	}
+
 	public boolean execute() {
 		if(! commandSupported(commandName) || ! playerIsOnline(issuer)) {
 			return false;
@@ -51,29 +53,102 @@ public class GameCommand {
 		switch (commandName) {
 			case "build":
 				return executeBuild();
+			case "place":
+				return executePlace();
 			case "move":
 				return executeMove();
+			case "track":
+				return executeTrack();
+			case "turn":
+				return executeTurn();
+			case "tilt":
+				return executeTilt();
 			case "undo":
 				return executeUndo();
 			case "redo":
 				return executeRedo();
-			case "track":
-				return executeTrack();
+			case "store":
+				return executeStore();
+			case "clone":
+				return executeClone();
+			case "give":
+				return executeGive();
 		}
 		return false;
 	}
-	
-	public boolean executeUndo() {
-		return Commands.undo(this.issuer, this.plugin);
+
+	@SuppressWarnings("deprecation")
+	public boolean executeBuild() {
+		JSONArray dimAr = (JSONArray) args.get("dimensions");
+		int[] dimensions = new int[3];
+		dimensions[0] = ((Long) dimAr.get(0)).intValue();
+		dimensions[1] = ((Long) dimAr.get(1)).intValue();
+		dimensions[2] = ((Long) dimAr.get(2)).intValue();
+		
+		int id = ((Long) args.get("block_code")).intValue();
+		Material m = Material.getMaterial(id);
+
+		Location l = issuer.getTargetBlock((HashSet<Byte>) null, 16).getLocation().add(0, 1, 0);
+
+		List<BlockRecord> blocksAffected;
+		if (args.containsKey("roof") && (Boolean) args.get("roof")) {
+			PyramidBuilder tempBuilder = new PyramidBuilder(plugin);
+			blocksAffected = tempBuilder.makePyramid(new BlockVector3(l.getX(), l.getY(), l.getZ()), m, dimensions[0], true, issuer.getWorld());
+			Commands.updateUndoAndRedoStacks(blocksAffected, issuer);
+			return true;
+		}
+
+		boolean isHollow = args.containsKey("hollow") && (Boolean) args.get("hollow");
+		blocksAffected = Commands.buildStructure(l, dimensions, m, isHollow, plugin);
+		Commands.updateUndoAndRedoStacks(blocksAffected, issuer);
+		return true;
 	}
-	
-	public boolean executeRedo() {
-		return Commands.redo(this.issuer, this.plugin);
+
+	@SuppressWarnings("deprecation")
+	public boolean executePlace() {
+		int[] dimensions = {1, 1, 1};
+		int id = ((Long) args.get("block_code")).intValue();
+		Material m = Material.getMaterial(id);
+
+		Location l = issuer.getTargetBlock((HashSet<Byte>) null, 16).getLocation().add(0, 1, 0);
+
+		List<BlockRecord> blocksAffected = Commands.buildStructure(l, dimensions, m, false, plugin);
+		Commands.updateUndoAndRedoStacks(blocksAffected, issuer);
+		return true;
+	}
+
+	public boolean executeMove() {
+		int distanceToMove = ((Long) args.get("dimensions")).intValue();
+		Location pLoc = issuer.getLocation();
+
+		double rotation = issuer.getLocation().getYaw();
+		String directionFacedByPlayer = CoordinateCalculations.getSpecificDirection((int) rotation);
+		Location newLoc = pLoc.clone();
+
+		switch (directionFacedByPlayer) {
+		  case ("north") : //negative z
+		      newLoc.add(0, 0, distanceToMove * -1);
+		      break;
+		  case ("east") : // positive x
+		      newLoc.add(distanceToMove, 0, 0);
+		      break;
+		  case ("south") : //positive z
+		      newLoc.add(0, 0, distanceToMove);
+		      break;
+		  case ("west") : //negative x
+		      newLoc.add(distanceToMove * -1, 0, 0);
+		      break;
+		}
+		
+		issuer.sendMessage(CoordinateCalculations.getSpecificDirection((int) rotation));
+		issuer.teleport(newLoc);
+
+		return true;
 	}
 
 	public boolean executeTrack() {
 		if (args.containsKey("move") && (Boolean) args.get("move"))
-				return issuer.performCommand("eyetrack move");
+			return issuer.performCommand("eyetrack move");
 		else if (args.containsKey("build") && (Boolean) args.get("build")) {
 			new BukkitRunnable() {
 				@Override
@@ -101,119 +176,64 @@ public class GameCommand {
 		else
 			return issuer.performCommand("eyetrack");
 	}
-	
+
+	public boolean executeTurn() {
+		String direction = args.get("direction").toString();
+		int degrees = ((Long) args.get("dimensions")).intValue();
+		Location l = issuer.getLocation();
+		if (direction.equalsIgnoreCase("left"))
+			l.setYaw(l.getYaw() - degrees);
+		else if (direction.equalsIgnoreCase("right"))
+			l.setYaw(l.getYaw() + degrees);
+		else {
+			issuer.sendMessage("Turn moves the camera left and right.");
+			return false;
+		}
+
+		issuer.teleport(l);
+		return true;
+	}
+
+	public boolean executeTilt() {
+		String direction = args.get("direction").toString();
+		int degrees = ((Long) args.get("dimensions")).intValue();
+		Location l = issuer.getLocation();
+		if (direction.equalsIgnoreCase("down"))
+			l.setPitch(l.getPitch() + degrees);
+		else if (direction.equalsIgnoreCase("up"))
+			l.setPitch(l.getPitch() - degrees);
+		else {
+			issuer.sendMessage("Tilt moves the camera up and down.");
+			return false;
+		}
+
+		issuer.teleport(l);
+		return true;
+	}
+
+	public boolean executeUndo() {
+		return Commands.undo(issuer, plugin);
+	}
+
+	public boolean executeRedo() {
+		return Commands.redo(issuer, plugin);
+	}
+
+	public boolean executeStore() {
+		return issuer.performCommand("mstore " + args.get("name"));
+	}
+
+	public boolean executeClone() {
+		return issuer.performCommand("mclone " + args.get("name"));
+	}
+
 	@SuppressWarnings("deprecation")
-	public boolean executeBuild() {
-		JSONArray dimAr = (JSONArray) args.get("dimensions");
-		int[] dimensions = new int[3];
-		dimensions[0] = ((Long) dimAr.get(0)).intValue();
-		dimensions[1] = ((Long) dimAr.get(1)).intValue();
-		dimensions[2] = ((Long) dimAr.get(2)).intValue();
-		
+	public boolean executeGive() {
 		int id = ((Long) args.get("block_code")).intValue();
-		Material m = Material.getMaterial(id);
+		int amount = ((Long) args.get("dimensions")).intValue();
 
-		Location l = issuer.getTargetBlock((HashSet<Byte>) null, 16).getLocation().add(0, 1, 0);
-
-		// TODO: Clean up this logic
-		if (args.containsKey("roof") && (Boolean) args.get("roof")) {
-			PyramidBuilder tempBuilder = new PyramidBuilder(this.plugin);
-			tempBuilder.makePyramid(new BlockVector3(l.getX(), l.getY(), l.getZ()), m, dimensions[0], true, issuer.getWorld());
-			return true;
-		}
-
-		boolean isHollow = args.containsKey("hollow") && (Boolean) args.get("hollow");
-		
-		List<BlockRecord> blocksAffected = Commands.buildStructure(l, dimensions, m, isHollow);
-		Commands.updateUndoAndRedoStacks(blocksAffected, this.issuer);
+		issuer.getInventory().addItem(new ItemStack(id, amount));
 		return true;
 	}
-	
-	public static List<BlockRecord>  updateBlocks(Location pos1, Location pos2, Material m) {
-		World world = pos1.getWorld();
-		int minX = Math.min(pos1.getBlockX(), pos2.getBlockX());
-		int maxX = Math.max(pos1.getBlockX(), pos2.getBlockX());
-		int minY = Math.min(pos1.getBlockY(), pos2.getBlockY());
-		int maxY = Math.max(pos1.getBlockY(), pos2.getBlockY());
-		int minZ = Math.min(pos1.getBlockZ(), pos2.getBlockZ());
-		int maxZ = Math.max(pos1.getBlockZ(), pos2.getBlockZ());
-		
-		List<BlockRecord> blocksAffected = new ArrayList<>();
 
-		for (int x = minX; x <= maxX; ++x)
-			for (int z = minZ; z <= maxZ; ++z)
-				for (int y = minY; y <= maxY; ++y)
-					blocksAffected.add(updateBlock(world, x, y, z, m,(byte) 0));
-
-		return blocksAffected;
-	}
-	
-	public void buildHollow(int[] dimensions, Location startLoc, Location endLoc, GameCommand gComm, Material m) {		
-		// bottom Wall
-		updateBlocks(startLoc, new Location(endLoc.getWorld(), endLoc.getX(), startLoc.getY(), endLoc.getZ()), m);
-
-		// top wall
-		updateBlocks(new Location(startLoc.getWorld(), startLoc.getX(), endLoc.getY(), startLoc.getZ()), endLoc, m);
-		
-		// back wall
-		updateBlocks(new Location(startLoc.getWorld(), startLoc.getX(), startLoc.getY(), endLoc.getZ()), endLoc, m);
-		
-		// front wall
-		updateBlocks(startLoc, new Location(endLoc.getWorld(), endLoc.getX(), endLoc.getY(), startLoc.getZ()), m);
-
-		// right wall
-		updateBlocks(new Location(startLoc.getWorld(), endLoc.getX(), startLoc.getY(), startLoc.getZ()), endLoc, m);
-		
-		// left wall
-		updateBlocks(startLoc, new Location(endLoc.getWorld(), startLoc.getX(), endLoc.getY(), endLoc.getZ()), m);
-	}
-
-	private static BlockRecord updateBlock(World world, int x, int y, int z, Material blockType, byte blockData) {
-		Block thisBlock = world.getBlockAt(x, y, z);
-		return updateBlock(thisBlock, blockType, blockData);
-	}
-
-	private static BlockRecord updateBlock(Block block, Material m, byte blockData) {
-		BlockRecord toReturn = new BlockRecord(block.getType(), block.getX(), block.getY(), block.getZ());
-		try { block.setType(m); }
-		catch(Exception e) {
-			// TODO: Handle this mess. At the moment, it updates block async, which raises an error every time. This is an illegal fix :(
-			block.getState().update();
-		}
-		return toReturn;
-	}
-	
-	public boolean executeMove() {
-		int distanceToMove = ((Long) args.get("dimensions")).intValue();
-		Location pLoc = issuer.getLocation();
-		
-		
-		double rotation = this.issuer.getLocation().getYaw();
-		String directionFacedByPlayer = CoordinateCalculations.getSpecificDirection((int) rotation);
-		Location newLoc = pLoc.clone();
-		
-		switch (directionFacedByPlayer) {
-		  case ("north") : //negative z
-		      newLoc.add(0, 0, distanceToMove * -1);
-		      break;
-		  case ("east") : // positive x
-		      newLoc.add(distanceToMove, 0, 0);
-		      break;
-		  case ("south") : //positive z
-		      newLoc.add(0, 0, distanceToMove);
-		      break;
-		  case ("west") : //negative x
-		      newLoc.add(distanceToMove * -1, 0, 0);
-		      break;
-		}
-		
-		this.issuer.sendMessage(CoordinateCalculations.getSpecificDirection((int) rotation));
-		Bukkit.getScheduler().runTask(plugin, () -> issuer.teleport(newLoc));
-
-		return true;
-	}
-	
-	public boolean playerIsOnline(Player p) {
-		return Bukkit.getOnlinePlayers().contains(p);
-	}	
 }

@@ -5,6 +5,8 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 
+// This class is not used.
+
 public class Structures {
 
     public static MultiCraft plugin;

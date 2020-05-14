@@ -38,7 +38,7 @@ commands:
   eyetrack:
     description: (MultiCraft) enable or disable eyetracking
     usage: /<command> mode(string)
-  msave:
+  mstore:
     description: (MultiCraft) structure storage command
     usage: /<command> name(string)
   mclone:

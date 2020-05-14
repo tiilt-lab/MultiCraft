@@ -22,7 +22,7 @@ public class MultiCraft extends JavaPlugin{
 		this.getCommand("rrbuild").setExecutor(mExec);
 		this.getCommand("eyebuild").setExecutor(mExec);
 		this.getCommand("eyetrack").setExecutor(mExec);
-		this.getCommand("msave").setExecutor(mExec);
+		this.getCommand("mstore").setExecutor(mExec);
 		this.getCommand("mclone").setExecutor(mExec);
 		this.getCommand("copyloc1").setExecutor(mExec);
 		this.getCommand("copyloc2").setExecutor(mExec);
@@ -36,7 +36,6 @@ public class MultiCraft extends JavaPlugin{
 	
 	@Override
 	public void onDisable() {
-		mExec.structureData.saveStructureData();
 		getLogger().info("MultiCraft has been disabled");
 	}
 	
