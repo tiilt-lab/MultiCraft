@@ -34,11 +34,13 @@ In order to use voice commands, run the following commands in two different term
 Wait for the MultiCraft Server to start, then start the Speech Server
 ```
 conda activate tiilt-multi
-python Server\TextServer.py
+cd Server
+python TextServer.py
 ```
 Wait for the Speech Server to connect, then start the Speech Client in a new window
 ```
 conda activate tiilt-multi
-python Client\SpeechHandler.py
+cd Client
+python SpeechHandler.py
 ```
 After the Speech Client connects, you can then enter your Minecraft Java __Full__ UUID when prompted (enter your Minecraft username here if you don't know: https://mcuuid.net/). Make sure you're playing with Minecraft Java 1.9.
