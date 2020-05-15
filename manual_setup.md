@@ -25,6 +25,7 @@ Install python modules for Server
 pip install spacy
 python -m spacy download en_core_web_sm
 pip install nltk
+python -m nltk.downloader wordnet
 pip install word2number
 ```
 To run the MultiCraft Server, look in the MultiCraftServer folder and run the `run.bat` file.
@@ -33,11 +34,11 @@ In order to use voice commands, run the following commands in two different term
 Wait for the MultiCraft Server to start, then start the Speech Server
 ```
 conda activate tiilt-multi
-python Server\ClientStringsServer.py
+python Server\TextServer.py
 ```
 Wait for the Speech Server to connect, then start the Speech Client in a new window
 ```
 conda activate tiilt-multi
-python Client\MultiCraftClientAudioHandler.py
+python Client\SpeechHandler.py
 ```
 After the Speech Client connects, you can then enter your Minecraft Java __Full__ UUID when prompted (enter your Minecraft username here if you don't know: https://mcuuid.net/). Make sure you're playing with Minecraft Java 1.9.
