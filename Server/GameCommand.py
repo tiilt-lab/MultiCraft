@@ -102,6 +102,7 @@ class GameCommand:
 
 
 	def get_storage_args(self):
+		# use regex to interpret these commands
 		if self.command == 'clone' and len(self.command_token) > 1:
 			self.args['name'] =  self.command_token[1].text
 			self.is_valid = True
@@ -115,6 +116,7 @@ class GameCommand:
 		# Give the user
 		if len(self.command_token) > 1:
 			self.set_material()
+			dimensions = self.get_dimensions()
 			self.args['dimensions'] = dimensions[0] if len(dimensions) else 1
 			self.is_valid = True
 
