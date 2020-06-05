@@ -31,32 +31,32 @@ __Inputs:__ None
 
 __Description:__ Fills the space between the locations marked by the `rloc1` and `rloc2` commands with stone. This command must be called last in the region building command sequence
 
-## /eyebuild (^)
+## /eyebuild (*^)
 __Inputs:__ `x` `y` `z` `material` `hollow`
 
 __Description:__ Build an `x` by `y` by `z` structure of  `material` at the player's cursor position after using the eye tracker to find a spot to build. The structure may also be made hollow if `hollow` == 1
 
-## /eyetrack (^)
+## /eyetrack (*^)
 __Inputs:__ `move`
 
 __Description:__ Enables eye tracking. If the `move` keyword is given, the player can also move forward if they stare in that direction for enough time
 
-## /msave
+## /msave (*)
 __Inputs:__ `name`
 
 __Description:__ Save the most recent structure created using a build command and name it `name`
 
-## /mclone
+## /mclone (*)
 __Inputs:__ `name`
 
 __Description:__ Clone a saved structure named `name`
 
-## /mundo
+## /mundo (*)
 __Inputs:__ None
 
 __Description:__ Undo the most recent strucrure created using a build command (mbuild, mmbuild, eyebuild, redo)
 
-## /mredo
+## /mredo (*)
 __Inputs:__ None
 
 __Description:__ Redo the most recent structure removed using the undo command
