@@ -67,11 +67,44 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 				return true;
 			}
 			case "mmbuild": {
-				if (args.length < 3){
+				if (args.length < 1){
 					p.sendMessage("Not enough parameters.");
 					break;
 				}
+				if(args.length==1)
+				{
+					int dim1 = Integer.parseInt(args[0]);
+					int[] dimensions = new int[]{dim1, dim1, dim1};
+					Location startLocation = p.getTargetBlock((HashSet<Byte>) null, 16).getLocation().add(0, 1, 0);
+					int materialId = 1;
+					Material material = Material.getMaterial(materialId);
+					List<BlockRecord> blocksAffected = Commands.buildStructure(startLocation, dimensions, material, args.length > 4, plugin);
+					Commands.updateUndoAndRedoStacks(blocksAffected, p);
+					return true;
+				}
+				else if (args.length==2)
+				{
+					int dim1 = Integer.parseInt(args[0]);
+					int[] dimensions = new int[]{dim1, dim1, dim1};
+					Location startLocation = p.getTargetBlock((HashSet<Byte>) null, 16).getLocation().add(0, 1, 0);
 
+					int materialId = 1;
+
+						try { materialId = Integer.parseInt(args[1]); } catch (NumberFormatException e) {
+							try { materialId = Materials.getId(args[1]); } catch (MaterialDoesNotExistException f) {
+								p.sendMessage("The material you specified does not exists. Defaulting to stone.");
+								materialId = 1;
+							}
+						}
+
+					Material material = Material.getMaterial(materialId);
+					List<BlockRecord> blocksAffected = Commands.buildStructure(startLocation, dimensions, material, args.length > 4, plugin);
+					Commands.updateUndoAndRedoStacks(blocksAffected, p);
+
+					return true;
+
+				}
+				else if(args.length>=3){
 				int[] dimensions = new int[]{Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2])};
 				Location startLocation = p.getTargetBlock((HashSet<Byte>) null, 16).getLocation().add(0, 1, 0);
 
@@ -88,7 +121,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 				List<BlockRecord> blocksAffected = Commands.buildStructure(startLocation, dimensions, material, args.length > 4, plugin);
 				Commands.updateUndoAndRedoStacks(blocksAffected, p);
 
-				return true;
+				return true;}
 			}
 			case "rbuild": {
 				RegionBuild rBuild = RegionBuild.getInstance();
