@@ -234,6 +234,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 					break;
 				}
 
+				StructureData universalStructureData = new StructureData(jarLocation + "universal" + "StructureData.csv");
 				StructureData playerStructureData = new StructureData(jarLocation + p.getUniqueId() + "StructureData.csv");
 
 				List<BlockRecord> playerBuildData;
@@ -252,9 +253,14 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 						Integer.toString(Math.abs(last.z - first.z) + 1),
 						Integer.toString(p.getWorld().getBlockAt(first.x, first.y, first.z).getType().getId())};
 
-				boolean overwrite = playerStructureData.setStructureData(entry);
+				boolean overwroteUniversal = universalStructureData.setStructureData(entry);
+				boolean overwrotePlayer = playerStructureData.setStructureData(entry);
+
 				p.sendMessage("Saved " + args[0] + ".");
-				if(overwrite) p.sendMessage("Warning: Overwrote " + args[0] + ".");
+				if(overwroteUniversal) p.sendMessage("Warning: Overwrote " + args[0] + " universally.");
+				if(overwrotePlayer) p.sendMessage("Warning: Overwrote " + args[0] + " locally.");
+
+				universalStructureData.saveStructureData();
 				playerStructureData.saveStructureData();
 
 				return true;
@@ -265,12 +271,17 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 					break;
 				}
 
+				StructureData universalStructureData = new StructureData(jarLocation + "universal" + "StructureData.csv");
 				StructureData playerStructureData = new StructureData(jarLocation + p.getUniqueId() + "StructureData.csv");
 
+				// check for player-stored structure first, then universal
 				String[] buildData = playerStructureData.getStructureData(args[0]);
 				if(buildData == null) {
-					p.sendMessage(args[0] + " was not found.");
-					break;
+					buildData = universalStructureData.getStructureData(args[0]);
+					if(buildData == null) {
+						p.sendMessage(args[0] + " was not found.");
+						break;
+					}
 				}
 
 				String mmbuild_args = String.join(" ", buildData);
