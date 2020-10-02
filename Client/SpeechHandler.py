@@ -41,8 +41,9 @@ with urllib.request.urlopen(f"https://api.mojang.com/users/profiles/minecraft/{m
 try:
     CLIENT_NAME = json.loads(mc_profile)["id"]
     print(f"Connecting as {CLIENT_NAME}")
-except ValueError:
-    print("Invalid username")
+except:
+    print("Unable to retrieve UUID: invalid username or no response received")
+    exit(1)
 
 
 # Initialize IBM Watson Speech to Text service if user wants to use voice
