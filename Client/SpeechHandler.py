@@ -3,6 +3,7 @@ from __future__ import print_function
 
 import json
 import socket
+import urllib.request
 from threading import Thread
 
 import pyaudio
@@ -34,7 +35,15 @@ audio_source = AudioSource(q, True, True)
 HOST = input("Multicraft Server IP: ").split(':')[0] # use socket.gethostbyname(socket.gethostname()) if you are also hosting
 PORT = 5001
 CLIENT_SOCKET = socket.socket()
-CLIENT_NAME = input("Your Full Minecraft Java UUID: ")
+mc_username = input("Your Full Minecraft Username: ")
+with urllib.request.urlopen(f"https://api.mojang.com/users/profiles/minecraft/{mc_username}") as response:
+    mc_profile = response.read().decode("utf-8")
+try:
+    CLIENT_NAME = json.loads(mc_profile)["id"]
+    print(f"Connecting as {CLIENT_NAME}")
+except:
+    print("Unable to retrieve UUID: invalid username or no response received")
+    exit(1)
 
 
 # Initialize IBM Watson Speech to Text service if user wants to use voice
