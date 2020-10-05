@@ -40,7 +40,7 @@ def client_thread(connection, keyword):
     split_by = 2 if keyword else 1
 
     while True:
-        client_input = connection.recv(1024).decode()
+        client_input = connection.recv(1024).decode(errors='ignore')
 
         if client_input is not None and len(client_input.split(' ')) > 1:
             client_transcript = client_input.split(' ', split_by)

@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.UUID;
 
 import com.multicraft.CommandsQueue;
 
@@ -36,9 +39,9 @@ public class EchoThread extends Thread{
                 } else {
                 	CommandsQueue.getInstance().commands.add(line);
 
-                    String clientNameField = "\"client_name\": \"";
-                    int start = line.indexOf(clientNameField) + clientNameField.length();
-                    plugin.getServer().getPlayer(java.util.UUID.fromString(line.substring(start, start + 36))).sendMessage(line);
+                    Pattern clientName = Pattern.compile("\"client_name\": \"(.+)\"");
+                    Matcher matcher = clientName.matcher(line);
+                    plugin.getServer().getPlayer(UUID.fromString(matcher.group(1))).sendMessage(line);
                 }
             } catch (IOException e) {
                 e.printStackTrace();

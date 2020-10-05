@@ -17,8 +17,8 @@ import com.multicraft.Materials.MaterialDoesNotExistException;
 public class MultiCraftCommandExecutor implements CommandExecutor {
 	private final MultiCraft plugin;
 	private final String jarLocation;
-	private final String eyeTrackLocation;
-	private boolean eyeTracking;
+	// private final String eyeTrackLocation;
+	// private boolean eyeTracking;
 	private final CopyHandler copyHandler;
 
 
@@ -26,8 +26,8 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 		this.plugin = plugin;
 		File filePath = new File(MultiCraftCommandExecutor.class.getProtectionDomain().getCodeSource().getLocation().getPath());
 		jarLocation = filePath.getPath().substring(0, filePath.getPath().indexOf(filePath.getName()));
-		eyeTrackLocation = jarLocation + "Tobii" + File.separator + "Interaction_Streams_101.exe";
-		eyeTracking = false;
+		// eyeTrackLocation = jarLocation + "Tobii" + File.separator + "Interaction_Streams_101.exe";
+		// eyeTracking = false;
 		copyHandler = new CopyHandler();
 	}
 	
@@ -61,7 +61,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 					}
 
 				Material material = Material.getMaterial(materialId);
-				List<BlockRecord> blocksAffected = Commands.buildStructure(startLocation, dimensions, material, args.length > 4, plugin);
+				List<BlockRecord> blocksAffected = Commands.buildStructure(p.getLocation(), startLocation, dimensions, material, args.length > 4, plugin);
 				Commands.updateUndoAndRedoStacks(blocksAffected, p);
 
 				return true;
@@ -71,57 +71,53 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 					p.sendMessage("Not enough parameters.");
 					break;
 				}
-				if(args.length==1)
+				if (args.length == 1)
 				{
 					int dim1 = Integer.parseInt(args[0]);
-					int[] dimensions = new int[]{dim1, dim1, dim1};
+					int[] dimensions = new int[] {dim1, dim1, dim1};
 					Location startLocation = p.getTargetBlock((HashSet<Byte>) null, 16).getLocation().add(0, 1, 0);
 					int materialId = 1;
 					Material material = Material.getMaterial(materialId);
-					List<BlockRecord> blocksAffected = Commands.buildStructure(startLocation, dimensions, material, args.length > 4, plugin);
+					List<BlockRecord> blocksAffected = Commands.buildStructure(p.getLocation(), startLocation, dimensions, material, false, plugin);
 					Commands.updateUndoAndRedoStacks(blocksAffected, p);
-					return true;
 				}
-				else if (args.length==2)
+				else if (args.length == 2)
 				{
 					int dim1 = Integer.parseInt(args[0]);
-					int[] dimensions = new int[]{dim1, dim1, dim1};
+					int[] dimensions = new int[] {dim1, dim1, dim1};
 					Location startLocation = p.getTargetBlock((HashSet<Byte>) null, 16).getLocation().add(0, 1, 0);
 
 					int materialId = 1;
+					try { materialId = Integer.parseInt(args[1]); } catch (NumberFormatException e) {
+						try { materialId = Materials.getId(args[1]); } catch (MaterialDoesNotExistException f) {
+							p.sendMessage("The material you specified does not exists. Defaulting to stone.");
+							materialId = 1;
+						}
+					}
 
-						try { materialId = Integer.parseInt(args[1]); } catch (NumberFormatException e) {
-							try { materialId = Materials.getId(args[1]); } catch (MaterialDoesNotExistException f) {
+					Material material = Material.getMaterial(materialId);
+					List<BlockRecord> blocksAffected = Commands.buildStructure(p.getLocation(), startLocation, dimensions, material, false, plugin);
+					Commands.updateUndoAndRedoStacks(blocksAffected, p);
+				}
+				else {
+					int[] dimensions = new int[] {Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2])};
+					Location startLocation = p.getTargetBlock((HashSet<Byte>) null, 16).getLocation().add(0, 1, 0);
+
+					int materialId = 1;
+					if (args.length > 3)
+						try { materialId = Integer.parseInt(args[3]); } catch (NumberFormatException e) {
+							try { materialId = Materials.getId(args[3]); } catch (MaterialDoesNotExistException f) {
 								p.sendMessage("The material you specified does not exists. Defaulting to stone.");
 								materialId = 1;
 							}
 						}
 
 					Material material = Material.getMaterial(materialId);
-					List<BlockRecord> blocksAffected = Commands.buildStructure(startLocation, dimensions, material, args.length > 4, plugin);
+					List<BlockRecord> blocksAffected = Commands.buildStructure(p.getLocation(), startLocation, dimensions, material, args.length > 4, plugin);
 					Commands.updateUndoAndRedoStacks(blocksAffected, p);
 
-					return true;
-
 				}
-				else if(args.length>=3){
-				int[] dimensions = new int[]{Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2])};
-				Location startLocation = p.getTargetBlock((HashSet<Byte>) null, 16).getLocation().add(0, 1, 0);
-
-				int materialId = 1;
-				if (args.length > 3)
-					try { materialId = Integer.parseInt(args[3]); } catch (NumberFormatException e) {
-						try { materialId = Materials.getId(args[3]); } catch (MaterialDoesNotExistException f) {
-							p.sendMessage("The material you specified does not exists. Defaulting to stone.");
-							materialId = 1;
-						}
-					}
-
-				Material material = Material.getMaterial(materialId);
-				List<BlockRecord> blocksAffected = Commands.buildStructure(startLocation, dimensions, material, args.length > 4, plugin);
-				Commands.updateUndoAndRedoStacks(blocksAffected, p);
-
-				return true;}
+				return true;
 			}
 			case "rbuild": {
 				RegionBuild rBuild = RegionBuild.getInstance();
@@ -168,63 +164,67 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 				return true;
 			}
 			case "eyebuild": {
-				if (args.length < 3) {
-					p.sendMessage("Not enough parameters.");
-					break;
-				}
+				// if (args.length < 3) {
+				// 	p.sendMessage("Not enough parameters.");
+				// 	break;
+				// }
 
-				new BukkitRunnable() {
-					@Override
-					public void run() {
-						Runtime run = Runtime.getRuntime();
-						String[] eyeTrackCommand = {eyeTrackLocation, "-d"};
-						try {
-							p.sendMessage("Tracking eyes...");
-							Process eyeTrack = run.exec(eyeTrackCommand);
+				// new BukkitRunnable() {
+				// 	@Override
+				// 	public void run() {
+				// 		Runtime run = Runtime.getRuntime();
+				// 		String[] eyeTrackCommand = {eyeTrackLocation, "-d"};
+				// 		try {
+				// 			p.sendMessage("Tracking eyes...");
+				// 			Process eyeTrack = run.exec(eyeTrackCommand);
 
-							while (eyeTrack.isAlive()) { /* Wait for eye tracking executable to complete. */ }
+				// 			while (eyeTrack.isAlive()) { /* Wait for eye tracking executable to complete. */ }
 
-							Bukkit.getScheduler().runTask(plugin, () -> {
-								p.sendMessage("Building Structure...");
-								String mmbuild_args = String.join(" ", args);
-								Bukkit.getPlayer(p.getUniqueId()).performCommand("mmbuild " + mmbuild_args);
-							});
+				// 			Bukkit.getScheduler().runTask(plugin, () -> {
+				// 				p.sendMessage("Building Structure...");
+				// 				String mmbuild_args = String.join(" ", args);
+				// 				Bukkit.getPlayer(p.getUniqueId()).performCommand("mmbuild " + mmbuild_args);
+				// 			});
 
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-					}
-				}.runTaskAsynchronously(this.plugin);
+				// 		} catch (Exception e) {
+				// 			e.printStackTrace();
+				// 		}
+				// 	}
+				// }.runTaskAsynchronously(this.plugin);
+
+				p.sendMessage("Please use Multicraft client to initiate eye tracking commands.");
 
 				return true;
 			}
 			case "eyetrack": {
-				if (!eyeTracking) {
-					new BukkitRunnable() {
-						@Override
-						public void run() {
-							Runtime run = Runtime.getRuntime();
-							Process eyeTrack;
-							String eyeTrackCommand = eyeTrackLocation;
-							if(args.length == 1 && args[0].equalsIgnoreCase("move"))
-								eyeTrackCommand += " -m";
+				// if (!eyeTracking) {
+				// 	new BukkitRunnable() {
+				// 		@Override
+				// 		public void run() {
+				// 			Runtime run = Runtime.getRuntime();
+				// 			Process eyeTrack;
+				// 			String eyeTrackCommand = eyeTrackLocation;
+				// 			if(args.length == 1 && args[0].equalsIgnoreCase("move"))
+				// 				eyeTrackCommand += " -m";
 
-							try {
-								p.sendMessage("Tracking eyes, press . to end.");
-								eyeTrack = run.exec(eyeTrackCommand);
-								eyeTracking = true;
+				// 			try {
+				// 				p.sendMessage("Tracking eyes, press . to end.");
+				// 				eyeTrack = run.exec(eyeTrackCommand);
+				// 				eyeTracking = true;
 
-								while (eyeTrack.isAlive()) { /* Wait for eye tracking executable to complete. */ }
+				// 				while (eyeTrack.isAlive()) { /* Wait for eye tracking executable to complete. */ }
 
-								p.sendMessage("No longer tracking eyes.");
-								eyeTracking = false;
+				// 				p.sendMessage("No longer tracking eyes.");
+				// 				eyeTracking = false;
 
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-						}
-					}.runTaskAsynchronously(this.plugin);
-				}
+				// 			} catch (Exception e) {
+				// 				e.printStackTrace();
+				// 			}
+				// 		}
+				// 	}.runTaskAsynchronously(this.plugin);
+				// }
+
+				p.sendMessage("Please use Multicraft client to initiate eye tracking commands.");
 
 				return true;
 			}
@@ -237,21 +237,33 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 				StructureData universalStructureData = new StructureData(jarLocation + "universal" + "StructureData.csv");
 				StructureData playerStructureData = new StructureData(jarLocation + p.getUniqueId() + "StructureData.csv");
 
-				List<BlockRecord> playerBuildData;
-				try { playerBuildData = PreviousBuildsData.getInstance().getPlayersBuildRecordForUndo(p).blocksAffected; }
+				BuildCommandData playerBuildData;
+				try { playerBuildData = PreviousBuildsData.getInstance().getPlayersBuildRecordForUndo(p); }
 				catch(NoCommandHistoryException e) {
 					p.sendMessage("No previous builds found.");
 					break;
 				}
 
-				BlockRecord first = playerBuildData.get(0);
-				BlockRecord last = playerBuildData.get(playerBuildData.size() - 1);
+				BlockRecord start = playerBuildData.start;
+				BlockRecord end = playerBuildData.end;
+				int structureMaterial = p.getWorld().getBlockAt(start.x, start.y, start.z).getType().getId();
+				int centerMaterial = p.getWorld().getBlockAt((end.x - start.x) / 2, (end.y - start.y) / 2, (end.z - start.z) / 2).getType().getId();
+				int[] dimensions = playerBuildData.getDimensions();
 
-				String[] entry = {args[0],
-						Integer.toString(Math.abs(last.x - first.x) + 1),
-						Integer.toString(Math.abs(last.y - first.y) + 1),
-						Integer.toString(Math.abs(last.z - first.z) + 1),
-						Integer.toString(p.getWorld().getBlockAt(first.x, first.y, first.z).getType().getId())};
+				String[] entry;
+				if (structureMaterial != centerMaterial)
+					entry = new String[]{args[0],
+							Integer.toString(dimensions[0]),
+							Integer.toString(dimensions[1]),
+							Integer.toString(dimensions[2]),
+							Integer.toString(structureMaterial),
+							"hollow"};
+				else
+					entry = new String[] { args[0],
+							Integer.toString(dimensions[0]),
+							Integer.toString(dimensions[1]),
+							Integer.toString(dimensions[2]),
+							Integer.toString(structureMaterial)};
 
 				boolean overwroteUniversal = universalStructureData.setStructureData(entry);
 				boolean overwrotePlayer = playerStructureData.setStructureData(entry);

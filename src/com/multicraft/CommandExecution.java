@@ -1,5 +1,6 @@
 package com.multicraft;
 
+import java.util.UUID;
 import org.json.simple.JSONObject;
 
 /*
@@ -21,7 +22,7 @@ public class CommandExecution extends Thread{
 
 					if (! gComm.execute()) {
 						String issuer = o.get("client_name").toString();
-						plugin.getServer().getPlayer(java.util.UUID.fromString(issuer)).sendMessage("Command execution failed.");
+						plugin.getServer().getPlayer(UUID.fromString(issuer)).sendMessage("Command execution failed.");
 					}
 
 				} catch (Exception e) {

@@ -53,8 +53,7 @@ public class Commands {
 			p.sendMessage("You have no build record available for redo.");
 			return false;
 		}
-		
-		
+
 		List<BlockRecord> blocksToChange = playerBuildRecord.blocksAffected;
 		List<BlockRecord> blocksAffectedDuringRedo = new ArrayList<>();
 		World world = p.getWorld();
@@ -70,70 +69,72 @@ public class Commands {
 		return true;
 	}
 	
-	public static List<BlockRecord> buildStructure(Location startLoc, int[] dimensions, Material m, boolean isHollow, MultiCraft plugin){
-		int[] buildCoordinates = CoordinateCalculations.getBuildCoordinates(startLoc, dimensions);
+	public static List<BlockRecord> buildStructure(Location playerLoc, Location startLoc, int[] dimensions, Material m, boolean isHollow, MultiCraft plugin){
+		int[] buildCoordinates = CoordinateCalculations.getBuildCoordinates(playerLoc, startLoc, dimensions);
 		Location endLoc = new Location(startLoc.getWorld(), buildCoordinates[0], buildCoordinates[1], buildCoordinates[2]);
 		List<BlockRecord> blocksAffected;
 
-		if(isHollow)
-			blocksAffected = buildHollow(dimensions, startLoc, endLoc, m, plugin);
-		else
-			blocksAffected = updateBlocks(startLoc, endLoc, m, plugin);
+		blocksAffected = isHollow ? buildHollow(startLoc, endLoc, m, plugin) : updateBlocks(startLoc, endLoc, m, plugin);
 		
 		return blocksAffected;
 	}
 	
-	public static List<BlockRecord> buildHollow(int[] dimensions, Location startLoc, Location endLoc, Material m, MultiCraft plugin) {
+	public static List<BlockRecord> buildHollow(Location startLoc, Location endLoc, Material m, MultiCraft plugin) {
 		List<BlockRecord> blocksAffected = new ArrayList<>();
 		// bottom Wall
 		blocksAffected.addAll(updateBlocks(startLoc, new Location(endLoc.getWorld(), endLoc.getX(), startLoc.getY(), endLoc.getZ()), m, plugin));
-		
-		// top wall
-		blocksAffected.addAll(updateBlocks(new Location(startLoc.getWorld(), startLoc.getX(), endLoc.getY(), startLoc.getZ()), endLoc, m, plugin));
-		
-		// back wall
-		blocksAffected.addAll(updateBlocks(new Location(startLoc.getWorld(), startLoc.getX(), startLoc.getY(), endLoc.getZ()), endLoc, m, plugin));
-		
+
 		// front wall
 		blocksAffected.addAll(updateBlocks(startLoc, new Location(endLoc.getWorld(), endLoc.getX(), endLoc.getY(), startLoc.getZ()), m, plugin));
 
-		// right wall
-		blocksAffected.addAll(updateBlocks(new Location(startLoc.getWorld(), endLoc.getX(), startLoc.getY(), startLoc.getZ()), endLoc, m, plugin));
-		
 		// left wall
 		blocksAffected.addAll(updateBlocks(startLoc, new Location(endLoc.getWorld(), startLoc.getX(), endLoc.getY(), endLoc.getZ()), m, plugin));
+
+		// back wall
+		blocksAffected.addAll(updateBlocks(new Location(startLoc.getWorld(), startLoc.getX(), startLoc.getY(), endLoc.getZ()), endLoc, m, plugin));
+
+		// right wall
+		blocksAffected.addAll(updateBlocks(new Location(startLoc.getWorld(), endLoc.getX(), startLoc.getY(), startLoc.getZ()), endLoc, m, plugin));
+
+		// top wall
+		blocksAffected.addAll(updateBlocks(new Location(startLoc.getWorld(), startLoc.getX(), endLoc.getY(), startLoc.getZ()), endLoc, m, plugin));
 		
 		return blocksAffected;
 	}
 	
-	public static List<BlockRecord>  updateBlocks(Location pos1, Location pos2, Material m, MultiCraft plugin) {
-		int minX, maxX, minY, maxY, minZ, maxZ;
+	public static List<BlockRecord> updateBlocks(Location pos1, Location pos2, Material m, MultiCraft plugin) {
+		boolean incrementX = pos1.getX() <= pos2.getX();
+		boolean incrementY = pos1.getY() <= pos2.getY();
+		boolean incrementZ = pos1.getZ() <= pos2.getZ();
+
 		World world = pos1.getWorld();
-		minX = min(pos1.getBlockX(), pos2.getBlockX());
-		maxX = max(pos1.getBlockX(), pos2.getBlockX());
-		minY = min(pos1.getBlockY(), pos2.getBlockY());
-		maxY = max(pos1.getBlockY(), pos2.getBlockY());
-		minZ = min(pos1.getBlockZ(), pos2.getBlockZ());
-		maxZ = max(pos1.getBlockZ(), pos2.getBlockZ());
-		
 		List<BlockRecord> blocksAffected = new ArrayList<>();
 
-		for (int x = minX; x <= maxX; ++x)
-			for (int z = minZ; z <= maxZ; ++z)
-				for (int y = minY; y <= maxY; ++y)
-					blocksAffected.add(updateBlock(world, plugin, x, y, z, m,(byte) 0));
+		int x = (int) pos1.getX();
+		while ((incrementX && x <= pos2.getX()) || (!incrementX && x >= pos2.getX())) {
+			int y = (int) pos1.getY();
+			while ((incrementY && y <= pos2.getY()) || (!incrementY && y >= pos2.getY())) {
+				int z = (int) pos1.getZ();
+				while ((incrementZ && z <= pos2.getZ()) || (!incrementZ && z >= pos2.getZ())) {
+					blocksAffected.add(updateBlock(world, plugin, x, y, z, m));
+					if (incrementZ) ++z;
+					else --z;
+				}
+				if (incrementY) ++y;
+				else --y;
+			}
+			if (incrementX) ++x;
+			else --x;
+		}
 
 		return blocksAffected;
 	}
 	
-	private static BlockRecord updateBlock(World world, MultiCraft plugin, int x, int y, int z, Material blockType, byte blockData) {
-		Block thisBlock = world.getBlockAt(x,y,z);
-		return updateBlock(thisBlock, blockType, plugin, blockData);
-	}
+	private static BlockRecord updateBlock(World world, MultiCraft plugin, int x, int y, int z, Material blockType) {
+		Block thisBlock = world.getBlockAt(x, y, z);
+		BlockRecord toReturn = new BlockRecord(thisBlock.getType(), x, y, z);
+		Bukkit.getScheduler().runTask(plugin, () -> { thisBlock.setType(blockType); });
 
-	private static BlockRecord updateBlock(Block block, Material m, MultiCraft plugin, byte blockData) {
-		BlockRecord toReturn = new BlockRecord(block.getType(), block.getX(), block.getY(), block.getZ());
-		Bukkit.getScheduler().runTask(plugin, () -> { block.setType(m); });
 		return toReturn;
 	}
 

@@ -6,6 +6,8 @@ import socket
 import urllib.request
 from threading import Thread
 
+from EyeTracker import process_eye_tracking
+
 import pyaudio
 from ibm_watson import SpeechToTextV1
 from ibm_watson.websocket import RecognizeCallback, AudioSource
@@ -90,9 +92,10 @@ class MyRecognizeCallback(RecognizeCallback):
     def on_data(self, data):
         # Once received a command, print and send the command string to the server
         if(data['results'][0]['final']):
-            transcript = data['results'][0]['alternatives'][0]['transcript']
+            transcript = data['results'][0]['alternatives'][0]['transcript'].lower()
             print(transcript)
-            CLIENT_SOCKET.send((CLIENT_NAME + " " + transcript).encode())
+            process_eye_tracking(transcript)
+            CLIENT_SOCKET.send((CLIENT_NAME + " " + result).encode())
 
     def on_close(self):
         client_socket.close()
