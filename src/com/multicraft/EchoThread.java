@@ -38,10 +38,11 @@ public class EchoThread extends Thread{
                     return;
                 } else {
                 	CommandsQueue.getInstance().commands.add(line);
+                    System.out.println(line);
 
-                    Pattern clientName = Pattern.compile("\"client_name\": \"(.+)\"");
-                    Matcher matcher = clientName.matcher(line);
-                    plugin.getServer().getPlayer(UUID.fromString(matcher.group(1))).sendMessage(line);
+                    String clientNameField = "\"client_name\": \"";
+                    int start = line.indexOf(clientNameField) + clientNameField.length();
+                    plugin.getServer().getPlayer(java.util.UUID.fromString(line.substring(start, start + 36))).sendMessage(line);
                 }
             } catch (IOException e) {
                 e.printStackTrace();

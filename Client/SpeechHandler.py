@@ -4,6 +4,7 @@ from __future__ import print_function
 import json
 import socket
 import urllib.request
+import uuid
 from threading import Thread
 
 from EyeTracker import process_eye_tracking
@@ -41,7 +42,7 @@ mc_username = input("Your Full Minecraft Username: ")
 with urllib.request.urlopen(f"https://api.mojang.com/users/profiles/minecraft/{mc_username}") as response:
     mc_profile = response.read().decode("utf-8")
 try:
-    CLIENT_NAME = json.loads(mc_profile)["id"]
+    CLIENT_NAME = str(uuid.UUID(json.loads(mc_profile)["id"]))
     print(f"Connecting as {CLIENT_NAME}")
 except:
     print("Unable to retrieve UUID: invalid username or no response received")
@@ -160,6 +161,7 @@ def main():
         # If the user does not want to use voice and instead type commands, enter testing mode
         while True:
             input_s = input("Message: ")
+            process_eye_tracking(input_s)
             CLIENT_SOCKET.send((CLIENT_NAME + " " + input_s).encode())
 
 
