@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.UUID;
 
 import com.multicraft.CommandsQueue;
 
@@ -35,10 +36,11 @@ public class EchoThread extends Thread{
                     return;
                 } else {
                 	CommandsQueue.getInstance().commands.add(line);
+                    System.out.println(line);
 
                     String clientNameField = "\"client_name\": \"";
                     int start = line.indexOf(clientNameField) + clientNameField.length();
-                    plugin.getServer().getPlayer(java.util.UUID.fromString(line.substring(start, start + 36))).sendMessage(line);
+                    plugin.getServer().getPlayer(UUID.fromString(line.substring(start, start + 36))).sendMessage(line);
                 }
             } catch (IOException e) {
                 e.printStackTrace();

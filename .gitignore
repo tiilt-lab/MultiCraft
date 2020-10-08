@@ -2,12 +2,20 @@
 *.pyc
 __pycache__/
 
+# logs and files created from testing
+MultiCraftServer/logs/
+MultiCraftServer/world/stats/
+MultiCraftServer/world/playerdata/
+MultiCraftServer/plugins/*.csv
+
 # ide specific folders and files
 .vscode/
 .idea/
 .settings/
 .classpath
 .project
+bin/
+out/
 
 # OS generated files
 .DS_Store

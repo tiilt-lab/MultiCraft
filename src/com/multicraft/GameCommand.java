@@ -99,7 +99,7 @@ public class GameCommand {
 		}
 
 		boolean isHollow = args.containsKey("hollow") && (Boolean) args.get("hollow");
-		blocksAffected = Commands.buildStructure(l, dimensions, m, isHollow, plugin);
+		blocksAffected = Commands.buildStructure(issuer.getLocation(), l, dimensions, m, isHollow, plugin);
 		Commands.updateUndoAndRedoStacks(blocksAffected, issuer);
 		return true;
 	}
@@ -112,7 +112,7 @@ public class GameCommand {
 
 		Location l = issuer.getTargetBlock((HashSet<Byte>) null, 16).getLocation().add(0, 1, 0);
 
-		List<BlockRecord> blocksAffected = Commands.buildStructure(l, dimensions, m, false, plugin);
+		List<BlockRecord> blocksAffected = Commands.buildStructure(issuer.getLocation(), l, dimensions, m, false, plugin);
 		Commands.updateUndoAndRedoStacks(blocksAffected, issuer);
 		return true;
 	}

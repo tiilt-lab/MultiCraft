@@ -1,124 +1,99 @@
 package com.multicraft;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import org.bukkit.Location;
 
 public class CoordinateCalculations {
 	
-	public static int[] getBuildCoordinates(Location loc, int[] dimensions) {
-		int angle = (int) loc.getYaw();
+	public static int[] getBuildCoordinates(Location playerloc, Location loc, int[] dimensions) {
+		int angle = (int) playerloc.getYaw();
+
 		int startX = loc.getBlockX(), startY = loc.getBlockY(), startZ = loc.getBlockZ();
+
 		String generalDirection = getGeneralDirection(angle);
-		int[] dirs = new int[3];
-		if(generalDirection.equals("north")) {
-			dirs = getFacingNorthCoordinates(startX, startY, startZ, dimensions);
-		}else if(generalDirection.equals("east")) {
-			dirs = getFacingEastCoordinates(startX, startY, startZ, dimensions);
-		}else if(generalDirection.equals("south")) {
-			dirs = getFacingSouthCoordinates(startX, startY, startZ, dimensions);
-		}else {
-			dirs = getFacingWestCoordinates(startX, startY, startZ, dimensions);
-		}
-		return new int[] {dirs[0], dirs[1], dirs[2]};
+
+		if (generalDirection.equals("north"))
+			return getFacingNorthCoordinates(startX, startY, startZ, dimensions);
+		if (generalDirection.equals("east"))
+			return getFacingEastCoordinates(startX, startY, startZ, dimensions);
+		if (generalDirection.equals("south"))
+			return getFacingSouthCoordinates(startX, startY, startZ, dimensions);
+		return getFacingWestCoordinates(startX, startY, startZ, dimensions);
 	}
 	
 	private static int[] getFacingNorthCoordinates(int startX, int startY, int startZ, int[] dimensions) {
 		// TODO Auto-generated method stub
-		int endX = 0, endZ = 0, endY = 0;
-		endZ = startZ - dimensions[0] + 1;
-		endY = startY + dimensions[1] - 1;
-		endX = startX - dimensions[2] + 1;
+		int endZ = startZ - dimensions[0] + 1;
+		int endY = startY + dimensions[1] - 1;
+		int endX = startX - dimensions[2] + 1;
 		return new int[] {endX, endY, endZ};
 	}
 
 	private static int[] getFacingEastCoordinates(int startX, int startY, int startZ, int[] dimensions) {
 		// TODO Auto-generated method stub
-		int endX = 0, endZ = 0, endY = 0;
-		endZ = startZ - dimensions[2] + 1;
-		endY = startY + dimensions[1] - 1;
-		endX = startX + dimensions[0] - 1;
+		int endZ = startZ - dimensions[2] + 1;
+		int endY = startY + dimensions[1] - 1;
+		int endX = startX + dimensions[0] - 1;
 		return new int[] {endX, endY, endZ};
 	}
 
 	private static int[] getFacingSouthCoordinates(int startX, int startY, int startZ, int[] dimensions) {
 		// TODO Auto-generated method stub
-		int endX = 0, endZ = 0, endY = 0;
-		endZ = startZ + dimensions[0] - 1;
-		endY = startY + dimensions[1] - 1;
-		endX = startX + dimensions[2] - 1;
+		int endZ = startZ + dimensions[0] - 1;
+		int endY = startY + dimensions[1] - 1;
+		int endX = startX + dimensions[2] - 1;
 		return new int[] {endX, endY, endZ};
 	}
 
 	private static int[] getFacingWestCoordinates(int startX, int startY, int startZ, int[] dimensions) {
 		// TODO Auto-generated method stub
-		int endX = 0, endZ = 0, endY = 0;
-		endZ = startZ + dimensions[2] - 1;
-		endY = startY + dimensions[1] - 1;
-		endX = startX - dimensions[0] + 1;
+		int endZ = startZ + dimensions[2] - 1;
+		int endY = startY + dimensions[1] - 1;
+		int endX = startX - dimensions[0] + 1;
 		return new int[] {endX, endY, endZ};
 	}
 
 	private static String getGeneralDirection(int angle) {
 		String specificDirection = getSpecificDirection(angle);
-		Set<String> northDir = new HashSet<String>(Arrays.asList("north", "north northeast", "north northwest", "northeast"));
-		Set<String> eastDir = new HashSet<String>(Arrays.asList("east", "east northeast", "east southeast", "southeast"));
-		// Set<String> westDir = new HashSet<String>(Arrays.asList("north", "north northeast", "north northwest", "northeast"));
-		Set<String> southDir = new HashSet<String>(Arrays.asList("south", "south southeast", "south southwest", "southwest"));
+		Set<String> northDir = new HashSet<String>(Arrays.asList("north northwest", "north", "north northeast", "northeast"));
+		Set<String> eastDir = new HashSet<String>(Arrays.asList("east northeast", "east", "east southeast", "southeast"));
+		Set<String> southDir = new HashSet<String>(Arrays.asList("south southeast", "south", "south southwest", "southwest"));
+//		Set<String> westDir = new HashSet<String>(Arrays.asList("west southwest", "west", "west northwest", "northwest"));
 		
-		if(northDir.contains(specificDirection)){
+		if (northDir.contains(specificDirection))
 			return "north";
-		}
-		if(eastDir.contains(specificDirection)){
+		if (eastDir.contains(specificDirection))
 			return "east";
-		}
-		if(southDir.contains(specificDirection)){
+		if (southDir.contains(specificDirection))
 			return "south";
-		}
 		return "west";
 	}
 	
 	public static String getSpecificDirection(int angle) {
-		if(angle < 0) {
+		if (angle < 0)
 			angle += 360;
-		}
+
 		int dirInt = (int) ((angle + 8) / 22.5);
-		if(dirInt == 0)
-			return "south";
-		else if(dirInt == 1)
-			return "south southwest";
-		else if (dirInt == 2)
-			return "southwest";
-		else if(dirInt == 3)
-			return "north southwest";
-		else if(dirInt == 4)
-			return "west"; // west
-		else if(dirInt == 5)
-			return "west northwest";
-		else if(dirInt == 6)
-			return "northwest";
-		else if(dirInt == 7)
-			return "north northwest";
-		else if(dirInt == 8)
-			return "north"; //north 
-		else if(dirInt == 9)
-			return "north northeast";
-		else if(dirInt == 10)
-			return "northeast";
-		else if(dirInt == 11)
-			return "south northeast";
-		else if(dirInt == 12)
-			return "east"; //east
-		else if(dirInt == 13)
-			return "east southeast";
-		else if(dirInt == 14)
-			return "southeast";
-		else if(dirInt == 15)
-			return "south southeast";
-		else
-			return "south"; // south
+
+		switch (dirInt) {
+			case 1: return "south southwest";
+			case 2: return "southwest";
+			case 3: return "west southwest";
+			case 4: return "west";
+			case 5: return "west northwest";
+			case 6: return "northwest";
+			case 7: return "north northwest";
+			case 8: return "north";
+			case 9: return "north northeast";
+			case 10: return "northeast";
+			case 11: return "east northeast";
+			case 12: return "east";
+			case 13: return "east southeast";
+			case 14: return "southeast";
+			case 15: return "south southeast";
+			default: return "south";
+		}
 	}
 
 }

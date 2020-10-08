@@ -51,7 +51,8 @@ def get_word_synonyms(word):
 
 
 # List of commands supported by the system
-supported_commands = ['build', 'place', 'move', 'track', 'turn', 'tilt', 'undo', 'redo', 'store', 'clone', 'give']
+supported_commands = ['build', 'place', 'move', 'turn', 'tilt', 'undo', 'redo', 'store', 'clone', 'give']
+# supported_commands.append('track')
 
 # List of the movement direction supported
 supported_directions = ['up', 'down', 'left', 'right', 'forward', 'back']
