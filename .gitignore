@@ -7,6 +7,7 @@ MultiCraftServer/logs/
 MultiCraftServer/world/stats/
 MultiCraftServer/world/playerdata/
 MultiCraftServer/plugins/*.csv
+MultiCraftServer/crash-reports
 
 # ide specific folders and files
 .vscode/
