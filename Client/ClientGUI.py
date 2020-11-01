@@ -11,7 +11,7 @@ from threading import Thread
 # from ibm_watson import SpeechToTextV1
 # from ibm_watson.websocket import RecognizeCallback, AudioSource
 
-# from EyeTracker import process_eye_tracking
+from EyeTracker import process_eye_tracking
 
 # # PyAudio Configuration
 # CHUNK = 1024
@@ -161,9 +161,66 @@ class Frame2():
             self.close_frame()
             msg_label = tk.Label(text=message)
             msg_label.pack() # outside of frame
+            frame3 = Frame3(root)
         else:
             self.msg_label = tk.Label(master=self.frame, text=message)
             self.msg_label.pack()
+
+    def close_frame(self):
+        self.frame.destroy()
+
+class Frame3():
+    def __init__(self, parent):
+        self.parent = parent
+        self.frame = tk.Frame(self.parent)
+        self.label = tk.Label(master=self.frame, text='Connect to Voice?')
+        self.button1 = tk.Button(master=self.frame, text='Yes', command=self.use_voice)
+        self.button2 = tk.Button(master=self.frame, text='No', command=self.use_text)
+        self.quit_btn = tk.Button(master=self.frame, text='Quit', command = parent.destroy)
+        self.label.pack()
+        self.button1.pack()
+        self.button2.pack()
+        self.quit_btn.pack()
+        self.frame.pack()
+    
+    def use_text(self):
+        self.close_frame()
+        text_label = tk.Label(text='Using text commands')
+        text_label.pack()
+        frame4 = Frame4(root)
+
+    def use_voice(self):
+        self.close_frame()
+        voice_label = tk.Label(text='Using voice commands')
+        voice_label.pack()
+        frame5 = Frame5(root)
+
+    def close_frame(self):
+        self.frame.destroy()
+
+class Frame4():
+    def __init__(self, parent):
+        self.parent = parent
+        self.frame = tk.Frame(self.parent)
+        self.label = tk.Label(master=self.frame, text='Message:')
+        self.entry = tk.Entry(master=self.frame)
+        self.button = tk.Button(master=self.frame, text='Send', command=self.send_command)
+        self.counter = 0
+        self.msg_label = tk.Label(master=self.frame, text='Ready')
+        self.quit_btn = tk.Button(master=self.frame, text='Quit', command=parent.destroy)
+        self.label.pack()
+        self.entry.pack()
+        self.button.pack()
+        self.msg_label.pack()
+        self.quit_btn.pack()
+        self.frame.pack()
+    
+    def send_command(self):
+        message = self.entry.get()
+        process_eye_tracking(message)
+        CLIENT_SOCKET.send(f'{CLIENT_NAME} {message}'.encode())
+        self.counter += 1
+        self.msg_label.config(text=f'[{self.counter}] Command sent')
 
     def close_frame(self):
         self.frame.destroy()
