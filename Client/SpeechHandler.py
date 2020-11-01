@@ -96,7 +96,7 @@ class MyRecognizeCallback(RecognizeCallback):
             transcript = data['results'][0]['alternatives'][0]['transcript'].lower()
             print(transcript)
             process_eye_tracking(transcript)
-            CLIENT_SOCKET.send((CLIENT_NAME + " " + result).encode())
+            CLIENT_SOCKET.send((CLIENT_NAME + " " + transcript).encode())
 
     def on_close(self):
         client_socket.close()
