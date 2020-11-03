@@ -131,6 +131,7 @@ class UsernameFrame(Frame):
         super().__init__(parent)
         self.label = tk.Label(master=self.frame, text='What is your Minecraft username?', font=label_font1)
         self.entry = tk.Entry(master=self.frame)
+        self.entry.bind('<Return>', lambda _: self.get_username())
         self.button = tk.Button(master=self.frame, text='OK', command=self.get_username, font=button_font)
         self.label.pack()
         self.entry.pack()
@@ -154,6 +155,7 @@ class ServerFrame(Frame):
         super().__init__(parent)
         self.label = tk.Label(master=self.frame, text='Server IP:', font=label_font1)
         self.entry = tk.Entry(master=self.frame)
+        self.entry.bind('<Return>', lambda _: self.get_ip())
         self.button = tk.Button(master=self.frame, text='OK', command=self.get_ip, font=button_font)
         self.label.pack()
         self.entry.pack()
@@ -201,6 +203,7 @@ class TextFrame(Frame):
         super().__init__(parent)
         self.label = tk.Label(master=self.frame, text='Message:', font=label_font1)
         self.entry = tk.Entry(master=self.frame)
+        self.entry.bind('<Return>', lambda _: self.send_command())
         self.button = tk.Button(master=self.frame, text='Send', command=self.send_command, font=button_font)
         self.counter = 0
         self.msg_label = tk.Label(master=self.frame, text=f'[{self.counter}] Ready', font=label_font2)
