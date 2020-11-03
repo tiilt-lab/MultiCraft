@@ -1,6 +1,7 @@
 import json
 import socket
 import tkinter as tk
+import tkinter.font
 import urllib.request
 import uuid
 from queue import Queue, Full
@@ -112,6 +113,11 @@ def pyaudio_callback(in_data, frame_count, time_info, status):
         pass # discard
     return (None, pyaudio.paContinue)
 
+
+
+
+# Tkinter GUI
+
 class Frame():
     def __init__(self, parent):
         self.parent = parent
@@ -123,14 +129,12 @@ class Frame():
 class UsernameFrame(Frame):
     def __init__(self, parent):
         super().__init__(parent)
-        self.label = tk.Label(master=self.frame, text='What is your Minecraft username?')
+        self.label = tk.Label(master=self.frame, text='What is your Minecraft username?', font=label_font1)
         self.entry = tk.Entry(master=self.frame)
-        self.button = tk.Button(master=self.frame, text='OK', command=self.get_username)
-        self.quit_btn = tk.Button(master=self.frame, text='Quit', command=parent.destroy)
+        self.button = tk.Button(master=self.frame, text='OK', command=self.get_username, font=button_font)
         self.label.pack()
         self.entry.pack()
         self.button.pack()
-        self.quit_btn.pack()
         self.frame.pack()
 
     def get_username(self):
@@ -138,24 +142,22 @@ class UsernameFrame(Frame):
         message = get_uuid(username)
         if 'Connected' in message:
             self.close_frame()
-            msg_label = tk.Label(text=message)
+            msg_label = tk.Label(text=message, font=label_font2)
             msg_label.pack() # outside of frame
             server_frame = ServerFrame(root)
         else:
-            self.msg_label = tk.Label(master=self.frame, text=message)
+            self.msg_label = tk.Label(master=self.frame, text=message, font=label_font2)
             self.msg_label.pack()
 
 class ServerFrame(Frame):
     def __init__(self, parent):
         super().__init__(parent)
-        self.label = tk.Label(master=self.frame, text='Server IP:')
+        self.label = tk.Label(master=self.frame, text='Server IP:', font=label_font1)
         self.entry = tk.Entry(master=self.frame)
-        self.button = tk.Button(master=self.frame, text='OK', command=self.get_ip)
-        self.quit_btn = tk.Button(master=self.frame, text='Quit', command=parent.destroy)
+        self.button = tk.Button(master=self.frame, text='OK', command=self.get_ip, font=button_font)
         self.label.pack()
         self.entry.pack()
         self.button.pack()
-        self.quit_btn.pack()
         self.frame.pack()
     
     def get_ip(self):
@@ -163,35 +165,33 @@ class ServerFrame(Frame):
         message = connect_to_server(ip)
         if 'Connected' in message:
             self.close_frame()
-            msg_label = tk.Label(text=message)
+            msg_label = tk.Label(text=message, font=label_font2)
             msg_label.pack() # outside of frame
             input_frame = InputFrame(root)
         else:
-            self.msg_label = tk.Label(master=self.frame, text=message)
+            self.msg_label = tk.Label(master=self.frame, text=message, font=label_font2)
             self.msg_label.pack()
 
 class InputFrame(Frame):
     def __init__(self, parent):
         super().__init__(parent)
-        self.label = tk.Label(master=self.frame, text='Connect to Voice?')
-        self.button1 = tk.Button(master=self.frame, text='Yes', command=self.use_voice)
-        self.button2 = tk.Button(master=self.frame, text='No', command=self.use_text)
-        self.quit_btn = tk.Button(master=self.frame, text='Quit', command = parent.destroy)
+        self.label = tk.Label(master=self.frame, text='Connect to Voice?', font=label_font1)
+        self.button1 = tk.Button(master=self.frame, text='Yes', command=self.use_voice, font=button_font)
+        self.button2 = tk.Button(master=self.frame, text='No', command=self.use_text, font=button_font)
         self.label.pack()
-        self.button1.pack()
-        self.button2.pack()
-        self.quit_btn.pack()
+        self.button1.pack(side=tk.LEFT)
+        self.button2.pack(side=tk.RIGHT)
         self.frame.pack()
     
     def use_text(self):
         self.close_frame()
-        text_label = tk.Label(text='Using text commands')
+        text_label = tk.Label(text='Using text commands', font=label_font2)
         text_label.pack()
         text_frame = TextFrame(root)
 
     def use_voice(self):
         self.close_frame()
-        voice_label = tk.Label(text='Using voice commands')
+        voice_label = tk.Label(text='Using voice commands', font=label_font2)
         voice_label.pack()
         global voice_frame
         voice_frame = VoiceFrame(root)
@@ -199,17 +199,15 @@ class InputFrame(Frame):
 class TextFrame(Frame):
     def __init__(self, parent):
         super().__init__(parent)
-        self.label = tk.Label(master=self.frame, text='Message:')
+        self.label = tk.Label(master=self.frame, text='Message:', font=label_font1)
         self.entry = tk.Entry(master=self.frame)
-        self.button = tk.Button(master=self.frame, text='Send', command=self.send_command)
+        self.button = tk.Button(master=self.frame, text='Send', command=self.send_command, font=button_font)
         self.counter = 0
-        self.msg_label = tk.Label(master=self.frame, text=f'[{self.counter}] Ready')
-        self.quit_btn = tk.Button(master=self.frame, text='Quit', command=parent.destroy)
+        self.msg_label = tk.Label(master=self.frame, text=f'[{self.counter}] Ready', font=label_font2)
         self.label.pack()
         self.entry.pack()
         self.button.pack()
         self.msg_label.pack()
-        self.quit_btn.pack()
         self.frame.pack()
     
     def send_command(self):
@@ -240,17 +238,15 @@ class VoiceFrame(Frame):
         self.recognize_thread = Thread(target=recognize_using_websocket, args=())
         self.recognize_thread.start()
         
-        self.prompt_lbl = tk.Label(master=self.frame, text='Transcript:')
+        self.prompt_lbl = tk.Label(master=self.frame, text='Transcript:', font=label_font1)
         self.transcript_lbl = tk.Label(master=self.frame, text='__________')
         self.counter = 0
-        self.msg_label = tk.Label(master=self.frame, text=f'[{self.counter}] Ready')
-        self.stop_button = tk.Button(master=self.frame, text='Stop Recording', command=self.stop)
-        self.quit_btn = tk.Button(master=self.frame, text='Quit', command=parent.destroy)
+        self.msg_label = tk.Label(master=self.frame, text=f'[{self.counter}] Ready', font=label_font2)
+        self.stop_button = tk.Button(master=self.frame, text='Stop Recording', command=self.stop, font=button_font)
         self.prompt_lbl.pack()
         self.transcript_lbl.pack()
         self.msg_label.pack()
         self.stop_button.pack()
-        self.quit_btn.pack()
         self.frame.pack()
 
     def voice_command(self, transcript):
@@ -267,5 +263,17 @@ class VoiceFrame(Frame):
     
 
 root = tk.Tk()
+root.title('Multicraft')
+width  = root.winfo_screenwidth() // 3
+height = root.winfo_screenheight() // 3
+root.geometry(f'{width}x{height}')
+
+# Fonts
+label_font1 = tk.font.Font(font=None, size=20)
+label_font2 = tk.font.Font(font=None, size=16)
+button_font = tk.font.Font(font=None, size=16)
+
 username_frame = UsernameFrame(root)
+quit_button = tk.Button(text='Quit', command=root.destroy, font=button_font)
+quit_button.pack(side=tk.BOTTOM, pady=(0, 40))
 root.mainloop()
