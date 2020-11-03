@@ -32,7 +32,7 @@ def get_uuid(mc_username):
     try:
         mc_username = json.loads(mc_profile)['name'] # ensures username is case-corrected
         CLIENT_NAME = str(uuid.UUID(json.loads(mc_profile)['id']))
-        return f'Connected as {mc_username} ({CLIENT_NAME})'
+        return f'Connected as {mc_username}\n({CLIENT_NAME})'
     except:
         return 'Unable to retrieve UUID: invalid username or API is down'
 
