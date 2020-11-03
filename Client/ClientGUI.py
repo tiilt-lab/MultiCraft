@@ -49,11 +49,9 @@ def connect_to_server(server_ip):
 
 def connect_to_voice():
     global SPEECH_TO_TEXT, CUSTOMIZATION_ID
-    with open('./client_credentials.json') as f:
-        credentials = json.load(f)
-        API_KEY = credentials['api_key']
-        SERVICE_URL = credentials['service_url']
-        CUSTOMIZATION_ID = credentials['customization_id']
+    API_KEY = "5rxG5Xq_tPrfk31RzjXr1Hr002GtA9d7_jev3flMyWcY"
+    SERVICE_URL = "https://api.us-south.speech-to-text.watson.cloud.ibm.com/instances/ec9cf368-d2f0-45e1-8b47-417add989664"
+    CUSTOMIZATION_ID = "5b00b52e-8edf-4993-825d-60a87b21879c"
     authenticator = IAMAuthenticator(API_KEY)
     SPEECH_TO_TEXT = SpeechToTextV1(authenticator=authenticator)
     SPEECH_TO_TEXT.set_service_url(SERVICE_URL)
