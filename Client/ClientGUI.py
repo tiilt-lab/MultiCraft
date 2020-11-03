@@ -5,7 +5,7 @@ import tkinter.font
 import urllib.request
 import uuid
 from queue import Queue, Full
-from threading import Event, Thread
+from threading import Thread
 
 import pyaudio
 from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
