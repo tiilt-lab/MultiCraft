@@ -218,6 +218,7 @@ class TextFrame(Frame):
         CLIENT_SOCKET.send(f'{CLIENT_NAME} {message}'.encode())
         self.counter += 1
         self.msg_label.config(text=f'[{self.counter}] Command sent')
+        self.entry.delete(0, tk.END)
 
 class VoiceFrame(Frame):
     def __init__(self, parent):
