@@ -53,18 +53,19 @@ except:
 USING_VOICE = input("Are you using voice [y/n]? ").lower() == 'y'
 if USING_VOICE:
     # Speech to Text service credeneitals are stored in ./client_credentials.json
-    f = open('./client_credentials.json')
-    credentials = json.load(f)
+    # f = open('./client_credentials.json')
+    # credentials = json.load(f)
 
-    API_KEY = credentials['api_key']
-    SERVICE_URL = credentials['service_url']
-    CUSTOMIZATION_ID = credentials['customization_id']
+    API_KEY = "5rxG5Xq_tPrfk31RzjXr1Hr002GtA9d7_jev3flMyWcY" #credentials['api_key']
+    SERVICE_URL = "https://api.us-south.speech-to-text.watson.cloud.ibm.com/instances/ec9cf368-d2f0-45e1-8b47-417add989664" #credentials['service_url']
+    CUSTOMIZATION_ID = "5b00b52e-8edf-4993-825d-60a87b21879c" #credentials['customization_id']
 
-    f.close()
+    # f.close()
 
     authenticator = IAMAuthenticator(API_KEY)
     SPEECH_TO_TEXT = SpeechToTextV1(authenticator=authenticator)
     SPEECH_TO_TEXT.set_service_url(SERVICE_URL)
+    SPEECH_TO_TEXT.set_disable_ssl_verification(True)
 
 
 # Define callback for the Speech to Text service
@@ -96,7 +97,7 @@ class MyRecognizeCallback(RecognizeCallback):
             transcript = data['results'][0]['alternatives'][0]['transcript'].lower()
             print(transcript)
             process_eye_tracking(transcript)
-            CLIENT_SOCKET.send((CLIENT_NAME + " " + result).encode())
+            CLIENT_SOCKET.send((CLIENT_NAME + " " + transcript).encode())
 
     def on_close(self):
         client_socket.close()
@@ -151,7 +152,7 @@ def main():
         # Stop recording when user enters Ctrl+C
         except KeyboardInterrupt:
             print("Recording stopped")
-            print("To start another recording, type: python audiohandler.py")
+            print("To start another recording, relaunch the application.")
             stream.stop_stream()
             stream.close()
             audio.terminate()
@@ -160,11 +161,15 @@ def main():
     else:
         # If the user does not want to use voice and instead type commands, enter testing mode
         while True:
-            input_s = input("Message: ")
-            process_eye_tracking(input_s)
-            CLIENT_SOCKET.send((CLIENT_NAME + " " + input_s).encode())
+            try:
+                input_s = input("Message: ")
+                process_eye_tracking(input_s)
+                CLIENT_SOCKET.send((CLIENT_NAME + " " + input_s).encode())
+            except KeyboardInterrupt:
+                break
 
 
 if __name__ == "__main__":
     CLIENT_SOCKET.connect((HOST, PORT))
     main()
+    CLIENT_SOCKET.close()
