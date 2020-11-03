@@ -85,12 +85,12 @@ class MyRecognizeCallback(RecognizeCallback):
         if(data['results'][0]['final']):
             transcript = data['results'][0]['alternatives'][0]['transcript'].lower()
             print(transcript)
-            frame5.voice_command(transcript)
+            voice_frame.voice_command(transcript)
             process_eye_tracking(transcript)
             CLIENT_SOCKET.send((CLIENT_NAME + " " + transcript).encode())
 
     def on_close(self):
-        client_socket.close()
+        CLIENT_SOCKET.close()
         print('Connection closed')
 
 # Initiate the recognize service and pass in the AudioSource
@@ -112,10 +112,17 @@ def pyaudio_callback(in_data, frame_count, time_info, status):
         pass # discard
     return (None, pyaudio.paContinue)
 
-class Frame1():
+class Frame():
     def __init__(self, parent):
         self.parent = parent
         self.frame = tk.Frame(self.parent)
+    
+    def close_frame(self):
+        self.frame.destroy()
+        
+class UsernameFrame(Frame):
+    def __init__(self, parent):
+        super().__init__(parent)
         self.label = tk.Label(master=self.frame, text='What is your Minecraft username?')
         self.entry = tk.Entry(master=self.frame)
         self.button = tk.Button(master=self.frame, text='OK', command=self.get_username)
@@ -133,18 +140,14 @@ class Frame1():
             self.close_frame()
             msg_label = tk.Label(text=message)
             msg_label.pack() # outside of frame
-            frame2 = Frame2(root)
+            server_frame = ServerFrame(root)
         else:
             self.msg_label = tk.Label(master=self.frame, text=message)
             self.msg_label.pack()
-    
-    def close_frame(self):
-        self.frame.destroy()
 
-class Frame2():
+class ServerFrame(Frame):
     def __init__(self, parent):
-        self.parent = parent
-        self.frame = tk.Frame(self.parent)
+        super().__init__(parent)
         self.label = tk.Label(master=self.frame, text='Server IP:')
         self.entry = tk.Entry(master=self.frame)
         self.button = tk.Button(master=self.frame, text='OK', command=self.get_ip)
@@ -162,18 +165,14 @@ class Frame2():
             self.close_frame()
             msg_label = tk.Label(text=message)
             msg_label.pack() # outside of frame
-            frame3 = Frame3(root)
+            input_frame = InputFrame(root)
         else:
             self.msg_label = tk.Label(master=self.frame, text=message)
             self.msg_label.pack()
 
-    def close_frame(self):
-        self.frame.destroy()
-
-class Frame3():
+class InputFrame(Frame):
     def __init__(self, parent):
-        self.parent = parent
-        self.frame = tk.Frame(self.parent)
+        super().__init__(parent)
         self.label = tk.Label(master=self.frame, text='Connect to Voice?')
         self.button1 = tk.Button(master=self.frame, text='Yes', command=self.use_voice)
         self.button2 = tk.Button(master=self.frame, text='No', command=self.use_text)
@@ -188,22 +187,18 @@ class Frame3():
         self.close_frame()
         text_label = tk.Label(text='Using text commands')
         text_label.pack()
-        frame4 = Frame4(root)
+        text_frame = TextFrame(root)
 
     def use_voice(self):
         self.close_frame()
         voice_label = tk.Label(text='Using voice commands')
         voice_label.pack()
-        global frame5
-        frame5 = Frame5(root)
+        global voice_frame
+        voice_frame = VoiceFrame(root)
 
-    def close_frame(self):
-        self.frame.destroy()
-
-class Frame4():
+class TextFrame(Frame):
     def __init__(self, parent):
-        self.parent = parent
-        self.frame = tk.Frame(self.parent)
+        super().__init__(parent)
         self.label = tk.Label(master=self.frame, text='Message:')
         self.entry = tk.Entry(master=self.frame)
         self.button = tk.Button(master=self.frame, text='Send', command=self.send_command)
@@ -224,13 +219,9 @@ class Frame4():
         self.counter += 1
         self.msg_label.config(text=f'[{self.counter}] Command sent')
 
-    def close_frame(self):
-        self.frame.destroy()
-
-class Frame5():
+class VoiceFrame(Frame):
     def __init__(self, parent):
-        self.parent = parent
-        self.frame = tk.Frame(self.parent)
+        super().__init__(parent)
 
         connect_to_voice()
         self.audio = pyaudio.PyAudio()
@@ -274,7 +265,6 @@ class Frame5():
         self.msg_label.config(text='Recording stopped')
     
 
-
 root = tk.Tk()
-frame1 = Frame1(root)
+username_frame = UsernameFrame(root)
 root.mainloop()
