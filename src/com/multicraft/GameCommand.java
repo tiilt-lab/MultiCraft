@@ -121,8 +121,8 @@ public class GameCommand {
 		int distanceToMove = ((Long) args.get("dimensions")).intValue();
 		Location pLoc = issuer.getLocation();
 
-		double rotation = issuer.getLocation().getYaw();
-		String directionFacedByPlayer = CoordinateCalculations.getSpecificDirection((int) rotation);
+		double rotation = pLoc.getYaw();
+		String directionFacedByPlayer = CoordinateCalculations.getGeneralDirection((int) rotation);
 		Location newLoc = pLoc.clone();
 
 		switch (directionFacedByPlayer) {
@@ -140,7 +140,7 @@ public class GameCommand {
 		      break;
 		}
 		
-		issuer.sendMessage(CoordinateCalculations.getGeneralDirection((int) rotation));
+		issuer.sendMessage(directionFacedByPlayer);
 		issuer.teleport(newLoc);
 
 		return true;
