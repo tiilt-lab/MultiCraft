@@ -140,7 +140,7 @@ public class GameCommand {
 		      break;
 		}
 		
-		issuer.sendMessage(CoordinateCalculations.getSpecificDirection((int) rotation));
+		issuer.sendMessage(CoordinateCalculations.getGeneralDirection((int) rotation));
 		issuer.teleport(newLoc);
 
 		return true;
