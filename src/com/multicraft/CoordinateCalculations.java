@@ -54,7 +54,7 @@ public class CoordinateCalculations {
 		return new int[] {endX, endY, endZ};
 	}
 
-	private static String getGeneralDirection(int angle) {
+	public static String getGeneralDirection(int angle) {
 		String specificDirection = getSpecificDirection(angle);
 		Set<String> northDir = new HashSet<String>(Arrays.asList("north northwest", "north", "north northeast", "northeast"));
 		Set<String> eastDir = new HashSet<String>(Arrays.asList("east northeast", "east", "east southeast", "southeast"));
@@ -70,7 +70,7 @@ public class CoordinateCalculations {
 		return "west";
 	}
 	
-	public static String getSpecificDirection(int angle) {
+	private static String getSpecificDirection(int angle) {
 		if (angle < 0)
 			angle += 360;
 
