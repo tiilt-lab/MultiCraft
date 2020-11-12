@@ -27,9 +27,9 @@ audio_source = AudioSource(q, True, True)
 
 def get_uuid(mc_username):
     global CLIENT_NAME
-    with urllib.request.urlopen(f'https://api.mojang.com/users/profiles/minecraft/{mc_username}') as response:
-        mc_profile = response.read().decode('utf-8')
     try:
+        with urllib.request.urlopen(f'https://api.mojang.com/users/profiles/minecraft/{mc_username}') as response:
+            mc_profile = response.read().decode('utf-8')
         mc_username = json.loads(mc_profile)['name'] # ensures username is case-corrected
         CLIENT_NAME = str(uuid.UUID(json.loads(mc_profile)['id']))
         return f'Connected as {mc_username}\n({CLIENT_NAME})'
@@ -113,9 +113,7 @@ def pyaudio_callback(in_data, frame_count, time_info, status):
 
 
 
-
 # Tkinter GUI
-
 class Frame():
     def __init__(self, parent):
         self.parent = parent
@@ -131,9 +129,12 @@ class UsernameFrame(Frame):
         self.entry = tk.Entry(master=self.frame)
         self.entry.bind('<Return>', lambda _: self.get_username())
         self.button = tk.Button(master=self.frame, text='OK', command=self.get_username, font=button_font)
+        self.counter = 0
+        self.error_label = tk.Label(master=self.frame, text='', font=label_font2)
         self.label.pack()
         self.entry.pack()
         self.button.pack()
+        self.error_label.pack()
         self.frame.pack()
 
     def get_username(self):
@@ -141,12 +142,12 @@ class UsernameFrame(Frame):
         message = get_uuid(username)
         if 'Connected' in message:
             self.close_frame()
-            msg_label = tk.Label(text=message, font=label_font2)
-            msg_label.pack() # outside of frame
+            username_label = tk.Label(text=message, font=label_font2)
+            username_label.pack() # outside of frame
             server_frame = ServerFrame(root)
         else:
-            self.msg_label = tk.Label(master=self.frame, text=message, font=label_font2)
-            self.msg_label.pack()
+            self.counter += 1
+            self.error_label.config(text=f'[{self.counter}] {message}')
 
 class ServerFrame(Frame):
     def __init__(self, parent):
@@ -155,9 +156,12 @@ class ServerFrame(Frame):
         self.entry = tk.Entry(master=self.frame)
         self.entry.bind('<Return>', lambda _: self.get_ip())
         self.button = tk.Button(master=self.frame, text='OK', command=self.get_ip, font=button_font)
+        self.counter = 0
+        self.error_label = tk.Label(master=self.frame, text='', font=label_font2)
         self.label.pack()
         self.entry.pack()
         self.button.pack()
+        self.error_label.pack()
         self.frame.pack()
     
     def get_ip(self):
@@ -169,8 +173,8 @@ class ServerFrame(Frame):
             msg_label.pack() # outside of frame
             input_frame = InputFrame(root)
         else:
-            self.msg_label = tk.Label(master=self.frame, text=message, font=label_font2)
-            self.msg_label.pack()
+            self.counter += 1
+            self.error_label.config(text=f'[{self.counter}] {message}')
 
 class InputFrame(Frame):
     def __init__(self, parent):
@@ -265,6 +269,8 @@ class VoiceFrame(Frame):
 
 root = tk.Tk()
 root.title('Multicraft')
+
+# Set window size
 width  = root.winfo_screenwidth() // 3
 height = root.winfo_screenheight() // 3
 root.geometry(f'{width}x{height}')
