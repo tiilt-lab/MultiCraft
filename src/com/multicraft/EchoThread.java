@@ -39,8 +39,12 @@ public class EchoThread extends Thread{
                     System.out.println(line);
 
                     String clientNameField = "\"client_name\": \"";
-                    int start = line.indexOf(clientNameField) + clientNameField.length();
-                    plugin.getServer().getPlayer(UUID.fromString(line.substring(start, start + 36))).sendMessage(line);
+                    int start = line.indexOf(clientNameField);
+                    if (start >= 0)
+                    {
+                        start += clientNameField.length();
+                        plugin.getServer().getPlayer(UUID.fromString(line.substring(start, start + 36))).sendMessage(line);
+                    }
                 }
             } catch (IOException e) {
                 e.printStackTrace();
