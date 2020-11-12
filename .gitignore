@@ -2,13 +2,22 @@
 *.pyc
 __pycache__/
 
-# logs and files created from testing
+# Server-specific logs and files
+MultiCraftServer/BuildData/
+MultiCraftServer/Bukkit/
+MultiCraftServer/CraftBukkit/
+MultiCraftServer/crash-reports/
 MultiCraftServer/logs/
-MultiCraftServer/world/stats/
-MultiCraftServer/world/playerdata/
 MultiCraftServer/plugins/*.csv
-MultiCraftServer/crash-reports
-MultiCraftServer/plugins/LogBlock/*
+MultiCraftServer/plugins/LogBlock/
+MultiCraftServer/Spigot/
+MultiCraftServer/world/
+MultiCraftServer/world_nether/
+MultiCraftServer/world_the_end/
+MultiCraftServer/*.json
+MultiCraftServer/*.txt
+MultiCraftServer/*.yml
+MultiCraftServer/server.properties
 
 # ide specific folders and files
 .vscode/
@@ -29,15 +38,3 @@ out/
 # jar-compilation specific files
 MultiCraft.jar_xml
 MultiCraft.iml
-
-# Minecraft server specific files
-MultiCraftServer/BuildData
-MultiCraftServer/Bukkit
-MultiCraftServer/CraftBukkit
-MultiCraftServer/Spigot
-MultiCraftServer/world/
-MultiCraftServer/world_nether/
-MultiCraftServer/world_the_end/
-MultiCraftServer/logs/
-MultiCraftServer/*.json
-MultiCraftServer/*.txt
