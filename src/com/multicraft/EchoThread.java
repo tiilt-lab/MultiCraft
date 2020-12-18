@@ -7,11 +7,13 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.UUID;
 
-import com.multicraft.CommandsQueue;
+import org.bukkit.entity.Player;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.ParseException;
+import org.json.simple.parser.JSONParser;
 
 public class EchoThread extends Thread{
 	protected Socket socket;
-	CommandsQueue cQ = CommandsQueue.getInstance();
 	MultiCraft plugin;
 	public EchoThread(Socket clientSocket, MultiCraft pl) {
 		socket = clientSocket;
@@ -19,8 +21,8 @@ public class EchoThread extends Thread{
 	}
 	
 	public void run() {
-		InputStream inp = null;
-        BufferedReader brinp = null;
+		InputStream inp;
+        BufferedReader brinp;
         try {
             inp = socket.getInputStream();
             brinp = new BufferedReader(new InputStreamReader(inp));
@@ -38,12 +40,22 @@ public class EchoThread extends Thread{
                 	CommandsQueue.getInstance().commands.add(line);
                     System.out.println(line);
 
-                    String clientNameField = "\"client_name\": \"";
-                    int start = line.indexOf(clientNameField);
-                    if (start >= 0)
-                    {
-                        start += clientNameField.length();
-                        plugin.getServer().getPlayer(UUID.fromString(line.substring(start, start + 36))).sendMessage(line);
+                    try {
+                        JSONParser parser = new JSONParser();
+                        JSONObject obj = (JSONObject) parser.parse(line);
+                        Object client = obj.get("client_name");
+                        if (client != null) {
+                            try {
+                                Player player = plugin.getServer().getPlayer(UUID.fromString(client.toString()));
+                                if (player != null)
+                                    player.sendMessage(line);
+                            } catch (IllegalArgumentException ie) {
+                                ie.printStackTrace();
+                            }
+                        }
+                    } catch(ParseException pe) {
+                        System.out.println("position: " + pe.getPosition());
+                        pe.printStackTrace();
                     }
                 }
             } catch (IOException e) {

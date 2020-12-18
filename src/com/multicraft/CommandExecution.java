@@ -1,6 +1,8 @@
 package com.multicraft;
 
 import java.util.UUID;
+
+import org.bukkit.entity.Player;
 import org.json.simple.JSONObject;
 
 /*
@@ -21,8 +23,10 @@ public class CommandExecution extends Thread{
 					GameCommand gComm = new GameCommand(o, plugin);
 
 					if (! gComm.execute()) {
-						String issuer = o.get("client_name").toString();
-						plugin.getServer().getPlayer(UUID.fromString(issuer)).sendMessage("Command execution failed.");
+						String client = o.get("client_name").toString();
+						Player issuer = plugin.getServer().getPlayer(UUID.fromString(client));
+						if (issuer != null)
+							issuer.sendMessage("Command execution failed.");
 					}
 
 				} catch (Exception e) {
