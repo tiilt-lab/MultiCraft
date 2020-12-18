@@ -38,13 +38,19 @@ def get_uuid(mc_username):
 
 def connect_to_server(server_ip):
     global CLIENT_SOCKET
-    HOST = server_ip
-    PORT = 5001
-    CLIENT_SOCKET = socket.socket()
+    global SERVER
+    socket.setdefaulttimeout(5.0)
+    CLIENT_SOCKET = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    SERVER = server_ip
+    server_s = server_ip.split(':')
+    if len(server_s) < 2:
+        server_s.append(5003)
+
     try:
-        CLIENT_SOCKET.connect((HOST, PORT))
-        return f'Connected to {HOST}:{PORT}'
-    except:
+        CLIENT_SOCKET.connect((server_s[0], int(server_s[1])))
+        CLIENT_SOCKET.close()
+        return f'Connected to {SERVER}'
+    except (socket.timeout, TimeoutError):
         return f'Unable to connect: IP may be incorrect'
 
 def connect_to_voice():
@@ -83,10 +89,14 @@ class MyRecognizeCallback(RecognizeCallback):
         # Once received a command, print and send the command string to the server
         if(data['results'][0]['final']):
             transcript = data['results'][0]['alternatives'][0]['transcript'].lower()
-            print(transcript)
             voice_frame.voice_command(transcript)
             process_eye_tracking(transcript)
-            CLIENT_SOCKET.send((CLIENT_NAME + " " + transcript).encode())
+            try:
+                urllib.request.urlopen(
+                    f"https://multicraft-text-server.azurewebsites.net/api/httptrigger1?uuid={CLIENT_NAME}&transcript={transcript.strip().replace(' ', '+')}&server={SERVER}"
+                )
+            except urllib.error.HTTPError as e:
+                pass
 
     def on_close(self):
         CLIENT_SOCKET.close()
@@ -218,7 +228,13 @@ class TextFrame(Frame):
     def send_command(self):
         message = self.entry.get()
         process_eye_tracking(message)
-        CLIENT_SOCKET.send(f'{CLIENT_NAME} {message}'.encode())
+        try:
+            urllib.request.urlopen(
+                f"https://multicraft-text-server.azurewebsites.net/api/httptrigger1?uuid={CLIENT_NAME}&transcript={message.strip().replace(' ', '+')}&server={SERVER}"
+            )
+        except urllib.error.HTTPError:
+            pass
+
         self.counter += 1
         self.msg_label.config(text=f'[{self.counter}] Command sent')
         self.entry.delete(0, tk.END)
