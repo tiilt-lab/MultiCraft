@@ -1,5 +1,0 @@
-flask
-flask_restful
-serial
-gevent
-ws4py
