@@ -1,0 +1,9 @@
+[submodule "MultiCraftTextServer"]
+	path = MultiCraftTextServer
+	url = https://github.com/mendozatudares/MultiCraftTextServer
+[submodule "MultiCraftServer"]
+	path = MultiCraftServer
+	url = https://github.com/mendozatudares/MultiCraftServer
+[submodule "MultiCraftClient"]
+	path = MultiCraftClient
+	url = https://github.com/mendozatudares/MultiCraftClient
