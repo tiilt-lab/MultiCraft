@@ -7,3 +7,6 @@
 [submodule "MultiCraftClient"]
 	path = MultiCraftClient
 	url = https://github.com/mendozatudares/MultiCraftClient
+[submodule "TangiCraft"]
+	path = TangiCraft
+	url = https://github.com/mendozatudares/TangiCraft
