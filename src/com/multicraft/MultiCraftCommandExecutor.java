@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.List;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -35,6 +36,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		Player p = (Player) sender;
+		GameMode pGameMode = p.getGameMode();
 		String cmdName = cmd.getName().toLowerCase();
 
 		switch(cmdName) {
@@ -61,6 +63,12 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 					}
 
 				Material material = Material.getMaterial(materialId);
+
+				if (pGameMode == GameMode.SURVIVAL && !p.getInventory().contains(material)) {
+					p.sendMessage("You do not have the material needed.");
+					break;
+				}
+
 				List<BlockRecord> blocksAffected = Commands.buildStructure(p.getLocation(), startLocation, dimensions, material, args.length > 4, plugin);
 				Commands.updateUndoAndRedoStacks(blocksAffected, p);
 
@@ -113,6 +121,12 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 						}
 
 					Material material = Material.getMaterial(materialId);
+
+					if (pGameMode == GameMode.SURVIVAL && !p.getInventory().contains(material)) {
+						p.sendMessage("You do not have the material needed.");
+						break;
+					}
+
 					List<BlockRecord> blocksAffected = Commands.buildStructure(p.getLocation(), startLocation, dimensions, material, args.length > 4, plugin);
 					Commands.updateUndoAndRedoStacks(blocksAffected, p);
 
