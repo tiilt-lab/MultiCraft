@@ -29,38 +29,35 @@ public class EchoThread extends Thread{
         } catch (IOException e) {
             return;
         }
-        String line;
         while (true) {
             try {
-                line = brinp.readLine();
-                if ((line == null) || line.equalsIgnoreCase("QUIT")) {
+                String line = brinp.readLine();
+                if (line == null) {
                     socket.close();
                     return;
-                } else {
-                	CommandsQueue.getInstance().commands.add(line);
-                    System.out.println(line);
-
-                    try {
-                        JSONParser parser = new JSONParser();
-                        JSONObject obj = (JSONObject) parser.parse(line);
-                        Object client = obj.get("client_name");
-                        if (client != null) {
-                            try {
-                                Player player = plugin.getServer().getPlayer(UUID.fromString(client.toString()));
-                                if (player != null)
-                                    player.sendMessage(line);
-                            } catch (IllegalArgumentException ie) {
-                                ie.printStackTrace();
+                }
+                try {
+                    JSONParser parser = new JSONParser();
+                    JSONObject obj = (JSONObject) parser.parse(line);
+                    Object client = obj.get("client_name");
+                    if (client != null) {
+                        try {
+                            Player player = plugin.getServer().getPlayer(UUID.fromString(client.toString()));
+                            if (player != null) {
+                                player.sendMessage(line);
+                                CommandsQueue.getInstance().commands.add(line);
+                                System.out.println(line);
                             }
+                        } catch (IllegalArgumentException ie) {
+                            ie.printStackTrace();
                         }
-                    } catch(ParseException pe) {
-                        System.out.println("position: " + pe.getPosition());
-                        pe.printStackTrace();
                     }
+                } catch(ParseException pe) {
+                    System.out.println("position: " + pe.getPosition());
+                    pe.printStackTrace();
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-                return;
             }
         }
     }
