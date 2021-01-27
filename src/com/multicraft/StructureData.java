@@ -31,6 +31,7 @@ public class StructureData {
             File structureFile = new File(path);
             HashMap<String, String[]> csvData = new HashMap<>();
             try {
+                structureFile.getParentFile().mkdirs();
                 if (!structureFile.createNewFile()) {
                     try (BufferedReader br = new BufferedReader(new FileReader(path))) {
                         String line;

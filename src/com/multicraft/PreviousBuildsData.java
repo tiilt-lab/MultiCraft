@@ -48,7 +48,7 @@ public class PreviousBuildsData {
 		}
 
 		CustomUndoStack tempStack = buildsUndoData.get(p.getUniqueId());
-		temp = tempStack.pop();
+		temp = tempStack.peek();
 		// temp = instance.buildsUndoData.get(p).pop();
 		return temp;
 	}
