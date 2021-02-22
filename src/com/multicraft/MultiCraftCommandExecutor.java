@@ -11,6 +11,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import com.multicraft.Materials.MaterialDoesNotExistException;
 
@@ -64,9 +65,22 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 
 				Material material = Material.getMaterial(materialId);
 
+				int numBlocksRequired = dimensions[0] * dimensions[1] * dimensions[2];
+				// adjust numBlocksRequired if hollow
+				if (args.length > 4) {
+					numBlocksRequired -= (dimensions[0] - 1) * (dimensions[1] - 1) * (dimensions[2] - 1);
+				}
 				if (pGameMode == GameMode.SURVIVAL && !p.getInventory().contains(material)) {
-					p.sendMessage("You do not have the material needed.");
-					break;
+					int amount = 0;
+					for (ItemStack stack : p.getInventory().getContents()) {
+						if (stack != null && stack.getType().equals(material)) {
+							amount += stack.getAmount();
+						}
+					}
+					if (amount < numBlocksRequired) {
+						p.sendMessage("You do not have the material needed.");
+						break;
+					}
 				}
 
 				List<BlockRecord> blocksAffected = Commands.buildStructure(p.getLocation(), startLocation, dimensions, material, args.length > 4, plugin);
