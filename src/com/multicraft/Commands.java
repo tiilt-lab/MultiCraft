@@ -86,18 +86,12 @@ public class Commands {
 
 		World world = pos1.getWorld();
 		List<BlockRecord> blocksAffected = new ArrayList<>();
-		Material lastUpdatedMaterial = null;
 
 		for (int x = startX; x <= endX; x++) {
 			for (int y = startY; y <= endY; y++) {
 				for (int z = startZ; z <= endZ; z++) {
 					if (hollow && !((x == startX || x == endX) && (y == startY || y == endY) && (z == startZ || z == endZ))) continue;
-
-					BlockRecord updatedBlock = updateBlock(world, plugin, x, y, z, m);
-					if (lastUpdatedMaterial == null || updatedBlock.material.equals(lastUpdatedMaterial)) {
-						blocksAffected.add(updatedBlock);
-						lastUpdatedMaterial = updatedBlock.material;
-					}
+					blocksAffected.add(updateBlock(world, plugin, x, y, z, m));
 				}
 			}
 		}
