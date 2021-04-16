@@ -46,7 +46,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 			case "mredo":
 				return Commands.redo(p, this.plugin);
 			case "mbuild": {
-				if (args.length < 3 || args.length > 4) {
+				if (args.length < 2 || args.length > 5) {
 					p.sendMessage("Incorrect number of parameters.");
 					return false;
 				}
@@ -74,7 +74,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 				int numBlocksRequired = dimensions[0] * dimensions[1] * dimensions[2];
 				// adjust numBlocksRequired if hollow
 				if (args.length > 4) {
-					numBlocksRequired -= (dimensions[0] - 1) * (dimensions[1] - 1) * (dimensions[2] - 1);
+					numBlocksRequired -= (dimensions[0] - 2) * (dimensions[1] - 2) * (dimensions[2] - 2);
 				}
 				if (pGameMode == GameMode.SURVIVAL) {
 					if (!p.getInventory().contains(material, numBlocksRequired)) {
@@ -103,6 +103,18 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 					Location startLocation = p.getTargetBlock((HashSet<Byte>) null, 16).getLocation().add(0, 1, 0);
 					int materialId = 1;
 					Material material = Material.getMaterial(materialId);
+
+					int numBlocksRequired = dimensions[0] * dimensions[1] * dimensions[2];
+					if (pGameMode == GameMode.SURVIVAL) {
+						if (!p.getInventory().contains(material, numBlocksRequired)) {
+							p.sendMessage("You do not have the material needed.");
+							return false;
+						} else {
+							p.getInventory().removeItem(new ItemStack(material, numBlocksRequired));
+							p.sendMessage("Used " + numBlocksRequired + " blocks.");
+						}
+					}
+
 					List<BlockRecord> blocksAffected = Commands.buildStructure(p.getLocation(), startLocation, dimensions, material, false, plugin);
 					Commands.updateUndoAndRedoStacks(blocksAffected, p);
 				}
@@ -121,6 +133,17 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 					}
 
 					Material material = Material.getMaterial(materialId);
+
+					int numBlocksRequired = dimensions[0] * dimensions[1] * dimensions[2];
+					if (pGameMode == GameMode.SURVIVAL) {
+						if (!p.getInventory().contains(material, numBlocksRequired)) {
+							p.sendMessage("You do not have the material needed.");
+							return false;
+						} else {
+							p.getInventory().removeItem(new ItemStack(material, numBlocksRequired));
+							p.sendMessage("Used " + numBlocksRequired + " blocks.");
+						}
+					}
 					List<BlockRecord> blocksAffected = Commands.buildStructure(p.getLocation(), startLocation, dimensions, material, false, plugin);
 					Commands.updateUndoAndRedoStacks(blocksAffected, p);
 				}
@@ -139,9 +162,19 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 
 					Material material = Material.getMaterial(materialId);
 
-					if (pGameMode == GameMode.SURVIVAL && !p.getInventory().contains(material)) {
-						p.sendMessage("You do not have the material needed.");
-						break;
+					int numBlocksRequired = dimensions[0] * dimensions[1] * dimensions[2];
+					// adjust numBlocksRequired if hollow
+					if (args.length > 4) {
+						numBlocksRequired -= (dimensions[0] - 2) * (dimensions[1] - 2) * (dimensions[2] - 2);
+					}
+					if (pGameMode == GameMode.SURVIVAL) {
+						if (!p.getInventory().contains(material, numBlocksRequired)) {
+							p.sendMessage("You do not have the material needed.");
+							return false;
+						} else {
+							p.getInventory().removeItem(new ItemStack(material, numBlocksRequired));
+							p.sendMessage("Used " + numBlocksRequired + " blocks.");
+						}
 					}
 
 					List<BlockRecord> blocksAffected = Commands.buildStructure(p.getLocation(), startLocation, dimensions, material, args.length > 4, plugin);
