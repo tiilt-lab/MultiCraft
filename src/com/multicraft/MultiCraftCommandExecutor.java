@@ -52,6 +52,12 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 				}
 
 				int[] dimensions = new int[]{Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2])};
+				for (int i : dimensions) {
+					if (i < 1) {
+						p.sendMessage("You cannot have a zero or negative dimension.");
+						break;
+					}
+				}
 				Location startLocation = p.getLocation();
 
 				int materialId = 1;
