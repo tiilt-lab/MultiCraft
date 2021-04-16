@@ -70,16 +70,13 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 				if (args.length > 4) {
 					numBlocksRequired -= (dimensions[0] - 1) * (dimensions[1] - 1) * (dimensions[2] - 1);
 				}
-				if (pGameMode == GameMode.SURVIVAL && !p.getInventory().contains(material)) {
-					int amount = 0;
-					for (ItemStack stack : p.getInventory().getContents()) {
-						if (stack != null && stack.getType().equals(material)) {
-							amount += stack.getAmount();
-						}
-					}
-					if (amount < numBlocksRequired) {
+				if (pGameMode == GameMode.SURVIVAL) {
+					if (!p.getInventory().contains(material, numBlocksRequired)) {
 						p.sendMessage("You do not have the material needed.");
 						break;
+					} else {
+						p.getInventory().removeItem(new ItemStack(material, numBlocksRequired));
+						p.sendMessage("Used " + numBlocksRequired + " blocks.");
 					}
 				}
 
