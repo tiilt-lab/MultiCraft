@@ -46,16 +46,16 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 			case "mredo":
 				return Commands.redo(p, this.plugin);
 			case "mbuild": {
-				if (args.length < 3) {
-					p.sendMessage("Not enough parameters.");
-					break;
+				if (args.length < 3 || args.length > 4) {
+					p.sendMessage("Incorrect number of parameters.");
+					return false;
 				}
 
 				int[] dimensions = new int[]{Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2])};
 				for (int i : dimensions) {
 					if (i < 1) {
 						p.sendMessage("You cannot have a zero or negative dimension.");
-						break;
+						return false;
 					}
 				}
 				Location startLocation = p.getLocation();
@@ -79,7 +79,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 				if (pGameMode == GameMode.SURVIVAL) {
 					if (!p.getInventory().contains(material, numBlocksRequired)) {
 						p.sendMessage("You do not have the material needed.");
-						break;
+						return false;
 					} else {
 						p.getInventory().removeItem(new ItemStack(material, numBlocksRequired));
 						p.sendMessage("Used " + numBlocksRequired + " blocks.");
