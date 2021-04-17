@@ -298,11 +298,11 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 					break;
 				}
 
-				StructureData universalStructureData = new StructureData(jarLocation + "universal" + "StructureData.csv");
-				StructureData playerStructureData = new StructureData(jarLocation + p.getUniqueId() + "StructureData.csv");
+				StructureData universalStructureData = new StructureData(jarLocation + "\\MultiCraft\\" + "universal" + "StructureData.csv");
+				StructureData playerStructureData = new StructureData(jarLocation + "\\MultiCraft\\" + p.getUniqueId() + "StructureData.csv");
 
 				BuildCommandData playerBuildData;
-				try { playerBuildData = PreviousBuildsData.getInstance().getPlayersBuildRecordForUndo(p); }
+				try { playerBuildData = PreviousBuildsData.getInstance().getPlayersLastBuildRecord(p); }
 				catch(NoCommandHistoryException e) {
 					p.sendMessage("No previous builds found.");
 					break;
@@ -347,8 +347,8 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 					break;
 				}
 
-				StructureData universalStructureData = new StructureData(jarLocation + "universal" + "StructureData.csv");
-				StructureData playerStructureData = new StructureData(jarLocation + p.getUniqueId() + "StructureData.csv");
+				StructureData universalStructureData = new StructureData(jarLocation + "\\MultiCraft\\" + "universal" + "StructureData.csv");
+				StructureData playerStructureData = new StructureData(jarLocation + "\\MultiCraft\\" + p.getUniqueId() + "StructureData.csv");
 
 				// check for player-stored structure first, then universal
 				String[] buildData = playerStructureData.getStructureData(args[0]);

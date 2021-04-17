@@ -52,13 +52,19 @@ public class PreviousBuildsData {
 		// temp = instance.buildsUndoData.get(p).pop();
 		return temp;
 	}
+
+	public BuildCommandData getPlayersLastBuildRecord(Player p) throws NoCommandHistoryException{
+		if(! buildsUndoData.containsKey(p.getUniqueId())) {
+			throw new NoCommandHistoryException("Player is not in the dictionary.");
+		}
+		CustomUndoStack tempStack = buildsUndoData.get(p.getUniqueId());
+		return tempStack.peek();
+	}
 	
 	public BuildCommandData getPlayersBuildRecordForRedo(Player p) throws NoCommandHistoryException{
 		if(! buildsRedoData.containsKey(p.getUniqueId()))
 			throw new NoCommandHistoryException("Player is not in the redo dictionary.");
-		BuildCommandData temp = null;
-		temp = instance.buildsRedoData.get(p.getUniqueId()).pop();
-		return temp;
+		return instance.buildsRedoData.get(p.getUniqueId()).pop();
 	}
 	
 	public void addToRedoStack(Player p, BuildCommandData data) {

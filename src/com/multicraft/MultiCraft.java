@@ -32,6 +32,9 @@ public class MultiCraft extends JavaPlugin{
 		new SpeechToTextServer(this).start();
 		new CommandsListener(this).start();
 		new CommandExecution(this).start();
+
+		// start thread to handle file transfers
+		new FileTransferServer(this).start();
 	}
 	
 	@Override

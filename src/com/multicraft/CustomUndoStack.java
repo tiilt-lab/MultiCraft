@@ -26,7 +26,21 @@ public class CustomUndoStack {
 		dataArr[insertIndex] = null;
 		return data;		 
 	}
-	
+
+	public BuildCommandData peek() throws NoCommandHistoryException {
+		if(this.isEmpty()) {
+			throw new NoCommandHistoryException("The stack is empty.");
+		}
+
+		int peekIndex = insertIndex - 1;
+
+		if(peekIndex < 0) {
+			peekIndex = this.size-1;
+		}
+
+		return dataArr[peekIndex];
+	}
+
 	public void push(BuildCommandData data) {
 		this.dataArr[this.insertIndex] = data;
 		this.insertIndex+=1;
@@ -44,12 +58,8 @@ public class CustomUndoStack {
 		
 		if(indexToCheck < 0)
 			indexToCheck = this.size-1;
-		
-		if(dataArr[indexToCheck] == null) {
-			return true;
-		}
-		
-		return false;
+
+		return dataArr[indexToCheck] == null;
 	}
 	
 	public int getSize() {
