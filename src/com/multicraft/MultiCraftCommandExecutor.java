@@ -157,7 +157,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 
 				Location loc1 = rBuild.getStartLocation(p);
 				Location loc2 = rBuild.getEndLocation(p);
-				Commands.updateBlocks(loc1, loc2, Material.getMaterial(1), false, plugin);
+				Commands.updateBlocks(loc1, loc2, Material.getMaterial(1), false, null, plugin);
 
 				p.sendMessage("Structure has been constructed in the region marked.");
 				return true;

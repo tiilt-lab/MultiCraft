@@ -57,8 +57,8 @@ public class GameCommand {
 				return executePlace();
 			case "move":
 				return executeMove();
-			case "track":
-				return executeTrack();
+			// case "track":
+				// return executeTrack();
 			case "turn":
 				return executeTurn();
 			case "tilt":
@@ -73,6 +73,8 @@ public class GameCommand {
 				return executeClone();
 			case "give":
 				return executeGive();
+			case "tbuild":
+				return executeTangiBuild();
 		}
 		return false;
 	}
@@ -233,6 +235,21 @@ public class GameCommand {
 		int amount = ((Long) args.get("dimensions")).intValue();
 
 		issuer.getInventory().addItem(new ItemStack(id, amount));
+		return true;
+	}
+
+	@SuppressWarnings("deprecation")
+	public boolean executeTangiBuild() {
+	    JSONObject blockMap = (JSONObject) args.get("block_map");
+		int[] dimensions = {1, 1, 1};
+
+		int id = ((Long) args.get("block_code")).intValue();
+		Material m = Material.getMaterial(id);
+
+		Location l = issuer.getTargetBlock((HashSet<Byte>) null, 16).getLocation().add(0, 1, 0);
+
+		List<BlockRecord> blocksAffected = Commands.buildTangiStructure(issuer.getLocation(), l, dimensions, m, false, blockMap, plugin);
+		Commands.updateUndoAndRedoStacks(blocksAffected, issuer);
 		return true;
 	}
 
