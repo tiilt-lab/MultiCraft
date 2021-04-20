@@ -77,12 +77,15 @@ public class Commands {
         return updateBlocks(startLoc, endLoc, m, isHollow, null, plugin);
     }
 
-    public static List<BlockRecord> buildTangiStructure(Location playerLoc, Location startLoc, int[] dimensions, Material m, boolean isHollow, JSONObject blockMap, MultiCraft plugin) {
+    public static List<BlockRecord> buildTangiStructure(Location playerLoc, Location startLoc, JSONObject blockMap, MultiCraft plugin) {
+        int[] dimensions = {10, 10, 10};
         int[] buildCoordinates = CoordinateCalculations.getBuildCoordinates(playerLoc, startLoc, dimensions);
         Location endLoc = new Location(startLoc.getWorld(), buildCoordinates[0], buildCoordinates[1], buildCoordinates[2]);
 
-        return updateBlocks(startLoc, endLoc, m, isHollow, blockMap, plugin);
+        return updateBlocks(startLoc, endLoc, Material.STONE, false, blockMap, plugin);
     }
+
+    @SuppressWarnings("deprecation")
     public static List<BlockRecord> updateBlocks(Location pos1, Location pos2, Material m, Boolean hollow, JSONObject blockMap, MultiCraft plugin) {
         int startX = min(pos1.getBlockX(), pos2.getBlockX());
         int startY = min(pos1.getBlockY(), pos2.getBlockY());
@@ -94,27 +97,30 @@ public class Commands {
         World world = pos1.getWorld();
         List<BlockRecord> blocksAffected = new ArrayList<>();
 
-
         for (int x = startX; x <= endX; x++) {
+            String relativeX = Integer.toString(x - startX);
             JSONObject blockMapY = null;
             if (blockMap != null) {
-                if (!blockMap.containsKey(x - startX)) continue;
-                else {
-                    blockMapY = (JSONObject) blockMap.get(x - startX);
-                }
+                if (!blockMap.containsKey(relativeX)) continue;
+                else blockMapY = (JSONObject) blockMap.get(relativeX);
             }
             for (int y = startY; y <= endY; y++) {
+                String relativeY = Integer.toString(y - startY);
                 JSONObject blockMapZ = null;
                 if (blockMapY != null) {
-                    if (!blockMapY.containsKey(y - startY)) continue;
-                    else {
-                        blockMapZ = (JSONObject) blockMapY.get(y - startY);
-                    }
+                    if (!blockMapY.containsKey(relativeY)) continue;
+                    else blockMapZ = ((JSONObject) blockMapY.get(relativeY));
                 }
                 for (int z = startZ; z <= endZ; z++) {
-                    if ((hollow && !((x == startX || x == endX) && (y == startY || y == endY) && (z == startZ || z == endZ)))
-                            || (blockMapZ != null && !blockMapZ.containsKey(z - startZ)))
-                        continue;
+                    String relativeZ = Integer.toString(z - startZ);
+                    if (hollow && !((x == startX || x == endX) && (y == startY || y == endY) && (z == startZ || z == endZ))) continue;
+                    else if (blockMapZ != null) {
+                        if (!blockMapZ.containsKey(relativeZ)) continue;
+                        else {
+                            int id = ((Long) blockMapZ.get(relativeZ)).intValue();
+                            m = Material.getMaterial(id);
+                        }
+                    }
                     blocksAffected.add(updateBlock(world, plugin, x, y, z, m));
                 }
             }
@@ -126,9 +132,7 @@ public class Commands {
     private static BlockRecord updateBlock(World world, MultiCraft plugin, int x, int y, int z, Material blockType) {
         Block thisBlock = world.getBlockAt(x, y, z);
         BlockRecord toReturn = new BlockRecord(thisBlock.getType(), x, y, z);
-        Bukkit.getScheduler().runTask(plugin, () -> {
-            thisBlock.setType(blockType);
-        });
+        Bukkit.getScheduler().runTask(plugin, () -> thisBlock.setType(blockType));
 
         return toReturn;
     }

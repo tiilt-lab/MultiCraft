@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import com.multicraft.EchoThread;
-
 /*
  * This Server handles socket connections for each client. One server receives connection requests and for each, 
  * creates a unique EchoThread instance to communicate with that particular client
@@ -31,6 +29,7 @@ public class SpeechToTextServer extends Thread{
 		
 		while(true) {
 			try {
+				assert serverSocket != null;
 				socket = serverSocket.accept();
 			}catch(IOException e) {
 				e.printStackTrace();

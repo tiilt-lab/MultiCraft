@@ -1,6 +1,5 @@
 package com.multicraft;
 
-import java.io.File;
 import java.util.*;
 
 import org.bukkit.Bukkit;
@@ -8,7 +7,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import com.multicraft.PyramidBuilder.BlockVector3;
@@ -21,17 +19,12 @@ public class GameCommand {
 	private String commandName;
 	private Player issuer;
 	private JSONObject args;
-	private String eyeTrackLocation;
-	
+
 	public GameCommand(JSONObject argsJSON, MultiCraft plugin) {
 		this.plugin = plugin;
 		args = argsJSON;
 		commandName = (String) args.get("command");
 		issuer = Bukkit.getServer().getPlayer(UUID.fromString(args.get("client_name").toString()));
-
-		File filePath = new File(GameCommand.class.getProtectionDomain().getCodeSource().getLocation().getPath());
-		String jarLocation = filePath.getPath().substring(0, filePath.getPath().indexOf(filePath.getName()));
-		eyeTrackLocation = jarLocation + "Tobii" + File.separator + "Interaction_Streams_101.exe";
 	}
 	
 	public GameCommand(MultiCraft plugin) {
@@ -57,8 +50,6 @@ public class GameCommand {
 				return executePlace();
 			case "move":
 				return executeMove();
-			// case "track":
-				// return executeTrack();
 			case "turn":
 				return executeTurn();
 			case "tilt":
@@ -148,37 +139,6 @@ public class GameCommand {
 		return true;
 	}
 
-	public boolean executeTrack() {
-		if (args.containsKey("move") && (Boolean) args.get("move"))
-			return issuer.performCommand("eyetrack move");
-		else if (args.containsKey("build") && (Boolean) args.get("build")) {
-			new BukkitRunnable() {
-				@Override
-				public void run() {
-					Runtime run = Runtime.getRuntime();
-					String[] eyeTrackCommand = {eyeTrackLocation, "-d"};
-					try {
-						issuer.sendMessage("Tracking eyes...");
-						Process eyeTrack = run.exec(eyeTrackCommand);
-
-						while (eyeTrack.isAlive()) { /* Wait for eye tracking executable to complete. */ }
-
-						Bukkit.getScheduler().runTask(plugin, () -> {
-							issuer.sendMessage("Building Structure...");
-							executeBuild();
-						});
-
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-			}.runTaskAsynchronously(this.plugin);
-			return true;
-		}
-		else
-			return issuer.performCommand("eyetrack");
-	}
-
 	public boolean executeTurn() {
 		String direction = args.get("direction").toString();
 		int degrees = ((Long) args.get("dimensions")).intValue();
@@ -241,14 +201,10 @@ public class GameCommand {
 	@SuppressWarnings("deprecation")
 	public boolean executeTangiBuild() {
 	    JSONObject blockMap = (JSONObject) args.get("block_map");
-		int[] dimensions = {1, 1, 1};
-
-		int id = ((Long) args.get("block_code")).intValue();
-		Material m = Material.getMaterial(id);
 
 		Location l = issuer.getTargetBlock((HashSet<Byte>) null, 16).getLocation().add(0, 1, 0);
 
-		List<BlockRecord> blocksAffected = Commands.buildTangiStructure(issuer.getLocation(), l, dimensions, m, false, blockMap, plugin);
+		List<BlockRecord> blocksAffected = Commands.buildTangiStructure(issuer.getLocation(), l, blockMap, plugin);
 		Commands.updateUndoAndRedoStacks(blocksAffected, issuer);
 		return true;
 	}

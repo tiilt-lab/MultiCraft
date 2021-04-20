@@ -6,7 +6,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 public class RegionBuild {
-	private static HashMap<Player, RegionCoordinates> playerRegionSelections = new HashMap<Player, RegionCoordinates>();
+	private static final HashMap<Player, RegionCoordinates> playerRegionSelections = new HashMap<>();
 	private static RegionBuild instance = null;
 	
 	
@@ -37,7 +37,6 @@ public class RegionBuild {
 		
 		startRegionBuildForPlayer(p);
 		markStartPosition(p, l);
-		return;
 	}
 	
 	public boolean markEndPosition(Player p, Location l) {
@@ -72,7 +71,7 @@ public class RegionBuild {
 	}
 
 	
-	private class RegionCoordinates{
+	private static class RegionCoordinates{
 		private Location startLocation;
 		private Location endLocation;
 		
@@ -80,11 +79,7 @@ public class RegionBuild {
 			startLocation = null;
 			endLocation = null;
 		}
-		
-//		public boolean hasBothCoordinates() {
-//			return startLocation != null && endLocation != null;
-//		}
-		
+
 		public void setStartLocation(Location loc) {
 			startLocation = loc;
 		}
