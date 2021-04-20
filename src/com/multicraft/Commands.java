@@ -98,22 +98,22 @@ public class Commands {
         for (int x = startX; x <= endX; x++) {
             JSONObject blockMapY = null;
             if (blockMap != null) {
-                if (!blockMap.containsKey(x)) continue;
+                if (!blockMap.containsKey(x - startX)) continue;
                 else {
-                    blockMapY = (JSONObject) blockMap.get(x);
+                    blockMapY = (JSONObject) blockMap.get(x - startX);
                 }
             }
             for (int y = startY; y <= endY; y++) {
                 JSONObject blockMapZ = null;
                 if (blockMapY != null) {
-                    if (!blockMapY.containsKey(y)) continue;
+                    if (!blockMapY.containsKey(y - startY)) continue;
                     else {
-                        blockMapZ = (JSONObject) blockMapY.get(y);
+                        blockMapZ = (JSONObject) blockMapY.get(y - startY);
                     }
                 }
                 for (int z = startZ; z <= endZ; z++) {
                     if ((hollow && !((x == startX || x == endX) && (y == startY || y == endY) && (z == startZ || z == endZ)))
-                            || (blockMapZ != null && !blockMapZ.containsKey(z)))
+                            || (blockMapZ != null && !blockMapZ.containsKey(z - startZ)))
                         continue;
                     blocksAffected.add(updateBlock(world, plugin, x, y, z, m));
                 }
