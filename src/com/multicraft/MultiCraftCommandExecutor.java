@@ -2,7 +2,6 @@ package com.multicraft;
 
 import java.io.File;
 import java.util.HashSet;
-import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -11,9 +10,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
-import com.multicraft.Materials.MaterialDoesNotExistException;
 
 
 public class MultiCraftCommandExecutor implements CommandExecutor {
@@ -45,7 +41,8 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 				return Commands.undo(p, plugin);
 			case "mredo":
 				return Commands.redo(p, plugin);
-			case "mbuild": {
+			case "mbuild":
+			case "mmbuild": {
 				if (args.length < 2 || args.length > 5) {
 					p.sendMessage("Incorrect number of parameters.");
 					return false;
@@ -85,101 +82,15 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 				}
 
 				Material material = Material.getMaterial(materialId);
+				Location startLocation;
+				if (cmdName.equals("mbuild")) {
+					startLocation = p.getLocation().getBlock().getLocation(); // rounds location coordinates
+				} else {
+					startLocation = p.getTargetBlock((HashSet<Byte>) null, 16).getLocation().add(0, 1, 0);
+				}
 
-				return Commands.build(p, p.getLocation(), p.getLocation(), dimensions, material, isHollow,
+				return Commands.build(p, p.getLocation(), startLocation, dimensions, material, isHollow,
 						p.getGameMode() == GameMode.SURVIVAL, plugin);
-			}
-			case "mmbuild": {
-				if (args.length < 1){
-					p.sendMessage("Not enough parameters.");
-					break;
-				}
-				if (args.length == 1)
-				{
-					int dim1 = Integer.parseInt(args[0]);
-					int[] dimensions = new int[] {dim1, dim1, dim1};
-					Location startLocation = p.getTargetBlock((HashSet<Byte>) null, 16).getLocation().add(0, 1, 0);
-					int materialId = 1;
-					Material material = Material.getMaterial(materialId);
-
-					int numBlocksRequired = dimensions[0] * dimensions[1] * dimensions[2];
-					if (pGameMode == GameMode.SURVIVAL) {
-						if (!p.getInventory().contains(material, numBlocksRequired)) {
-							p.sendMessage("You do not have the material needed.");
-							return false;
-						} else {
-							p.getInventory().removeItem(new ItemStack(material, numBlocksRequired));
-							p.sendMessage("Used " + numBlocksRequired + " blocks.");
-						}
-					}
-
-					List<BlockRecord> blocksAffected = Commands.buildStructure(p.getLocation(), startLocation, dimensions, material, false, plugin);
-					Commands.updateUndoAndRedoStacks(blocksAffected, p);
-				}
-				else if (args.length == 2)
-				{
-					int dim1 = Integer.parseInt(args[0]);
-					int[] dimensions = new int[] {dim1, dim1, dim1};
-					Location startLocation = p.getTargetBlock((HashSet<Byte>) null, 16).getLocation().add(0, 1, 0);
-
-					int materialId = 1;
-					try { materialId = Integer.parseInt(args[1]); } catch (NumberFormatException e) {
-						try { materialId = Materials.getId(args[1]); } catch (MaterialDoesNotExistException f) {
-							p.sendMessage("The material you specified does not exists. Defaulting to stone.");
-							materialId = 1;
-						}
-					}
-
-					Material material = Material.getMaterial(materialId);
-
-					int numBlocksRequired = dimensions[0] * dimensions[1] * dimensions[2];
-					if (pGameMode == GameMode.SURVIVAL) {
-						if (!p.getInventory().contains(material, numBlocksRequired)) {
-							p.sendMessage("You do not have the material needed.");
-							return false;
-						} else {
-							p.getInventory().removeItem(new ItemStack(material, numBlocksRequired));
-							p.sendMessage("Used " + numBlocksRequired + " blocks.");
-						}
-					}
-					List<BlockRecord> blocksAffected = Commands.buildStructure(p.getLocation(), startLocation, dimensions, material, false, plugin);
-					Commands.updateUndoAndRedoStacks(blocksAffected, p);
-				}
-				else {
-					int[] dimensions = new int[] {Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2])};
-					Location startLocation = p.getTargetBlock((HashSet<Byte>) null, 16).getLocation().add(0, 1, 0);
-
-					int materialId = 1;
-					if (args.length > 3)
-						try { materialId = Integer.parseInt(args[3]); } catch (NumberFormatException e) {
-							try { materialId = Materials.getId(args[3]); } catch (MaterialDoesNotExistException f) {
-								p.sendMessage("The material you specified does not exists. Defaulting to stone.");
-								materialId = 1;
-							}
-						}
-
-					Material material = Material.getMaterial(materialId);
-
-					int numBlocksRequired = dimensions[0] * dimensions[1] * dimensions[2];
-					// adjust numBlocksRequired if hollow
-					if (args.length > 4) {
-						numBlocksRequired -= (dimensions[0] - 2) * (dimensions[1] - 2) * (dimensions[2] - 2);
-					}
-					if (pGameMode == GameMode.SURVIVAL) {
-						if (!p.getInventory().contains(material, numBlocksRequired)) {
-							p.sendMessage("You do not have the material needed.");
-							return false;
-						} else {
-							p.getInventory().removeItem(new ItemStack(material, numBlocksRequired));
-							p.sendMessage("Used " + numBlocksRequired + " blocks.");
-						}
-					}
-
-					List<BlockRecord> blocksAffected = Commands.buildStructure(p.getLocation(), startLocation, dimensions, material, args.length > 4, plugin);
-					Commands.updateUndoAndRedoStacks(blocksAffected, p);
-
-				}
-				return true;
 			}
 			case "rbuild": {
 				RegionBuild rBuild = RegionBuild.getInstance();
