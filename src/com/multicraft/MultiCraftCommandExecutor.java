@@ -42,54 +42,52 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 
 		switch(cmdName) {
 			case "mundo":
-				return Commands.undo(p, this.plugin);
+				return Commands.undo(p, plugin);
 			case "mredo":
-				return Commands.redo(p, this.plugin);
+				return Commands.redo(p, plugin);
 			case "mbuild": {
 				if (args.length < 2 || args.length > 5) {
 					p.sendMessage("Incorrect number of parameters.");
 					return false;
 				}
 
-				int[] dimensions = new int[]{Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2])};
-				for (int i : dimensions) {
-					if (i < 1) {
+				int[] dimensions;
+				int materialId;
+				boolean isHollow = false;
+
+				// /mbuild x y z material hollow [5 args]
+				// /mbuild x y z material 		 [4 args]
+				// /mbuild dim material hollow 	 [3 args]
+				// /mbuild dim material 		 [2 args]
+				if (args.length == 5 || args.length == 4) {
+					dimensions = new int[]{Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2])};
+					materialId = Integer.parseInt(args[3]);
+					if (args.length == 5 && Integer.parseInt(args[4]) == 1) {
+						isHollow = true;
+					}
+				} else {
+					int dim = Integer.parseInt(args[0]);
+					dimensions = new int[]{dim, dim, dim};
+					materialId = Integer.parseInt(args[1]);
+					if (args.length == 3 && Integer.parseInt(args[2]) == 1) {
+						isHollow = true;
+					}
+				}
+
+				for (int d : dimensions) {
+					if (d < 1) {
 						p.sendMessage("You cannot have a zero or negative dimension.");
+						return false;
+					} else if (isHollow && d < 3) {
+						p.sendMessage("You cannot have a hollow structure with those dimensions.");
 						return false;
 					}
 				}
-				Location startLocation = p.getLocation();
-
-				int materialId = 1;
-				if (args.length > 3)
-					try { materialId = Integer.parseInt(args[3]); } catch (NumberFormatException e) {
-						try { materialId = Materials.getId(args[3]); } catch (MaterialDoesNotExistException f) {
-							p.sendMessage("The material you specified does not exists. Defaulting to stone.");
-							materialId = 1;
-						}
-					}
 
 				Material material = Material.getMaterial(materialId);
 
-				int numBlocksRequired = dimensions[0] * dimensions[1] * dimensions[2];
-				// adjust numBlocksRequired if hollow
-				if (args.length > 4) {
-					numBlocksRequired -= (dimensions[0] - 2) * (dimensions[1] - 2) * (dimensions[2] - 2);
-				}
-				if (pGameMode == GameMode.SURVIVAL) {
-					if (!p.getInventory().contains(material, numBlocksRequired)) {
-						p.sendMessage("You do not have the material needed.");
-						return false;
-					} else {
-						p.getInventory().removeItem(new ItemStack(material, numBlocksRequired));
-						p.sendMessage("Used " + numBlocksRequired + " blocks.");
-					}
-				}
-
-				List<BlockRecord> blocksAffected = Commands.buildStructure(p.getLocation(), startLocation, dimensions, material, args.length > 4, plugin);
-				Commands.updateUndoAndRedoStacks(blocksAffected, p);
-
-				return true;
+				return Commands.build(p, p.getLocation(), p.getLocation(), dimensions, material, isHollow,
+						p.getGameMode() == GameMode.SURVIVAL, plugin);
 			}
 			case "mmbuild": {
 				if (args.length < 1){
