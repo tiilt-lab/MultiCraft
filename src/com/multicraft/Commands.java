@@ -8,10 +8,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import static java.lang.Math.*;
-
 public class Commands {
-	
 	public static boolean undo(Player p, MultiCraft plugin) {
 		PreviousBuildsData pData = PreviousBuildsData.getInstance();
 		BuildCommandData playerBuildRecord;
@@ -19,7 +16,7 @@ public class Commands {
 		// get the player's build record
 		try {
 			playerBuildRecord = pData.getPlayersBuildRecordForUndo(p);
-		}catch(NoCommandHistoryException e) {
+		} catch (NoCommandHistoryException e) {
 			p.sendMessage("You have no build record available.");
 			return false;
 		}
@@ -47,7 +44,7 @@ public class Commands {
 		
 		try {
 			playerBuildRecord = pData.getPlayersBuildRecordForRedo(p);
-		}catch (NoCommandHistoryException e) {
+		} catch (NoCommandHistoryException e) {
 			p.sendMessage("You have no build record available for redo.");
 			return false;
 		}
@@ -88,7 +85,8 @@ public class Commands {
 		return true;
 	}
 	
-	public static List<BlockRecord> buildStructure(Location playerLoc, Location startLoc, int[] dimensions, Material m, boolean isHollow, MultiCraft plugin){
+	public static List<BlockRecord> buildStructure(Location playerLoc, Location startLoc, int[] dimensions,
+												   Material m, boolean isHollow, MultiCraft plugin) {
 		int[] buildCoordinates = CoordinateCalculations.getBuildCoordinates(playerLoc, startLoc, dimensions);
 		Location endLoc = new Location(startLoc.getWorld(), buildCoordinates[0], buildCoordinates[1], buildCoordinates[2]);
 		List<BlockRecord> blocksAffected;
@@ -101,22 +99,28 @@ public class Commands {
 	public static List<BlockRecord> buildHollow(Location startLoc, Location endLoc, Material m, MultiCraft plugin) {
 		List<BlockRecord> blocksAffected = new ArrayList<>();
 		// bottom Wall
-		blocksAffected.addAll(updateBlocks(startLoc, new Location(endLoc.getWorld(), endLoc.getX(), startLoc.getY(), endLoc.getZ()), m, plugin));
+		blocksAffected.addAll(updateBlocks(startLoc,
+				new Location(endLoc.getWorld(), endLoc.getX(), startLoc.getY(), endLoc.getZ()), m, plugin));
 
 		// front wall
-		blocksAffected.addAll(updateBlocks(startLoc, new Location(endLoc.getWorld(), endLoc.getX(), endLoc.getY(), startLoc.getZ()), m, plugin));
+		blocksAffected.addAll(updateBlocks(startLoc,
+				new Location(endLoc.getWorld(), endLoc.getX(), endLoc.getY(), startLoc.getZ()), m, plugin));
 
 		// left wall
-		blocksAffected.addAll(updateBlocks(startLoc, new Location(endLoc.getWorld(), startLoc.getX(), endLoc.getY(), endLoc.getZ()), m, plugin));
+		blocksAffected.addAll(updateBlocks(startLoc,
+				new Location(endLoc.getWorld(), startLoc.getX(), endLoc.getY(), endLoc.getZ()), m, plugin));
 
 		// back wall
-		blocksAffected.addAll(updateBlocks(new Location(startLoc.getWorld(), startLoc.getX(), startLoc.getY(), endLoc.getZ()), endLoc, m, plugin));
+		blocksAffected.addAll(updateBlocks(
+				new Location(startLoc.getWorld(), startLoc.getX(), startLoc.getY(), endLoc.getZ()), endLoc, m, plugin));
 
 		// right wall
-		blocksAffected.addAll(updateBlocks(new Location(startLoc.getWorld(), endLoc.getX(), startLoc.getY(), startLoc.getZ()), endLoc, m, plugin));
+		blocksAffected.addAll(updateBlocks(
+				new Location(startLoc.getWorld(), endLoc.getX(), startLoc.getY(), startLoc.getZ()), endLoc, m, plugin));
 
 		// top wall
-		blocksAffected.addAll(updateBlocks(new Location(startLoc.getWorld(), startLoc.getX(), endLoc.getY(), startLoc.getZ()), endLoc, m, plugin));
+		blocksAffected.addAll(updateBlocks(
+				new Location(startLoc.getWorld(), startLoc.getX(), endLoc.getY(), startLoc.getZ()), endLoc, m, plugin));
 		
 		return blocksAffected;
 	}
@@ -163,5 +167,4 @@ public class Commands {
 		pData.clearPlayerRedo(p);
 		pData.appendBuildRecord(p, affectedBlocksData);		
 	}
-
 }
