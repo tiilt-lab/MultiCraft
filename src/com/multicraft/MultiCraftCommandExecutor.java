@@ -84,7 +84,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 				Material material = Material.getMaterial(materialId);
 				Location startLocation;
 				if (cmdName.equals("mbuild")) {
-					startLocation = p.getLocation();
+					startLocation = p.getLocation().getBlock().getLocation(); // rounds location coordinates
 				} else {
 					startLocation = p.getTargetBlock((HashSet<Byte>) null, 16).getLocation().add(0, 1, 0);
 				}
