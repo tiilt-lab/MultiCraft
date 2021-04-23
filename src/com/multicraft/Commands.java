@@ -3,12 +3,10 @@ package com.multicraft;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import static java.lang.Math.*;
 
@@ -66,6 +64,27 @@ public class Commands {
 		// restore blocks
 		BuildCommandData toStoreInUndo = new BuildCommandData(blocksAffectedDuringRedo, blocksAffectedDuringRedo.size());
 		pData.addToUndoStack(p, toStoreInUndo);
+		return true;
+	}
+
+	public static boolean build(Player p, Location playerLoc, Location startLoc, int[] dimensions, Material material,
+								boolean isHollow, boolean inSurvival, MultiCraft plugin) {
+		if (inSurvival) {
+			int numBlocksRequired = dimensions[0] * dimensions[1] * dimensions[2];
+			if (isHollow) {
+				numBlocksRequired -= (dimensions[0] - 2) * (dimensions[1] - 2) * (dimensions[2] - 2);
+			}
+			if (!p.getInventory().contains(material, numBlocksRequired)) {
+				p.sendMessage("You do not have the required block(s).");
+				return false;
+			} else {
+				p.getInventory().removeItem(new ItemStack(material, numBlocksRequired));
+				p.sendMessage("Used " + numBlocksRequired + " blocks.");
+			}
+		}
+
+		List<BlockRecord> blocksAffected = buildStructure(playerLoc, startLoc, dimensions, material, isHollow, plugin);
+		updateUndoAndRedoStacks(blocksAffected, p);
 		return true;
 	}
 	
