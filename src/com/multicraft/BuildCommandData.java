@@ -1,10 +1,5 @@
 package com.multicraft;
 
-import com.mysql.fabric.xmlrpc.base.Array;
-import jdk.nashorn.internal.ir.Block;
-import org.bukkit.event.block.BlockRedstoneEvent;
-
-import java.util.Arrays;
 import java.util.List;
 
 public class BuildCommandData {
@@ -22,15 +17,6 @@ public class BuildCommandData {
 	private void setLocations() {
 		start = blocksAffected.get(0);
 		end = blocksAffected.get(blocksAffected.size() - 1);
-
-//		for (BlockRecord block : this.blocksAffected) {
-//			if (block.x <= start.x && block.y <= start.y && block.z <= start.z) {
-//				start = block;
-//			}
-//			if (block.x >= end.x && block.y >= end.y && block.z >= end.z) {
-//				end = block;
-//			}
-//		}
 	}
 
 	public int[] getDimensions() {

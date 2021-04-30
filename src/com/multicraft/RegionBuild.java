@@ -80,11 +80,7 @@ public class RegionBuild {
 			startLocation = null;
 			endLocation = null;
 		}
-		
-//		public boolean hasBothCoordinates() {
-//			return startLocation != null && endLocation != null;
-//		}
-		
+
 		public void setStartLocation(Location loc) {
 			startLocation = loc;
 		}
