@@ -2,6 +2,7 @@ package com.multicraft;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -64,8 +65,24 @@ public class Commands {
 		return true;
 	}
 
-	public static boolean build(Player p, Location playerLoc, Location startLoc, int[] dimensions, Material material,
+	@SuppressWarnings("deprecation")
+	public static boolean build(Player p, Location playerLoc, Location startLoc, int[] dimensions, String materialArg,
 								boolean isHollow, boolean inSurvival, MultiCraft plugin) {
+		Material material;
+		material = Material.getMaterial(materialArg.toUpperCase());
+		if (material == null) {
+			try {
+				material = Material.getMaterial(Integer.parseInt(materialArg));
+				if (material == null) {
+					p.sendMessage("A material with that id does not exist.");
+					return false;
+				}
+			} catch (NumberFormatException e) {
+				p.sendMessage("A material with that name does not exist.");
+				return false;
+			}
+		}
+
 		if (inSurvival) {
 			int numBlocksRequired = dimensions[0] * dimensions[1] * dimensions[2];
 			if (isHollow) {

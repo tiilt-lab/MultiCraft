@@ -49,7 +49,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 				}
 
 				int[] dimensions;
-				int materialId;
+				String materialArg;
 				boolean isHollow = false;
 
 				// /mbuild x y z material hollow [5 args]
@@ -58,14 +58,14 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 				// /mbuild dim material 		 [2 args]
 				if (args.length == 5 || args.length == 4) {
 					dimensions = new int[]{Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2])};
-					materialId = Integer.parseInt(args[3]);
+					materialArg = args[3];
 					if (args.length == 5 && Integer.parseInt(args[4]) == 1) {
 						isHollow = true;
 					}
 				} else {
 					int dim = Integer.parseInt(args[0]);
 					dimensions = new int[]{dim, dim, dim};
-					materialId = Integer.parseInt(args[1]);
+					materialArg = args[1];
 					if (args.length == 3 && Integer.parseInt(args[2]) == 1) {
 						isHollow = true;
 					}
@@ -81,7 +81,6 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 					}
 				}
 
-				Material material = Material.getMaterial(materialId);
 				Location startLocation;
 				if (cmdName.equals("mbuild")) {
 					startLocation = p.getLocation().getBlock().getLocation(); // rounds location coordinates
@@ -89,7 +88,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 					startLocation = p.getTargetBlock((HashSet<Byte>) null, 16).getLocation().add(0, 1, 0);
 				}
 
-				return Commands.build(p, p.getLocation(), startLocation, dimensions, material, isHollow,
+				return Commands.build(p, p.getLocation(), startLocation, dimensions, materialArg, isHollow,
 						p.getGameMode() == GameMode.SURVIVAL, plugin);
 			}
 			case "rbuild": {

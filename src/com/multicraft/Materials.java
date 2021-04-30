@@ -21,7 +21,7 @@ public class Materials {
 	@SuppressWarnings("static-access")
 	public static int getId(String s) throws MaterialDoesNotExistException {		
 		if(! getInstance().materials.containsKey(s.toLowerCase())) {
-			throw new MaterialDoesNotExistException("The material you requested does not exits");
+			throw new MaterialDoesNotExistException("The material you requested does not exist.");
 		}
 		return materials.get(s);
 	}
