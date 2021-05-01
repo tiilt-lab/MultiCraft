@@ -15,17 +15,12 @@ import org.bukkit.entity.Player;
 public class MultiCraftCommandExecutor implements CommandExecutor {
 	private final MultiCraft plugin;
 	private final String jarLocation;
-	// private final String eyeTrackLocation;
-	// private boolean eyeTracking;
 	private final CopyHandler copyHandler;
-
 
 	public MultiCraftCommandExecutor(MultiCraft plugin) {
 		this.plugin = plugin;
 		File filePath = new File(MultiCraftCommandExecutor.class.getProtectionDomain().getCodeSource().getLocation().getPath());
 		jarLocation = filePath.getPath().substring(0, filePath.getPath().indexOf(filePath.getName()));
-		// eyeTrackLocation = jarLocation + "Tobii" + File.separator + "Interaction_Streams_101.exe";
-		// eyeTracking = false;
 		copyHandler = new CopyHandler();
 	}
 	
@@ -33,7 +28,6 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		Player p = (Player) sender;
-		GameMode pGameMode = p.getGameMode();
 		String cmdName = cmd.getName().toLowerCase();
 
 		switch(cmdName) {
@@ -133,71 +127,6 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 				Commands.updateBlocks(loc1, loc2, Material.getMaterial(1), plugin);
 
 				p.sendMessage("Structure has been constructed in the region marked.");
-				return true;
-			}
-			case "eyebuild": {
-				// if (args.length < 3) {
-				// 	p.sendMessage("Not enough parameters.");
-				// 	break;
-				// }
-
-				// new BukkitRunnable() {
-				// 	@Override
-				// 	public void run() {
-				// 		Runtime run = Runtime.getRuntime();
-				// 		String[] eyeTrackCommand = {eyeTrackLocation, "-d"};
-				// 		try {
-				// 			p.sendMessage("Tracking eyes...");
-				// 			Process eyeTrack = run.exec(eyeTrackCommand);
-
-				// 			while (eyeTrack.isAlive()) { /* Wait for eye tracking executable to complete. */ }
-
-				// 			Bukkit.getScheduler().runTask(plugin, () -> {
-				// 				p.sendMessage("Building Structure...");
-				// 				String mmbuild_args = String.join(" ", args);
-				// 				Bukkit.getPlayer(p.getUniqueId()).performCommand("mmbuild " + mmbuild_args);
-				// 			});
-
-				// 		} catch (Exception e) {
-				// 			e.printStackTrace();
-				// 		}
-				// 	}
-				// }.runTaskAsynchronously(this.plugin);
-
-				p.sendMessage("Please use Multicraft client to initiate eye tracking commands.");
-
-				return true;
-			}
-			case "eyetrack": {
-				// if (!eyeTracking) {
-				// 	new BukkitRunnable() {
-				// 		@Override
-				// 		public void run() {
-				// 			Runtime run = Runtime.getRuntime();
-				// 			Process eyeTrack;
-				// 			String eyeTrackCommand = eyeTrackLocation;
-				// 			if(args.length == 1 && args[0].equalsIgnoreCase("move"))
-				// 				eyeTrackCommand += " -m";
-
-				// 			try {
-				// 				p.sendMessage("Tracking eyes, press . to end.");
-				// 				eyeTrack = run.exec(eyeTrackCommand);
-				// 				eyeTracking = true;
-
-				// 				while (eyeTrack.isAlive()) { /* Wait for eye tracking executable to complete. */ }
-
-				// 				p.sendMessage("No longer tracking eyes.");
-				// 				eyeTracking = false;
-
-				// 			} catch (Exception e) {
-				// 				e.printStackTrace();
-				// 			}
-				// 		}
-				// 	}.runTaskAsynchronously(this.plugin);
-				// }
-
-				p.sendMessage("Please use Multicraft client to initiate eye tracking commands.");
-
 				return true;
 			}
 			case "mstore": {

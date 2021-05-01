@@ -8,6 +8,10 @@ import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.json.simple.JSONObject;
+
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 public class Commands {
 	public static boolean undo(Player p, MultiCraft plugin) {
@@ -169,6 +173,58 @@ public class Commands {
 
 		return blocksAffected;
 	}
+
+	public static List<BlockRecord> buildTStructure(Location playerLoc, Location startLoc, JSONObject blockMap, MultiCraft plugin) {
+		int[] dimensions = {10, 10, 10};
+		int[] buildCoordinates = CoordinateCalculations.getBuildCoordinates(playerLoc, startLoc, dimensions);
+		Location endLoc = new Location(startLoc.getWorld(), buildCoordinates[0], buildCoordinates[1], buildCoordinates[2]);
+
+		return updateTBlocks(startLoc, endLoc, Material.STONE, blockMap, plugin);
+	}
+
+	@SuppressWarnings("deprecation")
+	public static List<BlockRecord> updateTBlocks(Location pos1, Location pos2, Material m, JSONObject blockMap, MultiCraft plugin) {
+		int startX = min(pos1.getBlockX(), pos2.getBlockX());
+		int startY = min(pos1.getBlockY(), pos2.getBlockY());
+		int startZ = min(pos1.getBlockZ(), pos2.getBlockZ());
+		int endX = max(pos1.getBlockX(), pos2.getBlockX());
+		int endY = max(pos1.getBlockY(), pos2.getBlockY());
+		int endZ = max(pos1.getBlockZ(), pos2.getBlockZ());
+
+		World world = pos1.getWorld();
+		List<BlockRecord> blocksAffected = new ArrayList<>();
+
+		for (int x = startX; x <= endX; x++) {
+			String relativeX = Integer.toString(x - startX);
+			JSONObject blockMapY = null;
+			if (blockMap != null) {
+				if (!blockMap.containsKey(relativeX)) continue;
+				else blockMapY = (JSONObject) blockMap.get(relativeX);
+			}
+			for (int y = startY; y <= endY; y++) {
+				String relativeY = Integer.toString(y - startY);
+				JSONObject blockMapZ = null;
+				if (blockMapY != null) {
+					if (!blockMapY.containsKey(relativeY)) continue;
+					else blockMapZ = ((JSONObject) blockMapY.get(relativeY));
+				}
+				for (int z = startZ; z <= endZ; z++) {
+					String relativeZ = Integer.toString(z - startZ);
+					if (blockMapZ != null) {
+						if (!blockMapZ.containsKey(relativeZ)) continue;
+						else {
+							int id = ((Long) blockMapZ.get(relativeZ)).intValue();
+							m = Material.getMaterial(id);
+						}
+					}
+					blocksAffected.add(updateBlock(world, plugin, x, y, z, m));
+				}
+			}
+		}
+
+		return blocksAffected;
+	}
+
 	
 	private static BlockRecord updateBlock(World world, MultiCraft plugin, int x, int y, int z, Material blockType) {
 		Block thisBlock = world.getBlockAt(x, y, z);
