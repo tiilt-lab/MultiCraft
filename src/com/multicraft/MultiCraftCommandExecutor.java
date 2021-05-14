@@ -1,7 +1,5 @@
 package com.multicraft;
 
-import java.io.File;
-import java.util.HashSet;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -11,6 +9,9 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.io.File;
+import java.util.HashSet;
+
 
 public class MultiCraftCommandExecutor implements CommandExecutor {
 	private final MultiCraft plugin;
@@ -19,7 +20,8 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 
 	public MultiCraftCommandExecutor(MultiCraft plugin) {
 		this.plugin = plugin;
-		File filePath = new File(MultiCraftCommandExecutor.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+		File filePath = new File(MultiCraftCommandExecutor.class.
+				getProtectionDomain().getCodeSource().getLocation().getPath());
 		jarLocation = filePath.getPath().substring(0, filePath.getPath().indexOf(filePath.getName()));
 		copyHandler = new CopyHandler();
 	}
@@ -30,7 +32,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 		Player p = (Player) sender;
 		String cmdName = cmd.getName().toLowerCase();
 
-		switch(cmdName) {
+		switch (cmdName) {
 			case "mundo":
 				return Commands.undo(p, plugin);
 			case "mredo":
@@ -38,7 +40,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 			case "mbuild":
 			case "mmbuild": {
 				if (args.length < 2 || args.length > 5) {
-					p.sendMessage("Incorrect number of parameters.");
+					p.sendMessage("Incorrect number of arguments.");
 					return false;
 				}
 
@@ -108,8 +110,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 				RegionBuild rBuild = RegionBuild.getInstance();
 				Location endLocation = p.getTargetBlock((HashSet<Byte>) null, 16).getLocation().add(0, 1, 0);
 
-				if (endLocation == null)
-					endLocation = p.getLocation();
+				if (endLocation == null) endLocation = p.getLocation();
 
 				if (!rBuild.markEndPosition(p, endLocation)) {
 					p.sendMessage("You cannot mark an end location without beginning a valid region build session.");
@@ -130,17 +131,20 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 				return true;
 			}
 			case "mstore": {
-				if(args.length != 1) {
-					p.sendMessage("Improper number of parameters.");
+				if (args.length != 1) {
+					p.sendMessage("Incorrect number of arguments.");
 					break;
 				}
 
-				StructureData universalStructureData = new StructureData(jarLocation + "\\MultiCraft\\" + "universal" + "StructureData.csv");
-				StructureData playerStructureData = new StructureData(jarLocation + "\\MultiCraft\\" + p.getUniqueId() + "StructureData.csv");
+				StructureData universalStructureData = new StructureData(jarLocation + "\\MultiCraft\\"
+						+ "universal" + "StructureData.csv");
+				StructureData playerStructureData = new StructureData(jarLocation + "\\MultiCraft\\"
+						+ p.getUniqueId() + "StructureData.csv");
 
 				BuildCommandData playerBuildData;
-				try { playerBuildData = PreviousBuildsData.getInstance().getPlayersLastBuildRecord(p); }
-				catch(NoCommandHistoryException e) {
+				try {
+					playerBuildData = PreviousBuildsData.getInstance().getPlayersLastBuildRecord(p);
+				} catch (NoCommandHistoryException e) {
 					p.sendMessage("No previous builds found.");
 					break;
 				}
@@ -148,30 +152,25 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 				BlockRecord start = playerBuildData.start;
 				BlockRecord end = playerBuildData.end;
 				int structureMaterial = p.getWorld().getBlockAt(start.x, start.y, start.z).getType().getId();
-				int centerMaterial = p.getWorld().getBlockAt((end.x - start.x) / 2, (end.y - start.y) / 2, (end.z - start.z) / 2).getType().getId();
+				int centerMaterial = p.getWorld().getBlockAt((end.x - start.x) / 2, (end.y - start.y) / 2,
+						(end.z - start.z) / 2).getType().getId();
 				int[] dimensions = playerBuildData.getDimensions();
 
 				String[] entry;
-				if (structureMaterial != centerMaterial)
-					entry = new String[]{args[0],
-							Integer.toString(dimensions[0]),
-							Integer.toString(dimensions[1]),
-							Integer.toString(dimensions[2]),
-							Integer.toString(structureMaterial),
-							"hollow"};
-				else
-					entry = new String[] { args[0],
-							Integer.toString(dimensions[0]),
-							Integer.toString(dimensions[1]),
-							Integer.toString(dimensions[2]),
-							Integer.toString(structureMaterial)};
+				if (structureMaterial != centerMaterial) {
+					entry = new String[]{args[0], Integer.toString(dimensions[0]), Integer.toString(dimensions[1]),
+							Integer.toString(dimensions[2]), Integer.toString(structureMaterial), "hollow"};
+				} else {
+					entry = new String[]{args[0], Integer.toString(dimensions[0]), Integer.toString(dimensions[1]),
+							Integer.toString(dimensions[2]), Integer.toString(structureMaterial)};
+				}
 
 				boolean overwroteUniversal = universalStructureData.setStructureData(entry);
 				boolean overwrotePlayer = playerStructureData.setStructureData(entry);
 
 				p.sendMessage("Saved " + args[0] + ".");
-				if(overwroteUniversal) p.sendMessage("Warning: Overwrote " + args[0] + " universally.");
-				if(overwrotePlayer) p.sendMessage("Warning: Overwrote " + args[0] + " locally.");
+				if (overwroteUniversal) p.sendMessage("Warning: Overwrote " + args[0] + " universally.");
+				if (overwrotePlayer) p.sendMessage("Warning: Overwrote " + args[0] + " locally.");
 
 				universalStructureData.saveStructureData();
 				playerStructureData.saveStructureData();
@@ -179,37 +178,39 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 				return true;
 			}
 			case "mclone": {
-				if(args.length != 1) {
-					p.sendMessage("Improper number of parameters");
+				if (args.length != 1) {
+					p.sendMessage("Incorrect number of arguments.");
 					break;
 				}
 
-				StructureData universalStructureData = new StructureData(jarLocation + "\\MultiCraft\\" + "universal" + "StructureData.csv");
-				StructureData playerStructureData = new StructureData(jarLocation + "\\MultiCraft\\" + p.getUniqueId() + "StructureData.csv");
+				StructureData universalStructureData = new StructureData(jarLocation + "\\MultiCraft\\"
+						+ "universal" + "StructureData.csv");
+				StructureData playerStructureData = new StructureData(jarLocation + "\\MultiCraft\\"
+						+ p.getUniqueId() + "StructureData.csv");
 
 				// check for player-stored structure first, then universal
 				String[] buildData = playerStructureData.getStructureData(args[0]);
-				if(buildData == null) {
+				if (buildData == null) {
 					buildData = universalStructureData.getStructureData(args[0]);
-					if(buildData == null) {
+					if (buildData == null) {
 						p.sendMessage(args[0] + " was not found.");
 						break;
 					}
 				}
 
-				String mmbuild_args = String.join(" ", buildData);
-				Bukkit.getPlayer(p.getUniqueId()).performCommand("mmbuild " + mmbuild_args);
+				String mmbuildArgs = String.join(" ", buildData);
+				Bukkit.getPlayer(p.getUniqueId()).performCommand("mmbuild " + mmbuildArgs);
 				p.sendMessage(args[0] + " was cloned.");
 				return true;
 			}
 			case "copyloc1": {
-				if(!p.isOp()) {
+				if (!p.isOp()) {
 					p.sendMessage("This command requires op status.");
 					break;
 				}
 
 				Location startLocation = p.getTargetBlock((HashSet<Byte>) null, 32).getLocation();
-				if(p.getWorld().getBlockAt(startLocation).getType() == Material.AIR) {
+				if (p.getWorld().getBlockAt(startLocation).getType() == Material.AIR) {
 					p.sendMessage("Please find a closer position");
 					break;
 				}
@@ -218,13 +219,13 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 				return true;
 			}
 			case "copyloc2": {
-				if(!p.isOp()) {
+				if (!p.isOp()) {
 					p.sendMessage("This command requires op status.");
 					break;
 				}
 
 				Location endLocation = p.getTargetBlock((HashSet<Byte>) null, 32).getLocation();
-				if(p.getWorld().getBlockAt(endLocation).getType() == Material.AIR) {
+				if (p.getWorld().getBlockAt(endLocation).getType() == Material.AIR) {
 					p.sendMessage("Please find a closer position");
 					break;
 				}
@@ -233,24 +234,25 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 				return true;
 			}
 			case "mpaste": {
-				if(!p.isOp()) {
+				if (!p.isOp()) {
 					p.sendMessage("This command requires op status.");
 					break;
 				}
 
 				String copyArgs = copyHandler.getCopyArgs(p);
-				if(copyArgs == null) {
+				if (copyArgs == null) {
 					p.sendMessage("Please ensure both copy locations are marked.");
 					break;
 				}
 
 				Location pasteLocation = p.getTargetBlock((HashSet<Byte>) null, 16).getLocation();
-				if(p.getWorld().getBlockAt(pasteLocation).getType() == Material.AIR) {
+				if (p.getWorld().getBlockAt(pasteLocation).getType() == Material.AIR) {
 					p.sendMessage("Please find a closer position");
 					break;
 				}
 
-				String pasteArgs = pasteLocation.getX() + " " + (pasteLocation.getY() + 1) + " " + pasteLocation.getZ() + " ";
+				String pasteArgs = pasteLocation.getX() + " " + (pasteLocation.getY() + 1) + " "
+						+ pasteLocation.getZ() + " ";
 				p.performCommand("clone " + copyArgs + pasteArgs + "masked");
 				return true;
 			}
