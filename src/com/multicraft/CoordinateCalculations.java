@@ -1,8 +1,10 @@
 package com.multicraft;
 
-import java.util.*;
-
 import org.bukkit.Location;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 public class CoordinateCalculations {
 	

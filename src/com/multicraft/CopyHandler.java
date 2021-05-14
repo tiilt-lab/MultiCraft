@@ -3,7 +3,8 @@ package com.multicraft;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.UUID;
 
 
 public class CopyHandler {

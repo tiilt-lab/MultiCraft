@@ -1,9 +1,9 @@
 package com.multicraft;
 
+import org.bukkit.entity.Player;
+
 import java.util.HashMap;
 import java.util.UUID;
-
-import org.bukkit.entity.Player;
 
 public class PreviousBuildsData {	
 	private HashMap<UUID, CustomUndoStack> buildsUndoData = new HashMap<>();

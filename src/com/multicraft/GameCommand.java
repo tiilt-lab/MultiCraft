@@ -1,8 +1,6 @@
 package com.multicraft;
 
-import java.io.File;
-import java.util.*;
-
+import com.multicraft.PyramidBuilder.BlockVector3;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -10,7 +8,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import com.multicraft.PyramidBuilder.BlockVector3;
+
+import java.io.File;
+import java.util.HashSet;
+import java.util.List;
+import java.util.UUID;
 
 /*
  * An object representation of a game command for MultiCraft

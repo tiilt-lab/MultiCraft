@@ -1,8 +1,9 @@
 package com.multicraft;
 
+import org.json.simple.JSONObject;
+
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import org.json.simple.JSONObject;
 
 public class CommandsQueue {
 	Queue<JSONObject> commandsQ = new ConcurrentLinkedQueue<JSONObject>();

@@ -1,9 +1,9 @@
 package com.multicraft;
 
-import java.util.UUID;
-
 import org.bukkit.entity.Player;
 import org.json.simple.JSONObject;
+
+import java.util.UUID;
 
 /*
  * Gets processed JSON objects from the commands queue and creates a game command which is then executed.

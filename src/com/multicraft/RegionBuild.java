@@ -1,9 +1,9 @@
 package com.multicraft;
 
-import java.util.HashMap;
-
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+
+import java.util.HashMap;
 
 public class RegionBuild {
 	private static HashMap<Player, RegionCoordinates> playerRegionSelections = new HashMap<Player, RegionCoordinates>();
