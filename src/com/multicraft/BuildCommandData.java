@@ -20,13 +20,6 @@ public class BuildCommandData {
 	}
 
 	public int[] getDimensions() {
-		return new int[]
-				{ Math.abs(end.x - start.x) + 1,
-						Math.abs(end.y - start.y) + 1,
-						Math.abs(end.z - start.z) + 1 } ;
+		return new int[]{Math.abs(end.x - start.x) + 1, Math.abs(end.y - start.y) + 1, Math.abs(end.z - start.z) + 1};
 	}
-
-
-
-
 }

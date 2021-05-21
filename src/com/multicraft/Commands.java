@@ -1,15 +1,13 @@
 package com.multicraft;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import static java.lang.Math.max;
@@ -28,15 +26,23 @@ public class Commands {
 			return false;
 		}
 		
-		// restore blocks			
+		// restore blocks
 		List<BlockRecord> blocksToChange = playerBuildRecord.blocksAffected;
 		List<BlockRecord> blocksAffectedDuringUndo = new ArrayList<>();
 		World world = p.getWorld();
-		for (BlockRecord b: blocksToChange) {		
+		for (BlockRecord b : blocksToChange) {
 			Block t = world.getBlockAt(b.x, b.y, b.z);
 			blocksAffectedDuringUndo.add(new BlockRecord(t.getType(), t.getX(), t.getY(), t.getZ()));
 			Bukkit.getScheduler().runTask(plugin, () -> t.setType(b.material));
-		}			
+		}
+
+		if (p.getGameMode() == GameMode.SURVIVAL) {
+			Material m = blocksAffectedDuringUndo.get(0).material;
+			HashSet<BlockRecord> uniqueBlocks = new HashSet<>(blocksAffectedDuringUndo);
+			int n = uniqueBlocks.size();
+			p.getInventory().addItem(new ItemStack(m, n));
+			p.sendMessage("Returned " + n + " " + m + " to your inventory.");
+		}
 		
 		// update re-do stack
 		BuildCommandData toStoreInRedo = new BuildCommandData(blocksAffectedDuringUndo, blocksAffectedDuringUndo.size());
@@ -58,12 +64,26 @@ public class Commands {
 
 		List<BlockRecord> blocksToChange = playerBuildRecord.blocksAffected;
 		List<BlockRecord> blocksAffectedDuringRedo = new ArrayList<>();
+
+		if (p.getGameMode() == GameMode.SURVIVAL) {
+			Material m = blocksToChange.get(0).material;
+			HashSet<BlockRecord> uniqueBlocks = new HashSet<>(blocksToChange);
+			int n = uniqueBlocks.size();
+			if (!p.getInventory().contains(m, n)) {
+				p.sendMessage("You do not have the required block(s).");
+				return false;
+			}
+			p.getInventory().removeItem(new ItemStack(m, n));
+			p.sendMessage("Removed " + n + " " + m + " from your inventory.");
+		}
+
 		World world = p.getWorld();
-		for (BlockRecord b: blocksToChange) {		
+		for (BlockRecord b : blocksToChange) {
 			Block t = world.getBlockAt(b.x, b.y, b.z);
 			blocksAffectedDuringRedo.add(new BlockRecord(t.getType(), t.getX(), t.getY(), t.getZ()));
 			Bukkit.getScheduler().runTask(plugin, () -> t.setType(b.material));
-		}		
+		}
+
 		
 		// restore blocks
 		BuildCommandData toStoreInUndo = new BuildCommandData(blocksAffectedDuringRedo, blocksAffectedDuringRedo.size());

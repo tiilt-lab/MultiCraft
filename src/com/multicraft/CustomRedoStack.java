@@ -10,7 +10,7 @@ public class CustomRedoStack {
 	public BuildCommandData pop() throws NoCommandHistoryException {
 		try {
 			return this.redoStack.pop();
-		}catch(NoCommandHistoryException e) {
+		} catch (NoCommandHistoryException e) {
 			throw e;
 		}		 
 	}

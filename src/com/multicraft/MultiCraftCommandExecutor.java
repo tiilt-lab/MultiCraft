@@ -88,6 +88,10 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 						p.getGameMode() == GameMode.SURVIVAL, plugin);
 			}
 			case "rbuild": {
+				if (p.getGameMode() != GameMode.CREATIVE) {
+					p.sendMessage("This command requires creative mode.");
+					break;
+				}
 				RegionBuild rBuild = RegionBuild.getInstance();
 				rBuild.startRegionBuildForPlayer(p);
 
@@ -97,6 +101,10 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 				return true;
 			}
 			case "rloc1": {
+				if (p.getGameMode() != GameMode.CREATIVE) {
+					p.sendMessage("This command requires creative mode.");
+					break;
+				}
 				RegionBuild rBuild = RegionBuild.getInstance();
 				Location startLocation = p.getTargetBlock((HashSet<Byte>) null, 16).getLocation().add(0, 1, 0);
 
@@ -107,6 +115,10 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 				return true;
 			}
 			case "rloc2": {
+				if (p.getGameMode() != GameMode.CREATIVE) {
+					p.sendMessage("This command requires creative mode.");
+					break;
+				}
 				RegionBuild rBuild = RegionBuild.getInstance();
 				Location endLocation = p.getTargetBlock((HashSet<Byte>) null, 16).getLocation().add(0, 1, 0);
 
@@ -121,6 +133,10 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 				return true;
 			}
 			case "rrbuild": {
+				if (p.getGameMode() != GameMode.CREATIVE) {
+					p.sendMessage("This command requires creative mode.");
+					break;
+				}
 				RegionBuild rBuild = RegionBuild.getInstance();
 
 				Location loc1 = rBuild.getStartLocation(p);
@@ -209,6 +225,11 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 					break;
 				}
 
+				if (p.getGameMode() != GameMode.CREATIVE) {
+					p.sendMessage("This command requires creative mode.");
+					break;
+				}
+
 				Location startLocation = p.getTargetBlock((HashSet<Byte>) null, 32).getLocation();
 				if (p.getWorld().getBlockAt(startLocation).getType() == Material.AIR) {
 					p.sendMessage("Please find a closer position");
@@ -224,6 +245,11 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 					break;
 				}
 
+				if (p.getGameMode() != GameMode.CREATIVE) {
+					p.sendMessage("This command requires creative mode.");
+					break;
+				}
+
 				Location endLocation = p.getTargetBlock((HashSet<Byte>) null, 32).getLocation();
 				if (p.getWorld().getBlockAt(endLocation).getType() == Material.AIR) {
 					p.sendMessage("Please find a closer position");
@@ -236,6 +262,11 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 			case "mpaste": {
 				if (!p.isOp()) {
 					p.sendMessage("This command requires op status.");
+					break;
+				}
+
+				if (p.getGameMode() != GameMode.CREATIVE) {
+					p.sendMessage("This command requires creative mode.");
 					break;
 				}
 
