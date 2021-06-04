@@ -16,6 +16,7 @@ import java.util.HashSet;
 public class MultiCraftCommandExecutor implements CommandExecutor {
 	private final MultiCraft plugin;
 	private final String jarLocation;
+	private final String MultiCraftDirName;
 	private final CopyHandler copyHandler;
 
 	public MultiCraftCommandExecutor(MultiCraft plugin) {
@@ -23,6 +24,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 		File filePath = new File(MultiCraftCommandExecutor.class.
 				getProtectionDomain().getCodeSource().getLocation().getPath());
 		jarLocation = filePath.getPath().substring(0, filePath.getPath().indexOf(filePath.getName()));
+		MultiCraftDirName = jarLocation + File.separator + "MultiCraft";
 		copyHandler = new CopyHandler();
 	}
 	
@@ -152,10 +154,10 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 					break;
 				}
 
-				StructureData universalStructureData = new StructureData(jarLocation + "\\MultiCraft\\"
-						+ "universal" + "StructureData.csv");
-				StructureData playerStructureData = new StructureData(jarLocation + "\\MultiCraft\\"
-						+ p.getUniqueId() + "StructureData.csv");
+				StructureData universalStructureData = new StructureData(MultiCraftDirName +
+						File.separator + "universal" + "StructureData.csv");
+				StructureData playerStructureData = new StructureData(MultiCraftDirName +
+						File.separator + p.getUniqueId() + "StructureData.csv");
 
 				BuildCommandData playerBuildData;
 				try {
@@ -168,17 +170,17 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 				BlockRecord start = playerBuildData.start;
 				BlockRecord end = playerBuildData.end;
 				int structureMaterial = p.getWorld().getBlockAt(start.x, start.y, start.z).getType().getId();
-				int centerMaterial = p.getWorld().getBlockAt((end.x - start.x) / 2, (end.y - start.y) / 2,
-						(end.z - start.z) / 2).getType().getId();
+				int centerMaterial = p.getWorld().getBlockAt((start.x + end.x) / 2, (start.y + end.y) / 2,
+						(start.z + end.z) / 2).getType().getId();
 				int[] dimensions = playerBuildData.getDimensions();
 
 				String[] entry;
 				if (structureMaterial != centerMaterial) {
 					entry = new String[]{args[0], Integer.toString(dimensions[0]), Integer.toString(dimensions[1]),
-							Integer.toString(dimensions[2]), Integer.toString(structureMaterial), "hollow"};
+							Integer.toString(dimensions[2]), Integer.toString(structureMaterial), "1"};
 				} else {
 					entry = new String[]{args[0], Integer.toString(dimensions[0]), Integer.toString(dimensions[1]),
-							Integer.toString(dimensions[2]), Integer.toString(structureMaterial)};
+							Integer.toString(dimensions[2]), Integer.toString(structureMaterial), "0"};
 				}
 
 				boolean overwroteUniversal = universalStructureData.setStructureData(entry);
@@ -199,10 +201,10 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 					break;
 				}
 
-				StructureData universalStructureData = new StructureData(jarLocation + "\\MultiCraft\\"
-						+ "universal" + "StructureData.csv");
-				StructureData playerStructureData = new StructureData(jarLocation + "\\MultiCraft\\"
-						+ p.getUniqueId() + "StructureData.csv");
+				StructureData universalStructureData = new StructureData(MultiCraftDirName +
+						File.separator + "universal" + "StructureData.csv");
+				StructureData playerStructureData = new StructureData(MultiCraftDirName +
+						File.separator + p.getUniqueId() + "StructureData.csv");
 
 				// check for player-stored structure first, then universal
 				String[] buildData = playerStructureData.getStructureData(args[0]);
