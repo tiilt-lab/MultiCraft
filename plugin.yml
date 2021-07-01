@@ -38,7 +38,7 @@ commands:
     usage: /<command>
   rrbuild:
     description: (MultiCraft) builds a structure from rloc1 to rloc2
-    usage: /<command>
+    usage: /<command> [material]
   copyloc1:
     description: (MultiCraft) selects first corner of copy
     usage: /<command>
