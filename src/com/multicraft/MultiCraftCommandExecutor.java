@@ -139,11 +139,38 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 					p.sendMessage("This command requires creative mode.");
 					break;
 				}
-				RegionBuild rBuild = RegionBuild.getInstance();
+				if (args.length > 1) {
+					p.sendMessage("Incorrect number of arguments.");
+					return false;
+				}
 
+				String materialArg;
+				if (args.length == 1) {
+					materialArg = args[0];
+				} else {
+					materialArg = "STONE";
+					p.sendMessage("No material selected. Defaulting to stone.");
+				}
+
+				Material material;
+				material = Material.getMaterial(materialArg.toUpperCase());
+				if (material == null) {
+					try {
+						material = Material.getMaterial(Integer.parseInt(materialArg));
+						if (material == null) {
+							p.sendMessage("A material with that id does not exist.");
+							return false;
+						}
+					} catch (NumberFormatException e) {
+						p.sendMessage("A material with that name does not exist.");
+						return false;
+					}
+				}
+
+				RegionBuild rBuild = RegionBuild.getInstance();
 				Location loc1 = rBuild.getStartLocation(p);
 				Location loc2 = rBuild.getEndLocation(p);
-				Commands.updateBlocks(loc1, loc2, Material.getMaterial(1), plugin);
+				Commands.updateBlocks(loc1, loc2, material, plugin);
 
 				p.sendMessage("Structure has been constructed in the region marked.");
 				return true;
