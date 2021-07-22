@@ -1,5 +1,6 @@
 package com.multicraft;
 
+import com.multicraft.util.JSONParser;
 import org.json.simple.JSONObject;
 
 /*
@@ -18,7 +19,7 @@ public class CommandsListener extends Thread{
 		while(true) {
 			if(! CommandsQueue.getInstance().commands.isEmpty()){
 				String str = "[" + CommandsQueue.getInstance().commands.remove() + "]";
-				JSONObject jsonObject = JSONParsing.JSONFromString(str);
+				JSONObject jsonObject = JSONParser.JSONFromString(str);
 				CommandsQueue.getInstance().commandsQ.add(jsonObject);
 			}
 		}

@@ -1,5 +1,6 @@
-package com.multicraft;
+package com.multicraft.data;
 
+import com.multicraft.exceptions.NoCommandHistoryException;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
@@ -40,7 +41,7 @@ public class PreviousBuildsData {
 		buildsRedoData.put(p.getUniqueId(), temp);
 	}
 	
-	public BuildCommandData getPlayersBuildRecordForUndo(Player p) throws NoCommandHistoryException{
+	public BuildCommandData getPlayersBuildRecordForUndo(Player p) throws NoCommandHistoryException {
 		
 		BuildCommandData temp = null;
 		if(! buildsUndoData.containsKey(p.getUniqueId())) {

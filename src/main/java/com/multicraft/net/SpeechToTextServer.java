@@ -1,4 +1,7 @@
-package com.multicraft;
+package com.multicraft.net;
+
+import com.multicraft.EchoThread;
+import com.multicraft.MultiCraft;
 
 import java.io.IOException;
 import java.net.ServerSocket;

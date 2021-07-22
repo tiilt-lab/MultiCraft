@@ -1,4 +1,6 @@
-package com.multicraft;
+package com.multicraft.data;
+
+import com.multicraft.exceptions.NoCommandHistoryException;
 
 public class CustomUndoStack {
 	BuildCommandData[] dataArr;

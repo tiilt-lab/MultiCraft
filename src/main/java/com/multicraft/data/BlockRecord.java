@@ -1,4 +1,4 @@
-package com.multicraft;
+package com.multicraft.data;
 
 import org.bukkit.Material;
 

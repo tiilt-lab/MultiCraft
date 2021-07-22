@@ -3,7 +3,7 @@ package com.multicraft.util;
 import org.bukkit.Bukkit;
 import org.bukkit.command.ConsoleCommandSender;
 
-public class ConsoleLogging {
+public class ConsoleLogger {
 
 	static ConsoleCommandSender console = Bukkit.getConsoleSender();
 	

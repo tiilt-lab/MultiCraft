@@ -1,6 +1,7 @@
 package com.multicraft;
 
 import com.multicraft.PyramidBuilder.BlockVector3;
+import com.multicraft.data.BlockRecord;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;

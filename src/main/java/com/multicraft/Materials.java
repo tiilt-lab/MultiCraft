@@ -1,5 +1,7 @@
 package com.multicraft;
 
+import com.multicraft.exceptions.MaterialDoesNotExistException;
+
 import java.util.HashMap;
 
 public class Materials {
@@ -369,16 +371,4 @@ public class Materials {
 		 };
 	}
 	
-
-	public static class MaterialDoesNotExistException extends Exception {
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-
-		public MaterialDoesNotExistException(String errorMessage) {
-			super(errorMessage);
-		}
-	}
-
 }

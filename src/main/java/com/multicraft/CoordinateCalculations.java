@@ -15,13 +15,15 @@ public class CoordinateCalculations {
 
 		String generalDirection = getGeneralDirection(angle);
 
-		if (generalDirection.equals("north"))
+		if (generalDirection.equals("north")) {
 			return getFacingNorthCoordinates(startX, startY, startZ, dimensions);
-		if (generalDirection.equals("east"))
+		} else if (generalDirection.equals("east")) {
 			return getFacingEastCoordinates(startX, startY, startZ, dimensions);
-		if (generalDirection.equals("south"))
+		} else if (generalDirection.equals("south")) {
 			return getFacingSouthCoordinates(startX, startY, startZ, dimensions);
-		return getFacingWestCoordinates(startX, startY, startZ, dimensions);
+		} else {
+			return getFacingWestCoordinates(startX, startY, startZ, dimensions);
+		}
 	}
 	
 	private static int[] getFacingNorthCoordinates(int startX, int startY, int startZ, int[] dimensions) {

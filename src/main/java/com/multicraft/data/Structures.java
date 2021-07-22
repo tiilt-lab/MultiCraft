@@ -7,11 +7,11 @@ import java.io.FileWriter;
 import java.util.Arrays;
 import java.util.HashMap;
 
-public class StructureData {
+public class Structures {
     private HashMap<String, String[]> structureDataMap;
     private String path;
 
-    public StructureData(String path) {
+    public Structures(String path) {
         this.path = path;
         structureDataMap = StructureFileHandler.readFile(path);
     }

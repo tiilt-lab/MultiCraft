@@ -1,5 +1,7 @@
 package com.multicraft;
 
+import com.multicraft.net.FileTransferServer;
+import com.multicraft.net.SpeechToTextServer;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class MultiCraft extends JavaPlugin{

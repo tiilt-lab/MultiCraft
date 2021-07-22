@@ -1,4 +1,4 @@
-package com.multicraft.exception;
+package com.multicraft.exceptions;
 
 public class MaterialDoesNotExistException extends Exception {
 

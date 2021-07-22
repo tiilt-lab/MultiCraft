@@ -4,7 +4,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
-public class JSONParsing {
+public class JSONParser {
 
 	public static JSONObject JSONFromString(String str) {
 		Object obj = JSONValue.parse(str);

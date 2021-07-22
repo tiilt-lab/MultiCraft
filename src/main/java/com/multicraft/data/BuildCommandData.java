@@ -1,6 +1,4 @@
-package com.multicraft;
-
-import com.multicraft.data.BlockRecord;
+package com.multicraft.data;
 
 import java.util.List;
 
