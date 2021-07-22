@@ -1,4 +1,4 @@
-package com.multicraft;
+package com.multicraft.data;
 
 import java.io.BufferedReader;
 import java.io.File;

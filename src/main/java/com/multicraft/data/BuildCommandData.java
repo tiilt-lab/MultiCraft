@@ -1,5 +1,7 @@
 package com.multicraft;
 
+import com.multicraft.data.BlockRecord;
+
 import java.util.List;
 
 public class BuildCommandData {
