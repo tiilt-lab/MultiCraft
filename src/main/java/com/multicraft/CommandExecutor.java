@@ -1,5 +1,7 @@
 package com.multicraft;
 
+import com.multicraft.data.CommandQueues;
+import com.multicraft.util.StoppableThread;
 import org.bukkit.entity.Player;
 import org.json.simple.JSONObject;
 
@@ -8,18 +10,19 @@ import java.util.UUID;
 /*
  * Gets processed JSON objects from the commands queue and creates a game command which is then executed.
  */
-public class CommandExecution extends Thread{
+public class CommandExecutor extends StoppableThread {
+
 	MultiCraft plugin;
 	
-	public CommandExecution(MultiCraft pl) {
-		plugin = pl;
+	public CommandExecutor(MultiCraft plugin) {
+		this.plugin = plugin;
 	}
 	
 	public void run() {
-		while(true) {
-			if (! CommandsQueue.getInstance().commandsQ.isEmpty()) {
+		while(!isStopped()) {
+			if (CommandQueues.getInstance().containsObjects()) {
 				try {
-					JSONObject o = CommandsQueue.getInstance().commandsQ.remove();
+					JSONObject o = CommandQueues.getInstance().consumeObject();
 					GameCommand gComm = new GameCommand(o, plugin);
 
 					if (! gComm.execute()) {
@@ -37,4 +40,5 @@ public class CommandExecution extends Thread{
 			}
 		}
 	}
+
 }

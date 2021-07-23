@@ -6,6 +6,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class MultiCraft extends JavaPlugin{
 
+	private SpeechToTextServer speechToTextServer;
+	private CommandListener commandListener;
+	private CommandExecutor commandExecutor;
+
 	@Override
 	public void onEnable() {
 		getLogger().info("MultiCraft has been enabled!");
@@ -28,9 +32,9 @@ public class MultiCraft extends JavaPlugin{
 		this.getCommand("mpaste").setExecutor(mExec);
 		
 		// start threads to handle client commands
-		new SpeechToTextServer(this).start();
-		new CommandsListener(this).start();
-		new CommandExecution(this).start();
+		speechToTextServer = new SpeechToTextServer(this);
+		commandListener = new CommandListener(this);
+		commandExecutor = new CommandExecutor(this);
 
 		// start thread to handle file transfers
 		new FileTransferServer(this).start();
@@ -38,6 +42,18 @@ public class MultiCraft extends JavaPlugin{
 	
 	@Override
 	public void onDisable() {
+		speechToTextServer.stopThread();
+		commandListener.stopThread();
+		commandExecutor.stopThread();
+
+		try {
+			speechToTextServer.join();
+			commandListener.join();
+			commandExecutor.join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
 		getLogger().info("MultiCraft has been disabled");
 	}
 	

@@ -21,14 +21,11 @@ public class BlockRecord {
 	public boolean equals(Object o) {
 		if (o == this) {
 			return true;
-		}
-
-		if (!(o instanceof BlockRecord)) {
+		} else if (!(o instanceof BlockRecord)) {
 			return false;
 		}
 
 		BlockRecord c = (BlockRecord) o;
-
 		return this.material == c.material && this.x == c.x && this.y == c.y && this.z == c.z;
 	}
 
@@ -39,6 +36,6 @@ public class BlockRecord {
 
 	@Override
 	public String toString() {
-		return "Material: " + material + ", x: " + x + ", y: " + y + ", z: " + z;
+		return String.format("material: %s, x: %d, y: %d, z: %d", material, x, y, z);
 	}
 }

@@ -3,7 +3,7 @@ package com.multicraft;
 import com.multicraft.data.BlockRecord;
 import com.multicraft.data.BuildCommandData;
 import com.multicraft.data.PreviousBuildsData;
-import com.multicraft.data.Structures;
+import com.multicraft.data.StructureMap;
 import com.multicraft.exceptions.NoCommandHistoryException;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -186,9 +186,9 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 					break;
 				}
 
-				Structures universalStructures = new Structures(MultiCraftDirName +
+				StructureMap universalStructureMap = new StructureMap(MultiCraftDirName +
 						File.separator + "universal" + "StructureData.csv");
-				Structures playerStructures = new Structures(MultiCraftDirName +
+				StructureMap playerStructureMap = new StructureMap(MultiCraftDirName +
 						File.separator + p.getUniqueId() + "StructureData.csv");
 
 				BuildCommandData playerBuildData;
@@ -215,15 +215,15 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 							Integer.toString(dimensions[2]), Integer.toString(structureMaterial), "0"};
 				}
 
-				boolean overwroteUniversal = universalStructures.setStructureData(entry);
-				boolean overwrotePlayer = playerStructures.setStructureData(entry);
+				boolean overwroteUniversal = universalStructureMap.setStructureData(entry);
+				boolean overwrotePlayer = playerStructureMap.setStructureData(entry);
 
 				p.sendMessage("Saved " + args[0] + ".");
 				if (overwroteUniversal) p.sendMessage("Warning: Overwrote " + args[0] + " universally.");
 				if (overwrotePlayer) p.sendMessage("Warning: Overwrote " + args[0] + " locally.");
 
-				universalStructures.saveStructureData();
-				playerStructures.saveStructureData();
+				universalStructureMap.saveStructureData();
+				playerStructureMap.saveStructureData();
 
 				return true;
 			}
@@ -233,15 +233,15 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 					break;
 				}
 
-				Structures universalStructures = new Structures(MultiCraftDirName +
+				StructureMap universalStructureMap = new StructureMap(MultiCraftDirName +
 						File.separator + "universal" + "StructureData.csv");
-				Structures playerStructures = new Structures(MultiCraftDirName +
+				StructureMap playerStructureMap = new StructureMap(MultiCraftDirName +
 						File.separator + p.getUniqueId() + "StructureData.csv");
 
 				// check for player-stored structure first, then universal
-				String[] buildData = playerStructures.getStructureData(args[0]);
+				String[] buildData = playerStructureMap.getStructureData(args[0]);
 				if (buildData == null) {
-					buildData = universalStructures.getStructureData(args[0]);
+					buildData = universalStructureMap.getStructureData(args[0]);
 					if (buildData == null) {
 						p.sendMessage(args[0] + " was not found.");
 						break;
