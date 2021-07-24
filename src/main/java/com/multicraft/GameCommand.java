@@ -19,6 +19,7 @@ import java.util.UUID;
  * An object representation of a game command for MultiCraft
  */
 public class GameCommand {
+
 	private final MultiCraft plugin;
 	private String commandName;
 	private Player issuer;
@@ -122,7 +123,7 @@ public class GameCommand {
 		Location pLoc = issuer.getLocation();
 
 		double rotation = pLoc.getYaw();
-		String directionFacedByPlayer = CoordinateCalculations.getGeneralDirection((int) rotation);
+		String directionFacedByPlayer = CoordinatesCalculator.getGeneralDirection((int) rotation);
 		Location newLoc = pLoc.clone();
 
 		switch (directionFacedByPlayer) {
@@ -215,4 +216,5 @@ public class GameCommand {
 		Commands.updateUndoAndRedoStacks(blocksAffected, issuer);
 		return true;
 	}
+
 }

@@ -5,6 +5,7 @@ import org.bukkit.Material;
 import java.util.Objects;
 
 public class BlockRecord {
+
 	public Material material;
 	public int x;
 	public int y;
@@ -38,4 +39,5 @@ public class BlockRecord {
 	public String toString() {
 		return String.format("material: %s, x: %d, y: %d, z: %d", material, x, y, z);
 	}
+
 }

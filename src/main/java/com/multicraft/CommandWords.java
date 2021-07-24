@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 public class CommandWords {
+
 	private static CommandWords instance = null;
 	HashSet<String> commands = new HashSet<>();
 
@@ -18,4 +19,5 @@ public class CommandWords {
 		}
 		return instance;
 	}
+
 }

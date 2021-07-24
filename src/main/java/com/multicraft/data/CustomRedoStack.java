@@ -3,21 +3,18 @@ package com.multicraft.data;
 import com.multicraft.exceptions.NoCommandHistoryException;
 
 public class CustomRedoStack {
+
 	public CustomUndoStack redoStack;
 	
 	public CustomRedoStack(int size) {
 		this.redoStack = new CustomUndoStack(size);
 	}
 	
-	public BuildCommandData pop() throws NoCommandHistoryException {
-		try {
-			return this.redoStack.pop();
-		} catch (NoCommandHistoryException e) {
-			throw e;
-		}		 
+	public BuildCommandRecord pop() throws NoCommandHistoryException {
+		return this.redoStack.pop();
 	}
 	
-	public void push(BuildCommandData data) {
+	public void push(BuildCommandRecord data) {
 		this.redoStack.push(data);
 	}
 	
@@ -28,4 +25,5 @@ public class CustomRedoStack {
 	public int getSize() {
 		return this.redoStack.size;
 	}
+
 }

@@ -3,14 +3,18 @@ package com.multicraft.net;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 
+import com.multicraft.MultiCraft;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 
-public class SpeechToTextWSServer extends WebSocketServer {
+public class MCWebSocketServer extends WebSocketServer {
 
-    public SpeechToTextWSServer(InetSocketAddress address) {
-        super(address);
+    private final MultiCraft plugin;
+
+    public MCWebSocketServer(MultiCraft plugin, int port) {
+        super(new InetSocketAddress("localhost", port));
+        this.plugin = plugin;
     }
 
     @Override
@@ -45,12 +49,4 @@ public class SpeechToTextWSServer extends WebSocketServer {
         System.out.println("server started successfully");
     }
 
-
-    public static void main(String[] args) {
-        String host = "localhost";
-        int port = 8887;
-
-        WebSocketServer server = new SpeechToTextWSServer(new InetSocketAddress(host, port));
-        server.run();
-    }
 }

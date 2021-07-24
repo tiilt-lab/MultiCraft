@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class CoordinateCalculations {
+public class CoordinatesCalculator {
 	
 	public static int[] getBuildCoordinates(Location playerloc, Location loc, int[] dimensions) {
 		int angle = (int) playerloc.getYaw();

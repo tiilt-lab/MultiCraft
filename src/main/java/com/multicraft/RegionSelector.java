@@ -1,43 +1,42 @@
 package com.multicraft;
 
+import com.multicraft.data.RegionCoordinates;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
 
-public class RegionBuild {
-	private static HashMap<Player, RegionCoordinates> playerRegionSelections = new HashMap<Player, RegionCoordinates>();
-	private static RegionBuild instance = null;
-	
-	
-	public static RegionBuild getInstance() {
+public class RegionSelector {
+
+	protected static HashMap<Player, RegionCoordinates> playerRegionSelections = new HashMap<>();
+
+	private static RegionSelector instance = null;
+
+	public static RegionSelector getInstance() {
 		if(instance == null) {
-			instance = new RegionBuild();
+			instance = new RegionSelector();
 		}
 		return instance;
 	}
 	
-	private RegionBuild() {
-	}
-	
-	
-	public void startRegionBuildForPlayer(Player p) {
+	public RegionSelector() { }
+
+	public void startRegionSelectForPlayer(Player p) {
 		RegionCoordinates r = new RegionCoordinates();
 		playerRegionSelections.put(p, r);
 	}
 	
 	
 	public void markStartPosition(Player p, Location l) {
-		if(playerRegionSelections.containsKey(p)){
+		if (playerRegionSelections.containsKey(p)){
 			RegionCoordinates rCoords = playerRegionSelections.get(p);
 			rCoords.setStartLocation(l);
 			playerRegionSelections.put(p, rCoords);
 			return;
 		}
 		
-		startRegionBuildForPlayer(p);
+		startRegionSelectForPlayer(p);
 		markStartPosition(p, l);
-		return;
 	}
 	
 	public boolean markEndPosition(Player p, Location l) {
@@ -48,45 +47,26 @@ public class RegionBuild {
 		rCoords.setEndLocation(l);
 		playerRegionSelections.put(p, rCoords);
 		return true;
-		
 	}
 	
 	public Location getStartLocation(Player p) {
-		if(! playerRegionSelections.containsKey(p)) {
+		if (!playerRegionSelections.containsKey(p)) {
 			// TODO: Throw Exception
 			return null;
 		}
 		
 		RegionCoordinates rCoords = playerRegionSelections.get(p);
-		return rCoords.startLocation;
+		return rCoords.getStartLocation();
 	}
 	
 	public Location getEndLocation(Player p) {
-		if(! playerRegionSelections.containsKey(p)) {
+		if (!playerRegionSelections.containsKey(p)) {
 			// TODO: Throw Exception
 			return null;
 		}
 		
 		RegionCoordinates rCoords = playerRegionSelections.get(p);
-		return rCoords.endLocation;
+		return rCoords.getEndLocation();
 	}
 
-	
-	private class RegionCoordinates{
-		private Location startLocation;
-		private Location endLocation;
-		
-		public RegionCoordinates() {
-			startLocation = null;
-			endLocation = null;
-		}
-
-		public void setStartLocation(Location loc) {
-			startLocation = loc;
-		}
-		
-		public void setEndLocation(Location loc) {
-			endLocation = loc;
-		}
-	}
 }

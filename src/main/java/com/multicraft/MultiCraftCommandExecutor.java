@@ -1,9 +1,10 @@
 package com.multicraft;
 
 import com.multicraft.data.BlockRecord;
-import com.multicraft.data.BuildCommandData;
-import com.multicraft.data.PreviousBuildsData;
+import com.multicraft.data.BuildCommandRecord;
+import com.multicraft.data.PreviousBuildRecords;
 import com.multicraft.data.StructureMap;
+import com.multicraft.exceptions.MaterialDoesNotExistException;
 import com.multicraft.exceptions.NoCommandHistoryException;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -20,17 +21,9 @@ import java.util.HashSet;
 
 public class MultiCraftCommandExecutor implements CommandExecutor {
 	private final MultiCraft plugin;
-	private final String jarLocation;
-	private final String MultiCraftDirName;
-	private final CopyHandler copyHandler;
 
 	public MultiCraftCommandExecutor(MultiCraft plugin) {
 		this.plugin = plugin;
-		File filePath = new File(MultiCraftCommandExecutor.class.
-				getProtectionDomain().getCodeSource().getLocation().getPath());
-		jarLocation = filePath.getPath().substring(0, filePath.getPath().indexOf(filePath.getName()));
-		MultiCraftDirName = jarLocation + File.separator + "MultiCraft";
-		copyHandler = new CopyHandler();
 	}
 	
 	@SuppressWarnings("deprecation")
@@ -99,8 +92,8 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 					p.sendMessage("This command requires creative mode.");
 					break;
 				}
-				RegionBuild rBuild = RegionBuild.getInstance();
-				rBuild.startRegionBuildForPlayer(p);
+				RegionSelector rBuild = RegionSelector.getInstance();
+				rBuild.startRegionSelectForPlayer(p);
 
 				p.sendMessage("Please select the first position by pointing at it with a cursor and issuing the command"
 						+ " /rloc1, then select the second position by pointing at it with the cursor and issuing command"
@@ -112,7 +105,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 					p.sendMessage("This command requires creative mode.");
 					break;
 				}
-				RegionBuild rBuild = RegionBuild.getInstance();
+				RegionSelector rBuild = RegionSelector.getInstance();
 				Location startLocation = p.getTargetBlock((HashSet<Byte>) null, 16).getLocation().add(0, 1, 0);
 
 				if (startLocation == null) startLocation = p.getLocation();
@@ -126,7 +119,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 					p.sendMessage("This command requires creative mode.");
 					break;
 				}
-				RegionBuild rBuild = RegionBuild.getInstance();
+				RegionSelector rBuild = RegionSelector.getInstance();
 				Location endLocation = p.getTargetBlock((HashSet<Byte>) null, 16).getLocation().add(0, 1, 0);
 
 				if (endLocation == null) endLocation = p.getLocation();
@@ -158,21 +151,14 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 				}
 
 				Material material;
-				material = Material.getMaterial(materialArg.toUpperCase());
-				if (material == null) {
-					try {
-						material = Material.getMaterial(Integer.parseInt(materialArg));
-						if (material == null) {
-							p.sendMessage("A material with that id does not exist.");
-							return false;
-						}
-					} catch (NumberFormatException e) {
-						p.sendMessage("A material with that name does not exist.");
-						return false;
-					}
+				try {
+					material = Materials.getMaterial(materialArg);
+				} catch (MaterialDoesNotExistException e) {
+					p.sendMessage(e.getMessage());
+					return false;
 				}
 
-				RegionBuild rBuild = RegionBuild.getInstance();
+				RegionSelector rBuild = RegionSelector.getInstance();
 				Location loc1 = rBuild.getStartLocation(p);
 				Location loc2 = rBuild.getEndLocation(p);
 				Commands.updateBlocks(loc1, loc2, material, plugin);
@@ -186,14 +172,14 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 					break;
 				}
 
-				StructureMap universalStructureMap = new StructureMap(MultiCraftDirName +
+				StructureMap universalStructureMap = new StructureMap(plugin.MultiCraftDirName +
 						File.separator + "universal" + "StructureData.csv");
-				StructureMap playerStructureMap = new StructureMap(MultiCraftDirName +
+				StructureMap playerStructureMap = new StructureMap(plugin.MultiCraftDirName +
 						File.separator + p.getUniqueId() + "StructureData.csv");
 
-				BuildCommandData playerBuildData;
+				BuildCommandRecord playerBuildData;
 				try {
-					playerBuildData = PreviousBuildsData.getInstance().getPlayersLastBuildRecord(p);
+					playerBuildData = PreviousBuildRecords.getInstance().getPlayersLastBuildRecord(p);
 				} catch (NoCommandHistoryException e) {
 					p.sendMessage("No previous builds found.");
 					break;
@@ -233,9 +219,9 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 					break;
 				}
 
-				StructureMap universalStructureMap = new StructureMap(MultiCraftDirName +
+				StructureMap universalStructureMap = new StructureMap(plugin.MultiCraftDirName +
 						File.separator + "universal" + "StructureData.csv");
-				StructureMap playerStructureMap = new StructureMap(MultiCraftDirName +
+				StructureMap playerStructureMap = new StructureMap(plugin.MultiCraftDirName +
 						File.separator + p.getUniqueId() + "StructureData.csv");
 
 				// check for player-stored structure first, then universal
@@ -264,12 +250,12 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 					break;
 				}
 
-				Location startLocation = p.getTargetBlock((HashSet<Byte>) null, 32).getLocation();
-				if (p.getWorld().getBlockAt(startLocation).getType() == Material.AIR) {
-					p.sendMessage("Please find a closer position");
-					break;
-				}
-				copyHandler.setCopyLoc1(p, startLocation);
+				CopyHandler cHandler = CopyHandler.getInstance();
+				Location startLocation = p.getTargetBlock((HashSet<Byte>) null, 16).getLocation().add(0, 1, 0);
+
+				if (startLocation == null) startLocation = p.getLocation();
+				cHandler.markStartPosition(p, startLocation);
+
 				p.sendMessage("The first position has been marked.");
 				return true;
 			}
@@ -284,12 +270,16 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 					break;
 				}
 
-				Location endLocation = p.getTargetBlock((HashSet<Byte>) null, 32).getLocation();
-				if (p.getWorld().getBlockAt(endLocation).getType() == Material.AIR) {
-					p.sendMessage("Please find a closer position");
+				CopyHandler cHandler = CopyHandler.getInstance();
+				Location endLocation = p.getTargetBlock((HashSet<Byte>) null, 16).getLocation().add(0, 1, 0);
+
+				if (endLocation == null) endLocation = p.getLocation();
+
+				if (!cHandler.markEndPosition(p, endLocation)) {
+					p.sendMessage("You cannot mark an end location without beginning a valid region build session.");
 					break;
 				}
-				copyHandler.setCopyLoc2(p, endLocation);
+
 				p.sendMessage("The second position has been marked.");
 				return true;
 			}
@@ -304,7 +294,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 					break;
 				}
 
-				String copyArgs = copyHandler.getCopyArgs(p);
+				String copyArgs = CopyHandler.getInstance().getCopyArgs(p);
 				if (copyArgs == null) {
 					p.sendMessage("Please ensure both copy locations are marked.");
 					break;

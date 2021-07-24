@@ -1,6 +1,7 @@
 package com.multicraft;
 
 import com.multicraft.exceptions.MaterialDoesNotExistException;
+import org.bukkit.Material;
 
 import java.util.HashMap;
 
@@ -22,15 +23,30 @@ public class Materials {
 	
 	@SuppressWarnings("static-access")
 	public static int getId(String s) throws MaterialDoesNotExistException {		
-		if(! getInstance().materials.containsKey(s.toLowerCase())) {
+		if (!getInstance().materials.containsKey(s.toLowerCase())) {
 			throw new MaterialDoesNotExistException("The material you requested does not exist.");
 		}
 		return materials.get(s);
 	}
+
+	public static Material getMaterial(String m) throws MaterialDoesNotExistException {
+	    Material material = Material.getMaterial(m.toUpperCase());
+	    if (material == null) {
+	    	try {
+	    		material = Material.getMaterial(Integer.parseInt(m));
+	    		if (material == null) {
+	    			throw new MaterialDoesNotExistException("A material with that id does not exist.");
+				}
+	    		return material;
+			} catch (NumberFormatException e) {
+				throw new MaterialDoesNotExistException("A material with that name does not exist.");
+			}
+		}
+	    return material;
+	}
 	
-	@SuppressWarnings("serial")
 	public static HashMap<String, Integer> initializeMaterialsDict(){
-		 return new HashMap<String, Integer>(){{
+		 return new HashMap<String, Integer>() {{
 			 put("acacia_door",430);
 			 put("acacia_fence",192);
 			 put("acacia_fence_gate",187);
@@ -367,8 +383,7 @@ public class Materials {
 			 put("crafting_table",58);
 			 put("written_book",387);
 			 put("yellow_flower",37);
-		 }
-		 };
+		 }};
 	}
 	
 }
