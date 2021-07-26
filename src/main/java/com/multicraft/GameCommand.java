@@ -10,10 +10,11 @@ import org.bukkit.inventory.ItemStack;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import java.io.File;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
+
+import static com.multicraft.Commands.updateUndoAndRedoStacks;
 
 /*
  * An object representation of a game command for MultiCraft
@@ -21,24 +22,17 @@ import java.util.UUID;
 public class GameCommand {
 
 	private final MultiCraft plugin;
-	private String commandName;
-	private Player issuer;
-	private JSONObject args;
+	private final String commandName;
+	private final Player issuer;
+	private final JSONObject args;
 
-	public GameCommand(JSONObject argsJSON, MultiCraft plugin) {
+	public GameCommand(JSONObject args, MultiCraft plugin) {
 		this.plugin = plugin;
-		args = argsJSON;
+		this.args = args;
 		commandName = (String) args.get("command");
 		issuer = Bukkit.getServer().getPlayer(UUID.fromString(args.get("client_name").toString()));
-
-		File filePath = new File(GameCommand.class.getProtectionDomain().getCodeSource().getLocation().getPath());
-		String jarLocation = filePath.getPath().substring(0, filePath.getPath().indexOf(filePath.getName()));
 	}
 	
-	public GameCommand(MultiCraft plugin) {
-		this.plugin = plugin;
-	}
-
 	public boolean commandSupported(String com) {
 		return CommandWords.getInstance().commands.contains(com);
 	}
@@ -48,7 +42,7 @@ public class GameCommand {
 	}
 
 	public boolean execute() {
-		if(! commandSupported(commandName) || ! playerIsOnline(issuer)) {
+		if (!commandSupported(commandName) || !playerIsOnline(issuer)) {
 			return false;
 		}
 		switch (commandName) {
@@ -95,13 +89,13 @@ public class GameCommand {
 		if (args.containsKey("roof") && (Boolean) args.get("roof")) {
 			PyramidBuilder tempBuilder = new PyramidBuilder(plugin);
 			blocksAffected = tempBuilder.makePyramid(new BlockVector3(l.getX(), l.getY(), l.getZ()), m, dimensions[0], true, issuer.getWorld());
-			Commands.updateUndoAndRedoStacks(blocksAffected, issuer);
+			updateUndoAndRedoStacks(blocksAffected, issuer);
 			return true;
 		}
 
 		boolean isHollow = args.containsKey("hollow") && (Boolean) args.get("hollow");
 		blocksAffected = Commands.buildStructure(issuer.getLocation(), l, dimensions, m, isHollow, plugin);
-		Commands.updateUndoAndRedoStacks(blocksAffected, issuer);
+		updateUndoAndRedoStacks(blocksAffected, issuer);
 		return true;
 	}
 
@@ -114,7 +108,7 @@ public class GameCommand {
 		Location l = issuer.getTargetBlock((HashSet<Byte>) null, 16).getLocation().add(0, 1, 0);
 
 		List<BlockRecord> blocksAffected = Commands.buildStructure(issuer.getLocation(), l, dimensions, m, false, plugin);
-		Commands.updateUndoAndRedoStacks(blocksAffected, issuer);
+		updateUndoAndRedoStacks(blocksAffected, issuer);
 		return true;
 	}
 
@@ -213,7 +207,7 @@ public class GameCommand {
 		Location l = issuer.getTargetBlock((HashSet<Byte>) null, 16).getLocation().add(0, 1, 0);
 
 		List<BlockRecord> blocksAffected = Commands.buildTStructure(issuer.getLocation(), l, blockMap, plugin);
-		Commands.updateUndoAndRedoStacks(blocksAffected, issuer);
+		updateUndoAndRedoStacks(blocksAffected, issuer);
 		return true;
 	}
 

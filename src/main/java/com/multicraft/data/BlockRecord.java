@@ -6,13 +6,13 @@ import java.util.Objects;
 
 public class BlockRecord {
 
-	public Material material;
-	public int x;
-	public int y;
-	public int z;
+	public final Material m;
+	public final int x;
+	public final int y;
+	public final int z;
 	
 	public BlockRecord(Material m, int x, int y, int z) {
-		this.material = m;
+		this.m = m;
 		this.x = x;
 		this.y = y;
 		this.z = z;
@@ -27,17 +27,17 @@ public class BlockRecord {
 		}
 
 		BlockRecord c = (BlockRecord) o;
-		return this.material == c.material && this.x == c.x && this.y == c.y && this.z == c.z;
+		return this.m == c.m && this.x == c.x && this.y == c.y && this.z == c.z;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(material, x, y, z);
+		return Objects.hash(m, x, y, z);
 	}
 
 	@Override
 	public String toString() {
-		return String.format("material: %s, x: %d, y: %d, z: %d", material, x, y, z);
+		return String.format("material: %s, x: %d, y: %d, z: %d", m, x, y, z);
 	}
 
 }

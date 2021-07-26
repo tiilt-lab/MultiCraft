@@ -155,7 +155,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 					material = Materials.getMaterial(materialArg);
 				} catch (MaterialDoesNotExistException e) {
 					p.sendMessage(e.getMessage());
-					return false;
+					material = Material.STONE;
 				}
 
 				RegionSelector rBuild = RegionSelector.getInstance();

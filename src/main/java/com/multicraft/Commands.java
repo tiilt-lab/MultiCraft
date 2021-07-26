@@ -39,11 +39,11 @@ public class Commands {
 		for (BlockRecord b : blocksToChange) {
 			Block t = world.getBlockAt(b.x, b.y, b.z);
 			blocksAffectedDuringUndo.add(new BlockRecord(t.getType(), t.getX(), t.getY(), t.getZ()));
-			Bukkit.getScheduler().runTask(plugin, () -> t.setType(b.material));
+			Bukkit.getScheduler().runTask(plugin, () -> t.setType(b.m));
 		}
 
 		if (p.getGameMode() == GameMode.SURVIVAL) {
-			Material m = blocksAffectedDuringUndo.get(0).material;
+			Material m = blocksAffectedDuringUndo.get(0).m;
 			HashSet<BlockRecord> uniqueBlocks = new HashSet<>(blocksAffectedDuringUndo);
 			int n = uniqueBlocks.size();
 			p.getInventory().addItem(new ItemStack(m, n));
@@ -72,7 +72,7 @@ public class Commands {
 		List<BlockRecord> blocksAffectedDuringRedo = new ArrayList<>();
 
 		if (p.getGameMode() == GameMode.SURVIVAL) {
-			Material m = blocksToChange.get(0).material;
+			Material m = blocksToChange.get(0).m;
 			HashSet<BlockRecord> uniqueBlocks = new HashSet<>(blocksToChange);
 			int n = uniqueBlocks.size();
 			if (!p.getInventory().contains(m, n)) {
@@ -87,10 +87,9 @@ public class Commands {
 		for (BlockRecord b : blocksToChange) {
 			Block t = world.getBlockAt(b.x, b.y, b.z);
 			blocksAffectedDuringRedo.add(new BlockRecord(t.getType(), t.getX(), t.getY(), t.getZ()));
-			Bukkit.getScheduler().runTask(plugin, () -> t.setType(b.material));
+			Bukkit.getScheduler().runTask(plugin, () -> t.setType(b.m));
 		}
 
-		
 		// restore blocks
 		BuildCommandRecord toStoreInUndo = new BuildCommandRecord(blocksAffectedDuringRedo, blocksAffectedDuringRedo.size());
 		pData.addToUndoStack(p, toStoreInUndo);
@@ -104,7 +103,7 @@ public class Commands {
 			material = Materials.getMaterial(materialArg);
 		} catch (MaterialDoesNotExistException e) {
 			p.sendMessage(e.getMessage());
-			return false;
+			material = Material.STONE;
 		}
 
 		if (inSurvival) {

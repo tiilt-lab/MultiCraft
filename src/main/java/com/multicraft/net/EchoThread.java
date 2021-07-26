@@ -1,6 +1,6 @@
 package com.multicraft.net;
 
-import com.multicraft.data.CommandQueues;
+import com.multicraft.data.CommandQueue;
 import com.multicraft.MultiCraft;
 import org.bukkit.entity.Player;
 import org.json.simple.JSONObject;
@@ -17,49 +17,49 @@ import java.util.UUID;
 
 public class EchoThread extends SimpleSocketThread {
 
+	private final JSONParser jsonParser = new JSONParser();
+	private String client = "";
+
 	public EchoThread(Socket socket, MultiCraft plugin) {
 	    super(socket, plugin);
 	}
 
 	public void run() {
-		InputStream inp;
-		BufferedReader brinp;
+		InputStream inputStream;
 		try {
-			inp = socket.getInputStream();
-			brinp = new BufferedReader(new InputStreamReader(inp));
+			inputStream = socket.getInputStream();
 		} catch (IOException e) {
+			plugin.getLogger().severe(String.format("IOException: \"%s\"", e.getMessage()));
 			return;
 		}
+
+		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 		while (!socket.isClosed()) {
+			String line = "";
 			try {
-				String line = brinp.readLine();
-				if (line == null) {
+				line = bufferedReader.readLine();
+				if (line == null || line.isEmpty()) {
 					socket.close();
 					break;
 				}
-				try {
-					JSONParser parser = new JSONParser();
-					JSONObject obj = (JSONObject) parser.parse(line);
-					Object client = obj.get("client_name");
-					if (client != null) {
-						try {
-							Player player = plugin.getServer().getPlayer(UUID.fromString(client.toString()));
-							if (player != null) {
-								player.sendMessage(line);
-								CommandQueues.getInstance().addString(line);
-								System.out.println(line);
-							}
-						} catch (IllegalArgumentException ie) {
-							ie.printStackTrace();
-						}
+				JSONObject jsonObject = (JSONObject) jsonParser.parse(line);
+				client = (String) jsonObject.get("client_name");
+				if (client != null && !client.isEmpty()) {
+					Player player = plugin.getServer().getPlayer(UUID.fromString(client));
+					if (player != null) {
+						player.sendMessage(line);
+						CommandQueue.getInstance().addObject(jsonObject);
+						plugin.getLogger().info(line);
 					}
-				} catch(ParseException pe) {
-					System.out.println("position: " + pe.getPosition());
-					pe.printStackTrace();
 				}
 			} catch (IOException e) {
-				e.printStackTrace();
+				plugin.getLogger().warning(String.format("IOException: \"%s\"", e.getMessage()));
+			} catch (IllegalArgumentException e) {
+				plugin.getLogger().warning(String.format("IllegalArgumentException: \"%s\" is an invalid UUID.", client));
+			} catch (ParseException e) {
+				plugin.getLogger().warning(String.format("ParseException: Position %s of ", e.getPosition(), line));
 			}
 		}
 	}
+
 }

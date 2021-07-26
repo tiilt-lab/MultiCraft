@@ -1,6 +1,6 @@
 package com.multicraft;
 
-import com.multicraft.data.CommandQueues;
+import com.multicraft.data.CommandQueue;
 import com.multicraft.net.*;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -14,8 +14,7 @@ public class MultiCraft extends JavaPlugin {
 	private final SimpleSocketServer<EchoThread> speechToTextServer = new SimpleSocketServer<>(this, 5003, EchoThread::new);
 	private final SimpleSocketServer<FileThread> fileTransferServer = new SimpleSocketServer<>(this, 5004, FileThread::new);
 	private final MCWebSocketServer webSocketServer = new MCWebSocketServer(this, 5005);
-	private final CommandQueues.CommandListener commandListener = new CommandQueues.CommandListener(this);
-	private final CommandQueues.CommandExecutor commandExecutor = new CommandQueues.CommandExecutor(this);
+	private final CommandQueue.CommandExecutor commandExecutor = new CommandQueue.CommandExecutor(this);
 
 	@Override
 	public void onEnable() {
@@ -47,7 +46,6 @@ public class MultiCraft extends JavaPlugin {
 		speechToTextServer.start();
 		fileTransferServer.start();
 		webSocketServer.start();
-		commandListener.start();
 		commandExecutor.start();
 	}
 	
@@ -56,7 +54,6 @@ public class MultiCraft extends JavaPlugin {
 	    // stop threads
 		speechToTextServer.interrupt();
 		fileTransferServer.interrupt();
-		commandListener.interrupt();
 		commandExecutor.interrupt();
 
 		getLogger().info("MultiCraft has been disabled.");

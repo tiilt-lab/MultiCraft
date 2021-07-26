@@ -32,7 +32,7 @@ public class FileThread extends SimpleSocketThread {
             dis.close();
             fos.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            plugin.getLogger().warning(String.format("IOException: \"%s\"", e.getMessage()));
         }
     }
 

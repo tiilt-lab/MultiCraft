@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PyramidBuilder implements CommandExecutor {
+
 	private final MultiCraft plugin;
 	
 	public PyramidBuilder(MultiCraft plugin) {
@@ -27,8 +28,6 @@ public class PyramidBuilder implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		Player p = (Player) sender;
 		if(cmd.getName().equalsIgnoreCase("pyramid")) {
-			// p.sendMessage("The pyramid command has been called");
-			// p.sendMessage(Integer.toString(args.length));
 			if(args.length < 1) {
 				p.sendMessage("Not enough parameters.");
 				return false;
@@ -36,17 +35,16 @@ public class PyramidBuilder implements CommandExecutor {
 			
 			// parse args to dimensions
 			int size = Integer.parseInt(args[0]);
-			Location playerLoc = p.getLocation();			
+			Location playerLoc = p.getLocation();
 
-			int materialId = 1;
-			if(args.length > 1) {
-				try { materialId = Integer.parseInt(args[1]); }
-				catch(NumberFormatException e) {
-					try { materialId = Materials.getId(args[1]); }
-					catch(MaterialDoesNotExistException f) { materialId = 1; }
-				}
+			Material material;
+			try {
+				material = Materials.getMaterial(args[1]);
+			} catch (MaterialDoesNotExistException e) {
+				p.sendMessage(e.getMessage());
+				material = Material.STONE;
 			}
-			Material material = Material.getMaterial(materialId);
+
 			boolean hollow = args.length > 2;
 
 			List<BlockRecord> blocksAffected =  makePyramid(new BlockVector3(playerLoc.getX(), playerLoc.getY(), playerLoc.getZ()), material, size, hollow, playerLoc.getWorld());
@@ -58,7 +56,6 @@ public class PyramidBuilder implements CommandExecutor {
 	
 	
 	public List<BlockRecord> makePyramid(BlockVector3 position, Material block, int size, boolean hollow, World w){
-		// plugin.getServer().broadcastMessage(position.toString());
         int height = size;
 
         List<BlockRecord> blocksAffected = new ArrayList<>();
