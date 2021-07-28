@@ -10,5 +10,5 @@
 ### Exporting JAR
 1. IntelliJ should recognize pom.xml and begin Maven setup.
 2. Add a new Maven Run Configuration (Add Configuration... > Add New Configuration > Maven)
-3. Use "package" for command line and Run.
+3. Use "compile assembly:single" for command line and Run.
 5. Exported JAR should appear in target directory.
