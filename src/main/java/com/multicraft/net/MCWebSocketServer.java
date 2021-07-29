@@ -30,12 +30,12 @@ public class MCWebSocketServer extends WebSocketServer {
 
     /* Only to be used by local main method for testing */
     private MCWebSocketServer(int port) {
-        super(new InetSocketAddress("localhost", port));
+        super(new InetSocketAddress(port));
         plugin = null;
     }
 
     public MCWebSocketServer(MultiCraft plugin, int port) {
-        super(new InetSocketAddress("localhost", port));
+        super(new InetSocketAddress(port));
         this.plugin = plugin;
     }
 
