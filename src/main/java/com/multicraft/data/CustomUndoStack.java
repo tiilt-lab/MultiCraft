@@ -52,10 +52,6 @@ public class CustomUndoStack {
 		}
 	}
 	
-	public BuildCommandRecord getItemAtIndex(int i) {
-		return dataArr[i];
-	}
-	
 	public boolean isEmpty() {
 		int indexToCheck = insertIndex-1;
 		
@@ -65,8 +61,4 @@ public class CustomUndoStack {
 		return dataArr[indexToCheck] == null;
 	}
 	
-	public int getSize() {
-		return this.size;
-	}
-
 }

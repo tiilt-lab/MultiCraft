@@ -1,6 +1,5 @@
 package com.multicraft;
 
-import com.multicraft.exceptions.MaterialDoesNotExistException;
 import com.multicraft.data.BlockRecord;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -23,7 +22,6 @@ public class PyramidBuilder implements CommandExecutor {
 		this.plugin = plugin;
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		Player p = (Player) sender;
@@ -37,13 +35,7 @@ public class PyramidBuilder implements CommandExecutor {
 			int size = Integer.parseInt(args[0]);
 			Location playerLoc = p.getLocation();
 
-			Material material;
-			try {
-				material = Materials.getMaterial(args[1]);
-			} catch (MaterialDoesNotExistException e) {
-				p.sendMessage(e.getMessage());
-				material = Material.STONE;
-			}
+			Material material = Commands.getMaterial(args[1]);
 
 			boolean hollow = args.length > 2;
 
@@ -65,25 +57,24 @@ public class PyramidBuilder implements CommandExecutor {
             for (int x = 0; x <= size; ++x)
                 for (int z = 0; z <= size; ++z)
                     if ((!hollow && z <= size && x <= size) || z == size || x == size) {
-                    	byte tempByte = (byte) 0;
-                    	blocksAffected.add(updateBlock(w, (int) position.x + x, (int) position.y + y, (int) position.z + z, block, tempByte));
-                    	blocksAffected.add(updateBlock(w, (int) position.x - x, (int) position.y + y, (int) position.z + z, block, tempByte));
-                    	blocksAffected.add(updateBlock(w, (int) position.x + x, (int) position.y + y, (int) position.z - z, block, tempByte));
-                    	blocksAffected.add(updateBlock(w, (int) position.x - x, (int) position.y + y, (int) position.z - z, block, tempByte));
+                    	blocksAffected.add(updateBlock(w, (int) position.x + x, (int) position.y + y, (int) position.z + z, block));
+                    	blocksAffected.add(updateBlock(w, (int) position.x - x, (int) position.y + y, (int) position.z + z, block));
+                    	blocksAffected.add(updateBlock(w, (int) position.x + x, (int) position.y + y, (int) position.z - z, block));
+                    	blocksAffected.add(updateBlock(w, (int) position.x - x, (int) position.y + y, (int) position.z - z, block));
                     }
         }
 
         return blocksAffected;
     }
 	
-	private BlockRecord updateBlock(World world, int x, int y, int z, Material blockType, byte blockData) {
+	private BlockRecord updateBlock(World world, int x, int y, int z, Material blockType) {
         Block thisBlock = world.getBlockAt(x,y,z);
-        return updateBlock(thisBlock, blockType, blockData);
+        return updateBlock(thisBlock, blockType);
     }
 	
-	private BlockRecord updateBlock(Block block, Material m, byte blockData) {
+	private BlockRecord updateBlock(Block block, Material m) {
 		BlockRecord toReturn = new BlockRecord(block.getType(), block.getX(), block.getY(), block.getZ());
-		Bukkit.getScheduler().runTask(plugin, () -> { block.setType(m); });
+		Bukkit.getScheduler().runTask(plugin, () -> block.setType(m));
 		return toReturn;
     }
 	
@@ -91,6 +82,7 @@ public class PyramidBuilder implements CommandExecutor {
 		public double x;
 		public double y;
 		public double z;
+
 		public BlockVector3(double x, double y, double z) {
 			this.x = x;
 			this.y = y;

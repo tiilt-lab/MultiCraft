@@ -22,19 +22,20 @@ import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public class MCWebSocketServer extends WebSocketServer {
+public class WebSocketThread extends WebSocketServer {
+
+    private static final String MINECRAFT_API = "https://api.mojang.com/users/profiles/minecraft/";
 
     private final MultiCraft plugin;
     private final JSONParser jsonParser = new JSONParser();
-    private final String minecraftAPI = "https://api.mojang.com/users/profiles/minecraft/";
 
     /* Only to be used by local main method for testing */
-    private MCWebSocketServer(int port) {
+    private WebSocketThread(int port) {
         super(new InetSocketAddress(port));
         plugin = null;
     }
 
-    public MCWebSocketServer(MultiCraft plugin, int port) {
+    public WebSocketThread(MultiCraft plugin, int port) {
         super(new InetSocketAddress(port));
         this.plugin = plugin;
     }
@@ -67,7 +68,7 @@ public class MCWebSocketServer extends WebSocketServer {
                 String command = (String) jsonObject.get("command");
                 String username = (String) jsonObject.get("username");
                 if (command != null && command.equals("login") && username != null && !username.isEmpty()) {
-                    URL url = new URL(minecraftAPI + username);
+                    URL url = new URL(MINECRAFT_API + username);
                     InputStream inputStream = url.openStream();
                     String result = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
                             .lines()
@@ -119,7 +120,7 @@ public class MCWebSocketServer extends WebSocketServer {
     }
 
     public static void main(String[] args) {
-        WebSocketServer server = new MCWebSocketServer(8887);
+        WebSocketServer server = new WebSocketThread(8887);
         server.run();
     }
 

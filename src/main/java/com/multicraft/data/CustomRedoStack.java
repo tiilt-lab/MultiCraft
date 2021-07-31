@@ -18,10 +18,6 @@ public class CustomRedoStack {
 		this.redoStack.push(data);
 	}
 	
-	public boolean isEmpty() {
-		return this.redoStack.isEmpty();
-	}
-	
 	public int getSize() {
 		return this.redoStack.size;
 	}

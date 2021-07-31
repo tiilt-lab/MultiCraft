@@ -20,12 +20,13 @@ public class CopyHandler extends RegionSelector {
     public String getCopyArgs(Player p) {
         if (playerRegionSelections.containsKey(p)) {
             RegionCoordinates r = playerRegionSelections.get(p);
-            if (r.getStartLocation() != null && r.getStartLocation() != null) {
+            if (r.getStartLocation() != null && r.getEndLocation() != null) {
                 Location s = r.getStartLocation();
                 Location e = r.getEndLocation();
                 return s.getX() + " " + s.getY() + " " + s.getZ() + " " + e.getX() + " " + e.getY() + " " + e.getZ();
             }
         }
+        p.sendMessage("Please ensure both copy locations are marked.");
         return "";
     }
 }

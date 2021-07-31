@@ -8,10 +8,11 @@ import java.util.UUID;
 
 public class PreviousBuildRecords {
 
+	private static final int DEFAULT_UNDO_STACK_SIZE = 5;
+	private static final int DEFAULT_REDO_STACK_SIZE = 5;
+
 	private final HashMap<UUID, CustomUndoStack> buildUndoData = new HashMap<>();
 	private final HashMap<UUID, CustomRedoStack> buildRedoData = new HashMap<>();
-	private final int DEFAULT_UNDO_STACK_SIZE = 5;
-	private final int DEFAULT_REDO_STACK_SIZE = 5;
 	private static PreviousBuildRecords instance = null;
 	
 	public static PreviousBuildRecords getInstance() {
@@ -42,15 +43,13 @@ public class PreviousBuildRecords {
 	
 	public BuildCommandRecord getPlayersBuildRecordForUndo(Player p) throws NoCommandHistoryException {
 		
-		BuildCommandRecord temp = null;
 		if(! buildUndoData.containsKey(p.getUniqueId())) {
 			throw new NoCommandHistoryException("Player is not in the dictionary.");
 		}
 
 		CustomUndoStack tempStack = buildUndoData.get(p.getUniqueId());
-		temp = tempStack.pop();
 		// temp = instance.buildsUndoData.get(p).pop();
-		return temp;
+		return tempStack.pop();
 	}
 
 	public BuildCommandRecord getPlayersLastBuildRecord(Player p) throws NoCommandHistoryException{
@@ -85,12 +84,4 @@ public class PreviousBuildRecords {
 		buildUndoData.put(p.getUniqueId(), temp);
 	}
 	
-	public int getPlayerUndoStackSize(Player p) {
-		return instance.buildUndoData.get(p.getUniqueId()).getSize();
-	}
-	
-	public BuildCommandRecord getItemAtIndexForPlayer(Player p, int i) {
-		return buildUndoData.get(p.getUniqueId()).getItemAtIndex(i);
-	}
-
 }
