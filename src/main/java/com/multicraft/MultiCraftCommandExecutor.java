@@ -109,7 +109,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 					break;
 				}
 
-				if (playerNotInCreativeMode(p)) break;
+				if (playerNotInCreativeMode(p) || RegionSelector.getInstance().getEndLocation(p) == null) break;
 
 				Material material = Commands.getMaterial(args.length == 1 ? args[0] : "STONE");
 
