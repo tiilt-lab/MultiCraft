@@ -15,13 +15,11 @@ import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.util.List;
-import java.util.function.Function;
 
 
 public class MultiCraftCommandExecutor implements CommandExecutor {
 
 	private final MultiCraft plugin;
-	private final Function<Player, Boolean> playerInCreativeMode = player -> player.getGameMode() == GameMode.CREATIVE;
 
 	public MultiCraftCommandExecutor(MultiCraft plugin) {
 		this.plugin = plugin;
@@ -83,7 +81,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 						p.getGameMode() == GameMode.SURVIVAL, plugin);
 			}
 			case "rloc1": {
-				if (playerRequirementNotMet(p, playerInCreativeMode)) break;
+				if (playerNotInCreativeMode(p)) break;
 
 				Location startLocation = Commands.getPlayerTargetLocation(p, 16, true);
 
@@ -93,7 +91,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 				return true;
 			}
 			case "rloc2": {
-				if (playerRequirementNotMet(p, playerInCreativeMode)) break;
+				if (playerNotInCreativeMode(p)) break;
 
 				Location endLocation = Commands.getPlayerTargetLocation(p, 16, true);
 
@@ -111,7 +109,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 					break;
 				}
 
-				if (playerRequirementNotMet(p, playerInCreativeMode)) break;
+				if (playerNotInCreativeMode(p)) break;
 
 				Material material = Commands.getMaterial(args.length == 1 ? args[0] : "STONE");
 
@@ -186,7 +184,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 				return p.performCommand("mmbuild " + mmbuildArgs);
 			}
 			case "copyloc1": {
-				if (playerRequirementNotMet(p, Player::isOp) || playerRequirementNotMet(p, playerInCreativeMode)) {
+				if (playerNotOp(p) || playerNotInCreativeMode(p)) {
 					break;
 				}
 
@@ -197,7 +195,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 				return true;
 			}
 			case "copyloc2": {
-				if (playerRequirementNotMet(p, Player::isOp) || playerRequirementNotMet(p, playerInCreativeMode)) {
+				if (playerNotOp(p) || playerNotInCreativeMode(p)) {
 					break;
 				}
 
@@ -212,7 +210,7 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 			}
 			case "mpaste": {
 				String copyArgs = CopyHandler.getInstance().getCopyArgs(p);
-				if (playerRequirementNotMet(p, Player::isOp) || playerRequirementNotMet(p, playerInCreativeMode) || copyArgs.isEmpty()) {
+				if (playerNotOp(p) || playerNotInCreativeMode(p) || copyArgs.isEmpty()) {
 					break;
 				}
 
@@ -228,9 +226,17 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 		return false;
 	}
 
-	private static boolean playerRequirementNotMet(Player p, Function<Player, Boolean> requirement) {
-		if (!requirement.apply(p)) {
-		    p.sendMessage("Command requirement for player not met.");
+	private static boolean playerNotOp(Player p) {
+		if (!p.isOp()) {
+			p.sendMessage("You must be OP to use this command.");
+			return true;
+		}
+		return false;
+	}
+
+	private static boolean playerNotInCreativeMode(Player p) {
+		if (p.getGameMode() != GameMode.CREATIVE) {
+		    p.sendMessage("You must be in Creative Mode to use this command.");
 			return true;
 		}
 		return false;
