@@ -62,6 +62,7 @@ public class WebSocketThread extends WebSocketServer {
                 if (player != null) {
                     player.sendMessage(message);
                     CommandQueue.getInstance().addObject(jsonObject);
+                    conn.send("{type: info, message: \"Command received.\"");
                 }
             } else {
                 /* JS clients may be attempting to login to MultiCraft. Check for and handle "login" command. */
@@ -120,7 +121,7 @@ public class WebSocketThread extends WebSocketServer {
     }
 
     public static void main(String[] args) {
-        WebSocketServer server = new WebSocketThread(8887);
+        WebSocketServer server = new WebSocketThread(5005);
         server.run();
     }
 
