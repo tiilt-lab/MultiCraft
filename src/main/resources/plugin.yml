@@ -1,6 +1,6 @@
 name: MultiCraft
 main: com.multicraft.MultiCraft
-version: 1.0 (alpha)
+version: 2.0 (alpha)
 commands:
   mbuild:
     description: (MultiCraft) builds a structure at player position
@@ -27,18 +27,15 @@ commands:
   pyramid:
     description: (MultiCraft) builds a square pyramid at player position
     usage: /<command> <dimension> <material> [hollow 0:1]
-  rbuild:
-    description: (MultiCraft) initiates a region build
-    usage: /<command>
   rloc1:
     description: (MultiCraft) selects first corner of region
     usage: /<command>
   rloc2:
     description: (MultiCraft) selects second corner of region
     usage: /<command>
-  rrbuild:
+  rbuild:
     description: (MultiCraft) builds a structure from rloc1 to rloc2
-    usage: /<command> [material]
+    usage: /<command> <material>
   copyloc1:
     description: (MultiCraft) selects first corner of copy
     usage: /<command>
@@ -48,12 +45,6 @@ commands:
   mpaste:
     description: (MultiCraft) copies the region from copyloc1 to copyloc2 to cursor position
     usage: /<command>
-  eyebuild:
-    description: (MultiCraft) builds structure at gaze position
-    usage: /<command> <x dimension> <y dimension> <z dimension> <material>
-  eyetrack:
-    description: (MultiCraft) enables or disables eyetracking
-    usage: /<command> [move]
   ray:
     description: (MultiCraft) trace a ray of stone from player line of sight
     usage: /<command>

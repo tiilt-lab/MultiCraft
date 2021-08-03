@@ -1,5 +1,9 @@
 package com.multicraft;
 
+import com.multicraft.data.BlockRecord;
+import com.multicraft.data.BuildCommandRecord;
+import com.multicraft.data.PreviousBuildRecords;
+import com.multicraft.exceptions.NoCommandHistoryException;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -14,9 +18,10 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 public class Commands {
+
 	public static boolean undo(Player p, MultiCraft plugin) {
-		PreviousBuildsData pData = PreviousBuildsData.getInstance();
-		BuildCommandData playerBuildRecord;
+		PreviousBuildRecords pData = PreviousBuildRecords.getInstance();
+		BuildCommandRecord playerBuildRecord;
 		
 		// get the player's build record
 		try {
@@ -29,15 +34,10 @@ public class Commands {
 		// restore blocks
 		List<BlockRecord> blocksToChange = playerBuildRecord.blocksAffected;
 		List<BlockRecord> blocksAffectedDuringUndo = new ArrayList<>();
-		World world = p.getWorld();
-		for (BlockRecord b : blocksToChange) {
-			Block t = world.getBlockAt(b.x, b.y, b.z);
-			blocksAffectedDuringUndo.add(new BlockRecord(t.getType(), t.getX(), t.getY(), t.getZ()));
-			Bukkit.getScheduler().runTask(plugin, () -> t.setType(b.material));
-		}
+		restoreBlocks(p, plugin, blocksToChange, blocksAffectedDuringUndo);
 
 		if (p.getGameMode() == GameMode.SURVIVAL) {
-			Material m = blocksAffectedDuringUndo.get(0).material;
+			Material m = blocksAffectedDuringUndo.get(0).m;
 			HashSet<BlockRecord> uniqueBlocks = new HashSet<>(blocksAffectedDuringUndo);
 			int n = uniqueBlocks.size();
 			p.getInventory().addItem(new ItemStack(m, n));
@@ -45,15 +45,15 @@ public class Commands {
 		}
 		
 		// update re-do stack
-		BuildCommandData toStoreInRedo = new BuildCommandData(blocksAffectedDuringUndo, blocksAffectedDuringUndo.size());
+		BuildCommandRecord toStoreInRedo = new BuildCommandRecord(blocksAffectedDuringUndo, blocksAffectedDuringUndo.size());
 		pData.addToRedoStack(p, toStoreInRedo);
 		return true;
 	}
-	
+
 	public static boolean redo(Player p, MultiCraft plugin) {
 		// get data from redoStack
-		PreviousBuildsData pData = PreviousBuildsData.getInstance();
-		BuildCommandData playerBuildRecord;
+		PreviousBuildRecords pData = PreviousBuildRecords.getInstance();
+		BuildCommandRecord playerBuildRecord;
 		
 		try {
 			playerBuildRecord = pData.getPlayersBuildRecordForRedo(p);
@@ -66,7 +66,7 @@ public class Commands {
 		List<BlockRecord> blocksAffectedDuringRedo = new ArrayList<>();
 
 		if (p.getGameMode() == GameMode.SURVIVAL) {
-			Material m = blocksToChange.get(0).material;
+			Material m = blocksToChange.get(0).m;
 			HashSet<BlockRecord> uniqueBlocks = new HashSet<>(blocksToChange);
 			int n = uniqueBlocks.size();
 			if (!p.getInventory().contains(m, n)) {
@@ -77,37 +77,26 @@ public class Commands {
 			p.sendMessage("Removed " + n + " " + m + " from your inventory.");
 		}
 
-		World world = p.getWorld();
-		for (BlockRecord b : blocksToChange) {
-			Block t = world.getBlockAt(b.x, b.y, b.z);
-			blocksAffectedDuringRedo.add(new BlockRecord(t.getType(), t.getX(), t.getY(), t.getZ()));
-			Bukkit.getScheduler().runTask(plugin, () -> t.setType(b.material));
-		}
+		restoreBlocks(p, plugin, blocksToChange, blocksAffectedDuringRedo);
 
-		
 		// restore blocks
-		BuildCommandData toStoreInUndo = new BuildCommandData(blocksAffectedDuringRedo, blocksAffectedDuringRedo.size());
+		BuildCommandRecord toStoreInUndo = new BuildCommandRecord(blocksAffectedDuringRedo, blocksAffectedDuringRedo.size());
 		pData.addToUndoStack(p, toStoreInUndo);
 		return true;
 	}
 
-	@SuppressWarnings("deprecation")
+	private static void restoreBlocks(Player p, MultiCraft plugin, List<BlockRecord> blocksToChange, List<BlockRecord> blocksAffected) {
+		World world = p.getWorld();
+		for (BlockRecord b : blocksToChange) {
+			Block t = world.getBlockAt(b.x, b.y, b.z);
+			blocksAffected.add(new BlockRecord(t.getType(), t.getX(), t.getY(), t.getZ()));
+			Bukkit.getScheduler().runTask(plugin, () -> t.setType(b.m));
+		}
+	}
+
 	public static boolean build(Player p, Location playerLoc, Location startLoc, int[] dimensions, String materialArg,
 								boolean isHollow, boolean inSurvival, MultiCraft plugin) {
-		Material material;
-		material = Material.getMaterial(materialArg.toUpperCase());
-		if (material == null) {
-			try {
-				material = Material.getMaterial(Integer.parseInt(materialArg));
-				if (material == null) {
-					p.sendMessage("A material with that id does not exist.");
-					return false;
-				}
-			} catch (NumberFormatException e) {
-				p.sendMessage("A material with that name does not exist.");
-				return false;
-			}
-		}
+		Material material = getMaterial(materialArg);
 
 		if (inSurvival) {
 			int numBlocksRequired = dimensions[0] * dimensions[1] * dimensions[2];
@@ -130,7 +119,7 @@ public class Commands {
 	
 	public static List<BlockRecord> buildStructure(Location playerLoc, Location startLoc, int[] dimensions,
 												   Material m, boolean isHollow, MultiCraft plugin) {
-		int[] buildCoordinates = CoordinateCalculations.getBuildCoordinates(playerLoc, startLoc, dimensions);
+		int[] buildCoordinates = CoordinatesCalculator.getBuildCoordinates(playerLoc, startLoc, dimensions);
 		Location endLoc = new Location(startLoc.getWorld(), buildCoordinates[0], buildCoordinates[1], buildCoordinates[2]);
 		List<BlockRecord> blocksAffected;
 
@@ -142,39 +131,35 @@ public class Commands {
 	public static List<BlockRecord> buildHollow(Location startLoc, Location endLoc, Material m, MultiCraft plugin) {
 		List<BlockRecord> blocksAffected = new ArrayList<>();
 		// bottom Wall
-		blocksAffected.addAll(updateBlocks(startLoc,
-				new Location(endLoc.getWorld(), endLoc.getX(), startLoc.getY(), endLoc.getZ()), m, plugin));
+		blocksAffected.addAll(updateBlocks(startLoc, new Location(endLoc.getWorld(), endLoc.getX(), startLoc.getY(), endLoc.getZ()), m, plugin));
 
 		// front wall
-		blocksAffected.addAll(updateBlocks(startLoc,
-				new Location(endLoc.getWorld(), endLoc.getX(), endLoc.getY(), startLoc.getZ()), m, plugin));
+		blocksAffected.addAll(updateBlocks(startLoc, new Location(endLoc.getWorld(), endLoc.getX(), endLoc.getY(), startLoc.getZ()), m, plugin));
 
 		// left wall
-		blocksAffected.addAll(updateBlocks(startLoc,
-				new Location(endLoc.getWorld(), startLoc.getX(), endLoc.getY(), endLoc.getZ()), m, plugin));
+		blocksAffected.addAll(updateBlocks(startLoc, new Location(endLoc.getWorld(), startLoc.getX(), endLoc.getY(), endLoc.getZ()), m, plugin));
 
 		// back wall
-		blocksAffected.addAll(updateBlocks(
-				new Location(startLoc.getWorld(), startLoc.getX(), startLoc.getY(), endLoc.getZ()), endLoc, m, plugin));
+		blocksAffected.addAll(updateBlocks(new Location(startLoc.getWorld(), startLoc.getX(), startLoc.getY(), endLoc.getZ()), endLoc, m, plugin));
 
 		// right wall
-		blocksAffected.addAll(updateBlocks(
-				new Location(startLoc.getWorld(), endLoc.getX(), startLoc.getY(), startLoc.getZ()), endLoc, m, plugin));
+		blocksAffected.addAll(updateBlocks(new Location(startLoc.getWorld(), endLoc.getX(), startLoc.getY(), startLoc.getZ()), endLoc, m, plugin));
 
 		// top wall
-		blocksAffected.addAll(updateBlocks(
-				new Location(startLoc.getWorld(), startLoc.getX(), endLoc.getY(), startLoc.getZ()), endLoc, m, plugin));
+		blocksAffected.addAll(updateBlocks(new Location(startLoc.getWorld(), startLoc.getX(), endLoc.getY(), startLoc.getZ()), endLoc, m, plugin));
 		
 		return blocksAffected;
 	}
 	
 	public static List<BlockRecord> updateBlocks(Location pos1, Location pos2, Material m, MultiCraft plugin) {
+		List<BlockRecord> blocksAffected = new ArrayList<>();
+
+		World world = pos1.getWorld();
+		if (world == null) return blocksAffected;
+
 		boolean incrementX = pos1.getX() <= pos2.getX();
 		boolean incrementY = pos1.getY() <= pos2.getY();
 		boolean incrementZ = pos1.getZ() <= pos2.getZ();
-
-		World world = pos1.getWorld();
-		List<BlockRecord> blocksAffected = new ArrayList<>();
 
 		int x = (int) pos1.getX();
 		while ((incrementX && x <= pos2.getX()) || (!incrementX && x >= pos2.getX())) {
@@ -198,23 +183,24 @@ public class Commands {
 
 	public static List<BlockRecord> buildTStructure(Location playerLoc, Location startLoc, JSONObject blockMap, MultiCraft plugin) {
 		int[] dimensions = {10, 10, 10};
-		int[] buildCoordinates = CoordinateCalculations.getBuildCoordinates(playerLoc, startLoc, dimensions);
+		int[] buildCoordinates = CoordinatesCalculator.getBuildCoordinates(playerLoc, startLoc, dimensions);
 		Location endLoc = new Location(startLoc.getWorld(), buildCoordinates[0], buildCoordinates[1], buildCoordinates[2]);
 
 		return updateTBlocks(startLoc, endLoc, Material.STONE, blockMap, plugin);
 	}
 
-	@SuppressWarnings("deprecation")
 	public static List<BlockRecord> updateTBlocks(Location pos1, Location pos2, Material m, JSONObject blockMap, MultiCraft plugin) {
+		List<BlockRecord> blocksAffected = new ArrayList<>();
+
+		World world = pos1.getWorld();
+		if (world == null) return blocksAffected;
+
 		int startX = min(pos1.getBlockX(), pos2.getBlockX());
 		int startY = min(pos1.getBlockY(), pos2.getBlockY());
 		int startZ = min(pos1.getBlockZ(), pos2.getBlockZ());
 		int endX = max(pos1.getBlockX(), pos2.getBlockX());
 		int endY = max(pos1.getBlockY(), pos2.getBlockY());
 		int endZ = max(pos1.getBlockZ(), pos2.getBlockZ());
-
-		World world = pos1.getWorld();
-		List<BlockRecord> blocksAffected = new ArrayList<>();
 
 		for (int x = startX; x <= endX; x++) {
 			String relativeX = Integer.toString(x - startX);
@@ -235,8 +221,7 @@ public class Commands {
 					if (blockMapZ != null) {
 						if (!blockMapZ.containsKey(relativeZ)) continue;
 						else {
-							int id = ((Long) blockMapZ.get(relativeZ)).intValue();
-							m = Material.getMaterial(id);
+							m = getMaterial((String) blockMapZ.get(relativeZ));
 						}
 					}
 					blocksAffected.add(updateBlock(world, plugin, x, y, z, m));
@@ -247,19 +232,32 @@ public class Commands {
 		return blocksAffected;
 	}
 
-	
 	private static BlockRecord updateBlock(World world, MultiCraft plugin, int x, int y, int z, Material blockType) {
 		Block thisBlock = world.getBlockAt(x, y, z);
 		BlockRecord toReturn = new BlockRecord(thisBlock.getType(), x, y, z);
-		Bukkit.getScheduler().runTask(plugin, () -> { thisBlock.setType(blockType); });
+		Bukkit.getScheduler().runTask(plugin, () -> thisBlock.setType(blockType));
 
 		return toReturn;
 	}
 
 	public static void updateUndoAndRedoStacks(List<BlockRecord> blocksAffected, Player p) {
-		BuildCommandData affectedBlocksData = new BuildCommandData(blocksAffected, blocksAffected.size());
-		PreviousBuildsData pData = PreviousBuildsData.getInstance();
+		BuildCommandRecord affectedBlocksData = new BuildCommandRecord(blocksAffected, blocksAffected.size());
+		PreviousBuildRecords pData = PreviousBuildRecords.getInstance();
 		pData.clearPlayerRedo(p);
 		pData.appendBuildRecord(p, affectedBlocksData);		
 	}
+
+	public static Location getPlayerTargetLocation(Player p, int distance, boolean getSurfaceLocation) {
+		return (!getSurfaceLocation ? p.getTargetBlock(null, distance) : p.getLastTwoTargetBlocks(null, distance).get(0)).getLocation();
+	}
+
+	public static Material getMaterial(String m) {
+		Material material = Material.getMaterial(m.toUpperCase());
+		if (material == null) {
+			material = Material.STONE;
+		}
+
+		return material;
+	}
+
 }

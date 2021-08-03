@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class CoordinateCalculations {
+public class CoordinatesCalculator {
 	
 	public static int[] getBuildCoordinates(Location playerloc, Location loc, int[] dimensions) {
 		int angle = (int) playerloc.getYaw();
@@ -15,13 +15,16 @@ public class CoordinateCalculations {
 
 		String generalDirection = getGeneralDirection(angle);
 
-		if (generalDirection.equals("north"))
-			return getFacingNorthCoordinates(startX, startY, startZ, dimensions);
-		if (generalDirection.equals("east"))
-			return getFacingEastCoordinates(startX, startY, startZ, dimensions);
-		if (generalDirection.equals("south"))
-			return getFacingSouthCoordinates(startX, startY, startZ, dimensions);
-		return getFacingWestCoordinates(startX, startY, startZ, dimensions);
+		switch (generalDirection) {
+			case "north":
+				return getFacingNorthCoordinates(startX, startY, startZ, dimensions);
+			case "east":
+				return getFacingEastCoordinates(startX, startY, startZ, dimensions);
+			case "south":
+				return getFacingSouthCoordinates(startX, startY, startZ, dimensions);
+			default:
+				return getFacingWestCoordinates(startX, startY, startZ, dimensions);
+		}
 	}
 	
 	private static int[] getFacingNorthCoordinates(int startX, int startY, int startZ, int[] dimensions) {
@@ -58,9 +61,9 @@ public class CoordinateCalculations {
 
 	public static String getGeneralDirection(int angle) {
 		String specificDirection = getSpecificDirection(angle);
-		Set<String> northDir = new HashSet<String>(Arrays.asList("north northwest", "north", "north northeast", "northeast"));
-		Set<String> eastDir = new HashSet<String>(Arrays.asList("east northeast", "east", "east southeast", "southeast"));
-		Set<String> southDir = new HashSet<String>(Arrays.asList("south southeast", "south", "south southwest", "southwest"));
+		Set<String> northDir = new HashSet<>(Arrays.asList("north northwest", "north", "north northeast", "northeast"));
+		Set<String> eastDir = new HashSet<>(Arrays.asList("east northeast", "east", "east southeast", "southeast"));
+		Set<String> southDir = new HashSet<>(Arrays.asList("south southeast", "south", "south southwest", "southwest"));
 //		Set<String> westDir = new HashSet<String>(Arrays.asList("west southwest", "west", "west northwest", "northwest"));
 		
 		if (northDir.contains(specificDirection))

@@ -1,6 +1,7 @@
 package com.multicraft;
 
 import com.multicraft.PyramidBuilder.BlockVector3;
+import com.multicraft.data.BlockRecord;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -9,46 +10,32 @@ import org.bukkit.inventory.ItemStack;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import java.io.File;
-import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
+
+import static com.multicraft.Commands.getPlayerTargetLocation;
+import static com.multicraft.Commands.updateUndoAndRedoStacks;
 
 /*
  * An object representation of a game command for MultiCraft
  */
 public class GameCommand {
-	private final MultiCraft plugin;
-	private String commandName;
-	private Player issuer;
-	private JSONObject args;
 
-	public GameCommand(JSONObject argsJSON, MultiCraft plugin) {
+	private final MultiCraft plugin;
+	private final String commandName;
+	private final Player issuer;
+	private final JSONObject args;
+
+	public GameCommand(JSONObject args, MultiCraft plugin) {
 		this.plugin = plugin;
-		args = argsJSON;
+		this.args = args;
 		commandName = (String) args.get("command");
 		issuer = Bukkit.getServer().getPlayer(UUID.fromString(args.get("client_name").toString()));
-
-		File filePath = new File(GameCommand.class.getProtectionDomain().getCodeSource().getLocation().getPath());
-		String jarLocation = filePath.getPath().substring(0, filePath.getPath().indexOf(filePath.getName()));
 	}
 	
-	public GameCommand(MultiCraft plugin) {
-		this.plugin = plugin;
-	}
-
-	public boolean commandSupported(String com) {
-		return CommandWords.getInstance().commands.contains(com);
-	}
-
-	public boolean playerIsOnline(Player p) {
-		return Bukkit.getOnlinePlayers().contains(p);
-	}
-
 	public boolean execute() {
-		if(! commandSupported(commandName) || ! playerIsOnline(issuer)) {
-			return false;
-		}
+		if (!issuer.isOnline()) return false;
+
 		switch (commandName) {
 			case "build":
 				return executeBuild();
@@ -76,7 +63,6 @@ public class GameCommand {
 		return false;
 	}
 
-	@SuppressWarnings("deprecation")
 	public boolean executeBuild() {
 		JSONArray dimAr = (JSONArray) args.get("dimensions");
 		int[] dimensions = new int[3];
@@ -84,35 +70,33 @@ public class GameCommand {
 		dimensions[1] = ((Long) dimAr.get(1)).intValue();
 		dimensions[2] = ((Long) dimAr.get(2)).intValue();
 		
-		int id = ((Long) args.get("block_code")).intValue();
-		Material m = Material.getMaterial(id);
+		Material m = Commands.getMaterial((String) args.get("material"));
 
-		Location l = issuer.getTargetBlock((HashSet<Byte>) null, 16).getLocation().add(0, 1, 0);
+		Location location = getPlayerTargetLocation(issuer, 16, true);
 
 		List<BlockRecord> blocksAffected;
 		if (args.containsKey("roof") && (Boolean) args.get("roof")) {
 			PyramidBuilder tempBuilder = new PyramidBuilder(plugin);
-			blocksAffected = tempBuilder.makePyramid(new BlockVector3(l.getX(), l.getY(), l.getZ()), m, dimensions[0], true, issuer.getWorld());
-			Commands.updateUndoAndRedoStacks(blocksAffected, issuer);
+			blocksAffected = tempBuilder.makePyramid(new BlockVector3(location.getX(), location.getY(), location.getZ()), m, dimensions[0], true, issuer.getWorld());
+			updateUndoAndRedoStacks(blocksAffected, issuer);
 			return true;
 		}
 
 		boolean isHollow = args.containsKey("hollow") && (Boolean) args.get("hollow");
-		blocksAffected = Commands.buildStructure(issuer.getLocation(), l, dimensions, m, isHollow, plugin);
-		Commands.updateUndoAndRedoStacks(blocksAffected, issuer);
+		blocksAffected = Commands.buildStructure(issuer.getLocation(), location, dimensions, m, isHollow, plugin);
+		updateUndoAndRedoStacks(blocksAffected, issuer);
 		return true;
 	}
 
-	@SuppressWarnings("deprecation")
 	public boolean executePlace() {
 		int[] dimensions = {1, 1, 1};
-		int id = ((Long) args.get("block_code")).intValue();
-		Material m = Material.getMaterial(id);
 
-		Location l = issuer.getTargetBlock((HashSet<Byte>) null, 16).getLocation().add(0, 1, 0);
+		Material m = Commands.getMaterial((String) args.get("material"));
 
-		List<BlockRecord> blocksAffected = Commands.buildStructure(issuer.getLocation(), l, dimensions, m, false, plugin);
-		Commands.updateUndoAndRedoStacks(blocksAffected, issuer);
+		Location location = getPlayerTargetLocation(issuer, 16, true);
+
+		List<BlockRecord> blocksAffected = Commands.buildStructure(issuer.getLocation(), location, dimensions, m, false, plugin);
+		updateUndoAndRedoStacks(blocksAffected, issuer);
 		return true;
 	}
 
@@ -121,7 +105,7 @@ public class GameCommand {
 		Location pLoc = issuer.getLocation();
 
 		double rotation = pLoc.getYaw();
-		String directionFacedByPlayer = CoordinateCalculations.getGeneralDirection((int) rotation);
+		String directionFacedByPlayer = CoordinatesCalculator.getGeneralDirection((int) rotation);
 		Location newLoc = pLoc.clone();
 
 		switch (directionFacedByPlayer) {
@@ -195,23 +179,22 @@ public class GameCommand {
 		return issuer.performCommand("mclone " + args.get("name"));
 	}
 
-	@SuppressWarnings("deprecation")
 	public boolean executeGive() {
-		int id = ((Long) args.get("block_code")).intValue();
+		Material material = Commands.getMaterial((String) args.get("material"));
 		int amount = ((Long) args.get("dimensions")).intValue();
 
-		issuer.getInventory().addItem(new ItemStack(id, amount));
+		issuer.getInventory().addItem(new ItemStack(material, amount));
 		return true;
 	}
 
-	@SuppressWarnings("deprecation")
 	public boolean executeTBuild() {
 		JSONObject blockMap = (JSONObject) args.get("block_map");
 
-		Location l = issuer.getTargetBlock((HashSet<Byte>) null, 16).getLocation().add(0, 1, 0);
+		Location location = Commands.getPlayerTargetLocation(issuer, 16, true);
 
-		List<BlockRecord> blocksAffected = Commands.buildTStructure(issuer.getLocation(), l, blockMap, plugin);
-		Commands.updateUndoAndRedoStacks(blocksAffected, issuer);
+		List<BlockRecord> blocksAffected = Commands.buildTStructure(issuer.getLocation(), location, blockMap, plugin);
+		updateUndoAndRedoStacks(blocksAffected, issuer);
 		return true;
 	}
+
 }

@@ -1,17 +1,20 @@
-package com.multicraft;
+package com.multicraft.data;
+
+import com.multicraft.exceptions.NoCommandHistoryException;
 
 public class CustomUndoStack {
-	BuildCommandData[] dataArr;
+
+	BuildCommandRecord[] dataArr;
 	int insertIndex;
 	int size;
 
 	public CustomUndoStack(int size) {
-		this.dataArr = new BuildCommandData[size];
+		this.dataArr = new BuildCommandRecord[size];
 		this.insertIndex = 0;
 		this.size = size;
 	}
 
-	public BuildCommandData pop() throws NoCommandHistoryException {
+	public BuildCommandRecord pop() throws NoCommandHistoryException {
 		if(this.isEmpty()) {
 			throw new NoCommandHistoryException("The stack is empty.");
 		}
@@ -22,12 +25,12 @@ public class CustomUndoStack {
 			insertIndex = this.size-1;
 		}
 		
-		BuildCommandData data = dataArr[insertIndex];
+		BuildCommandRecord data = dataArr[insertIndex];
 		dataArr[insertIndex] = null;
 		return data;		 
 	}
 
-	public BuildCommandData peek() throws NoCommandHistoryException {
+	public BuildCommandRecord peek() throws NoCommandHistoryException {
 		if(this.isEmpty()) {
 			throw new NoCommandHistoryException("The stack is empty.");
 		}
@@ -41,16 +44,12 @@ public class CustomUndoStack {
 		return dataArr[peekIndex];
 	}
 
-	public void push(BuildCommandData data) {
+	public void push(BuildCommandRecord data) {
 		this.dataArr[this.insertIndex] = data;
 		this.insertIndex+=1;
 		if(this.insertIndex == size) {
 			this.insertIndex = 0;
 		}
-	}
-	
-	public BuildCommandData getItemAtIndex(int i) {
-		return dataArr[i];
 	}
 	
 	public boolean isEmpty() {
@@ -62,7 +61,4 @@ public class CustomUndoStack {
 		return dataArr[indexToCheck] == null;
 	}
 	
-	public int getSize() {
-		return this.size;
-	}
 }

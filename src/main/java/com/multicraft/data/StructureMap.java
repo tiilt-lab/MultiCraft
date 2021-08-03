@@ -1,17 +1,15 @@
-package com.multicraft;
+package com.multicraft.data;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.*;
 import java.util.Arrays;
 import java.util.HashMap;
 
-public class StructureData {
-    private HashMap<String, String[]> structureDataMap;
-    private String path;
+public class StructureMap {
 
-    public StructureData(String path) {
+    private final HashMap<String, String[]> structureDataMap;
+    private final String path;
+
+    public StructureMap(String path) {
         this.path = path;
         structureDataMap = StructureFileHandler.readFile(path);
     }
@@ -30,6 +28,7 @@ public class StructureData {
     }
 
     private static class StructureFileHandler {
+
         public static HashMap<String, String[]> readFile(String path) {
             File structureFile = new File(path);
             HashMap<String, String[]> csvData = new HashMap<>();
@@ -42,17 +41,17 @@ public class StructureData {
                             String[] entry = line.split(",");
                             csvData.put(entry[0], Arrays.copyOfRange(entry, 1, entry.length));
                         }
-                    } catch (Exception e) {
+                    } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
-            } catch (Exception e) {
+            } catch (IOException | SecurityException e) {
                 e.printStackTrace();
             }
             return csvData;
         }
 
-        public static boolean writeFile(String path, HashMap<String, String[]> structureDataMap) {
+        public static void writeFile(String path, HashMap<String, String[]> structureDataMap) {
             try (FileWriter fw = new FileWriter(path)) {
                 for (String structureDataKey : structureDataMap.keySet()) {
                     fw.append(structureDataKey).append(",");
@@ -60,12 +59,12 @@ public class StructureData {
                     fw.append("\n");
                 }
                 fw.flush();
-                return true;
-            } catch (Exception e) {
+            } catch (IOException e) {
                 e.printStackTrace();
-                return false;
             }
         }
+
     }
+
 }
 
