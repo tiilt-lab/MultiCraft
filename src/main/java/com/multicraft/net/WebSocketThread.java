@@ -120,7 +120,7 @@ public class WebSocketThread extends WebSocketServer {
     }
 
     public static void main(String[] args) {
-        WebSocketServer server = new WebSocketThread(8887);
+        WebSocketServer server = new WebSocketThread(5005);
         server.run();
     }
 
