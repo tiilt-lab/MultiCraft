@@ -252,9 +252,12 @@ public class Commands {
 	}
 
 	public static Material getMaterial(String m) {
-		Material material = Material.getMaterial(m.toUpperCase());
+		Material material = Material.matchMaterial(m, true);
 		if (material == null) {
-			material = Material.STONE;
+			material = Material.matchMaterial(m, true);
+			if (material == null) {
+				material = Material.STONE;
+			}
 		}
 
 		return material;

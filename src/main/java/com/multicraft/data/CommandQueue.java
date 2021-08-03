@@ -2,11 +2,11 @@ package com.multicraft.data;
 
 import com.multicraft.GameCommand;
 import com.multicraft.MultiCraft;
+import com.multicraft.util.UUIDParser;
 import org.bukkit.entity.Player;
 import org.json.simple.JSONObject;
 
 import java.util.Queue;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class CommandQueue {
@@ -56,7 +56,7 @@ public class CommandQueue {
 					}
 
 					String client = (String) jsonObject.get("client_name");
-					Player issuer = plugin.getServer().getPlayer(UUID.fromString(client));
+					Player issuer = plugin.getServer().getPlayer(UUIDParser.parse(client));
 					if (issuer != null) {
 						issuer.sendMessage(String.format("\"%s\" command execution failed.", jsonObject.get("command")));
 					}

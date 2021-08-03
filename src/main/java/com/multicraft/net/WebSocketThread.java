@@ -2,6 +2,7 @@ package com.multicraft.net;
 
 import com.multicraft.MultiCraft;
 import com.multicraft.data.CommandQueue;
+import com.multicraft.util.UUIDParser;
 import org.bukkit.entity.Player;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
@@ -19,7 +20,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class WebSocketThread extends WebSocketServer {
@@ -58,7 +58,7 @@ public class WebSocketThread extends WebSocketServer {
             String client = (String) jsonObject.get("client_name");
             if (plugin != null && client != null && !client.isEmpty()) {
                 /* Check for and handle incoming commands. Only possible if server is running in plugin context. */
-                Player player = plugin.getServer().getPlayer(UUID.fromString(client));
+                Player player = plugin.getServer().getPlayer(UUIDParser.parse(client));
                 if (player != null) {
                     player.sendMessage(message);
                     CommandQueue.getInstance().addObject(jsonObject);
