@@ -2,7 +2,7 @@ package com.multicraft;
 
 import com.multicraft.PyramidBuilder.BlockVector3;
 import com.multicraft.data.BlockRecord;
-import org.bukkit.Bukkit;
+import com.multicraft.util.UUIDParser;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -11,7 +11,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.util.List;
-import java.util.UUID;
 
 import static com.multicraft.Commands.getPlayerTargetLocation;
 import static com.multicraft.Commands.updateUndoAndRedoStacks;
@@ -30,7 +29,7 @@ public class GameCommand {
 		this.plugin = plugin;
 		this.args = args;
 		commandName = (String) args.get("command");
-		issuer = Bukkit.getServer().getPlayer(UUID.fromString(args.get("client_name").toString()));
+		issuer = plugin.getServer().getPlayer(UUIDParser.parse((String) args.get("client_name")));
 	}
 	
 	public boolean execute() {
