@@ -3,6 +3,7 @@ package com.multicraft;
 import com.multicraft.PyramidBuilder.BlockVector3;
 import com.multicraft.data.BlockRecord;
 import com.multicraft.util.UUIDParser;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -22,18 +23,18 @@ public class GameCommand {
 
 	private final MultiCraft plugin;
 	private final String commandName;
-	private final Player issuer;
+	private final Player player;
 	private final JSONObject args;
 
 	public GameCommand(JSONObject args, MultiCraft plugin) {
 		this.plugin = plugin;
 		this.args = args;
 		commandName = (String) args.get("command");
-		issuer = plugin.getServer().getPlayer(UUIDParser.parse((String) args.get("client_name")));
+		player = plugin.getServer().getPlayer(UUIDParser.parse((String) args.get("client_name")));
 	}
 	
 	public boolean execute() {
-		if (!issuer.isOnline()) return false;
+		if (!player.isOnline()) return false;
 
 		switch (commandName) {
 			case "build":
@@ -71,19 +72,19 @@ public class GameCommand {
 		
 		Material m = Commands.getMaterial((String) args.get("material"));
 
-		Location location = getPlayerTargetLocation(issuer, 16, true);
+		Location location = getPlayerTargetLocation(player, 16, true);
 
 		List<BlockRecord> blocksAffected;
 		if (args.containsKey("roof") && (Boolean) args.get("roof")) {
 			PyramidBuilder tempBuilder = new PyramidBuilder(plugin);
-			blocksAffected = tempBuilder.makePyramid(new BlockVector3(location.getX(), location.getY(), location.getZ()), m, dimensions[0], true, issuer.getWorld());
-			updateUndoAndRedoStacks(blocksAffected, issuer);
+			blocksAffected = tempBuilder.makePyramid(new BlockVector3(location.getX(), location.getY(), location.getZ()), m, dimensions[0], true, player.getWorld());
+			updateUndoAndRedoStacks(blocksAffected, player);
 			return true;
 		}
 
 		boolean isHollow = args.containsKey("hollow") && (Boolean) args.get("hollow");
-		blocksAffected = Commands.buildStructure(issuer.getLocation(), location, dimensions, m, isHollow, plugin);
-		updateUndoAndRedoStacks(blocksAffected, issuer);
+		blocksAffected = Commands.buildStructure(player.getLocation(), location, dimensions, m, isHollow, plugin);
+		updateUndoAndRedoStacks(blocksAffected, player);
 		return true;
 	}
 
@@ -92,16 +93,16 @@ public class GameCommand {
 
 		Material m = Commands.getMaterial((String) args.get("material"));
 
-		Location location = getPlayerTargetLocation(issuer, 16, true);
+		Location location = getPlayerTargetLocation(player, 16, true);
 
-		List<BlockRecord> blocksAffected = Commands.buildStructure(issuer.getLocation(), location, dimensions, m, false, plugin);
-		updateUndoAndRedoStacks(blocksAffected, issuer);
+		List<BlockRecord> blocksAffected = Commands.buildStructure(player.getLocation(), location, dimensions, m, false, plugin);
+		updateUndoAndRedoStacks(blocksAffected, player);
 		return true;
 	}
 
 	public boolean executeMove() {
 		int distanceToMove = ((Long) args.get("dimensions")).intValue();
-		Location pLoc = issuer.getLocation();
+		Location pLoc = player.getLocation();
 
 		double rotation = pLoc.getYaw();
 		String directionFacedByPlayer = CoordinatesCalculator.getGeneralDirection((int) rotation);
@@ -122,78 +123,80 @@ public class GameCommand {
 		      break;
 		}
 		
-		issuer.sendMessage(directionFacedByPlayer);
-		issuer.teleport(newLoc);
-
+		teleportPlayer(player, newLoc);
 		return true;
 	}
 
 	public boolean executeTurn() {
 		String direction = args.get("direction").toString();
 		int degrees = ((Long) args.get("dimensions")).intValue();
-		Location l = issuer.getLocation();
+		Location newLoc = player.getLocation();
 		if (direction.equalsIgnoreCase("left"))
-			l.setYaw(l.getYaw() - degrees);
+			newLoc.setYaw(newLoc.getYaw() - degrees);
 		else if (direction.equalsIgnoreCase("right"))
-			l.setYaw(l.getYaw() + degrees);
+			newLoc.setYaw(newLoc.getYaw() + degrees);
 		else {
-			issuer.sendMessage("Turn moves the camera left and right.");
+			player.sendMessage("Turn moves the camera left and right.");
 			return false;
 		}
 
-		issuer.teleport(l);
+		teleportPlayer(player, newLoc);
 		return true;
 	}
 
 	public boolean executeTilt() {
 		String direction = args.get("direction").toString();
 		int degrees = ((Long) args.get("dimensions")).intValue();
-		Location l = issuer.getLocation();
+		Location newLoc = player.getLocation();
 		if (direction.equalsIgnoreCase("down"))
-			l.setPitch(l.getPitch() + degrees);
+			newLoc.setPitch(newLoc.getPitch() + degrees);
 		else if (direction.equalsIgnoreCase("up"))
-			l.setPitch(l.getPitch() - degrees);
+			newLoc.setPitch(newLoc.getPitch() - degrees);
 		else {
-			issuer.sendMessage("Tilt moves the camera up and down.");
+			player.sendMessage("Tilt moves the camera up and down.");
 			return false;
 		}
 
-		issuer.teleport(l);
+		teleportPlayer(player, newLoc);
 		return true;
 	}
 
 	public boolean executeUndo() {
-		return Commands.undo(issuer, plugin);
+		return Commands.undo(player, plugin);
 	}
 
 	public boolean executeRedo() {
-		return Commands.redo(issuer, plugin);
+		return Commands.redo(player, plugin);
 	}
 
 	public boolean executeStore() {
-		return issuer.performCommand("mstore " + args.get("name"));
+		return player.performCommand("mstore " + args.get("name"));
 	}
 
 	public boolean executeClone() {
-		return issuer.performCommand("mclone " + args.get("name"));
+		return player.performCommand("mclone " + args.get("name"));
 	}
 
 	public boolean executeGive() {
 		Material material = Commands.getMaterial((String) args.get("material"));
 		int amount = ((Long) args.get("dimensions")).intValue();
 
-		issuer.getInventory().addItem(new ItemStack(material, amount));
+		player.getInventory().addItem(new ItemStack(material, amount));
 		return true;
 	}
 
 	public boolean executeTBuild() {
 		JSONObject blockMap = (JSONObject) args.get("block_map");
 
-		Location location = Commands.getPlayerTargetLocation(issuer, 16, true);
+		Location location = Commands.getPlayerTargetLocation(player, 16, true);
 
-		List<BlockRecord> blocksAffected = Commands.buildTStructure(issuer.getLocation(), location, blockMap, plugin);
-		updateUndoAndRedoStacks(blocksAffected, issuer);
+		List<BlockRecord> blocksAffected = Commands.buildTStructure(player.getLocation(), location, blockMap, plugin);
+		updateUndoAndRedoStacks(blocksAffected, player);
 		return true;
+	}
+
+	private void teleportPlayer(Player p, Location l) {
+		Bukkit.getScheduler().runTask(plugin, () -> p.teleport(l));
 	}
 
 }

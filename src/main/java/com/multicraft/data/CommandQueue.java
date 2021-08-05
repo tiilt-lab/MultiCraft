@@ -49,10 +49,13 @@ public class CommandQueue {
 			while(!Thread.interrupted()) {
 				if (getInstance().containsObjects()) {
 					JSONObject jsonObject = getInstance().consumeObject();
-					GameCommand gComm = new GameCommand(jsonObject, plugin);
 
-					if (gComm.execute()) {
-						continue;
+					try {
+						GameCommand gComm = new GameCommand(jsonObject, plugin);
+						boolean success = gComm.execute();
+						if (success) continue;
+					} catch (Exception e) {
+						e.printStackTrace();
 					}
 
 					String client = (String) jsonObject.get("client_name");
