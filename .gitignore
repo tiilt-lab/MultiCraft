@@ -33,3 +33,6 @@ hs_err_pid*
 
 # Server-specific logs and files
 *.log
+
+# Included server directory
+server/

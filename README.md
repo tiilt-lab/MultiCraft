@@ -6,8 +6,8 @@ A project aimed at providing a voice and gaze interaction interface for Minecraf
 
 ## Gameplay Setup
 ### Setting up a MultiCraft Server
-[MultiCraftServer](https://github.com/tiilt-lab/MultiCraftServer/) should provide enough information for creating your own Minecraft server with MultiCraft. In order for players and MultiCraftClients to access your server, you'll need to either have the server be set up on a computer with public IP address or use port forwarding on your router.
+[MultiCraftServer](https://github.com/tiilt-lab/MultiCraft/tree/master/server) should provide enough information for creating your own Minecraft server with MultiCraft. In order for players and MultiCraftClients to access your server, you'll need to either have the server be set up on a computer with public IP address or use port forwarding on your router.
 ### Connecting to a MultiCraft Server in Minecraft
-MultiCraft runs on Minecraft Java Edition version 1.9. You can download the Minecraft launcher [here](https://www.minecraft.net/en-us/download), create and launch a new 1.9 installation, and connect to the MultiCraft Minecraft server set up above.
+MultiCraft runs on Minecraft Java Edition version 1.14. You can download the Minecraft launcher [here](https://www.minecraft.net/en-us/download), create and launch a new 1.14 installation, and connect to the MultiCraft Minecraft server set up above.
 ### Connecting MultiCraftClients to a MultiCraft Server
 [MultiCraftClient releases](https://github.com/tiilt-lab/MultiCraftClient/releases) should contain released versions of MultiCraftClients. Download the most recent version of `ClientGUI.exe` and follow the directions while running it to connect to the server.
