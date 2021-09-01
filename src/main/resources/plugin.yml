@@ -1,6 +1,6 @@
 name: MultiCraft
 main: com.multicraft.MultiCraft
-version: 2.2 (alpha)
+version: 2.3
 commands:
   mbuild:
     description: (MultiCraft) builds a structure at player position

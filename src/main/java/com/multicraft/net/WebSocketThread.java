@@ -3,7 +3,6 @@ package com.multicraft.net;
 import com.multicraft.MultiCraft;
 import com.multicraft.data.CommandQueue;
 import com.multicraft.util.UUIDParser;
-import org.bukkit.entity.Player;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
@@ -56,14 +55,10 @@ public class WebSocketThread extends WebSocketServer {
         try {
             JSONObject jsonObject = (JSONObject) jsonParser.parse(message);
             String client = (String) jsonObject.get("client_name");
-            if (plugin != null && client != null && !client.isEmpty()) {
+            if (plugin != null && client != null && !client.isEmpty() && plugin.getServer().getPlayer(UUIDParser.parse(client)) != null) {
                 /* Check for and handle incoming commands. Only possible if server is running in plugin context. */
-                Player player = plugin.getServer().getPlayer(UUIDParser.parse(client));
-                if (player != null) {
-                    player.sendMessage(message);
-                    CommandQueue.getInstance().addObject(jsonObject);
-                    conn.send("{type: info, message: \"Command received.\"");
-                }
+                CommandQueue.getInstance().addObject(jsonObject);
+                conn.send("{type: info, message: \"Command received.\"");
             } else {
                 /* JS clients may be attempting to login to MultiCraft. Check for and handle "login" command. */
                 String command = (String) jsonObject.get("command");

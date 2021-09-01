@@ -3,7 +3,6 @@ package com.multicraft.net;
 import com.multicraft.MultiCraft;
 import com.multicraft.data.CommandQueue;
 import com.multicraft.util.UUIDParser;
-import org.bukkit.entity.Player;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -31,13 +30,9 @@ public class EchoThread extends SimpleSocketThread {
 				try {
 					JSONObject jsonObject = (JSONObject) jsonParser.parse(line);
 					client = (String) jsonObject.get("client_name");
-					if (client != null && !client.isEmpty()) {
-						Player player = plugin.getServer().getPlayer(UUIDParser.parse(client));
-						if (player != null) {
-							player.sendMessage(line);
-							CommandQueue.getInstance().addObject(jsonObject);
-							plugin.getLogger().info(line);
-						}
+					if (client != null && !client.isEmpty() && plugin.getServer().getPlayer(UUIDParser.parse(client)) != null) {
+						CommandQueue.getInstance().addObject(jsonObject);
+						plugin.getLogger().info(line);
 					}
 				} catch (ParseException e) {
 					plugin.getLogger().warning(String.format("ParseException: Position %s of \"%s\".", e.getPosition(), line));
