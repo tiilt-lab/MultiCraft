@@ -8,10 +8,12 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import static com.multicraft.Commands.getPlayerTargetLocation;
 import static com.multicraft.Commands.updateUndoAndRedoStacks;
@@ -36,31 +38,47 @@ public class GameCommand {
 	public boolean execute() {
 		if (!player.isOnline()) return false;
 
-		switch (commandName) {
-			case "build":
-				return executeBuild();
-			case "place":
-				return executePlace();
-			case "move":
-				return executeMove();
-			case "turn":
-				return executeTurn();
-			case "tilt":
-				return executeTilt();
-			case "undo":
-				return executeUndo();
-			case "redo":
-				return executeRedo();
-			case "store":
-				return executeStore();
-			case "clone":
-				return executeClone();
-			case "give":
-				return executeGive();
-			case "tbuild":
-				return executeTBuild();
-		}
-		return false;
+
+		final boolean[] result = {false};
+		plugin.getServer().getScheduler().runTask(plugin, () -> {
+			switch (commandName) {
+				case "build":
+					result[0] = executeBuild();
+					break;
+				case "place":
+					result[0] = executePlace();
+					break;
+				case "move":
+					result[0] = executeMove();
+					break;
+				case "turn":
+					result[0] = executeTurn();
+					break;
+				case "tilt":
+					result[0] =  executeTilt();
+					break;
+				case "undo":
+					result[0] = executeUndo();
+					break;
+				case "redo":
+					result[0] = executeRedo();
+					break;
+				case "store":
+					result[0] = executeStore();
+					break;
+				case "clone":
+					result[0] = executeClone();
+					break;
+				case "give":
+					result[0] = executeGive();
+					break;
+				case "tbuild":
+					result[0] = executeTBuild();
+					break;
+			}
+		});
+
+		return result[0];
 	}
 
 	public boolean executeBuild() {
