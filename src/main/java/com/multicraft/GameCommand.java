@@ -9,6 +9,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -35,50 +36,49 @@ public class GameCommand {
 		player = plugin.getServer().getPlayer(UUIDParser.parse((String) args.get("client_name")));
 	}
 	
-	public boolean execute() {
-		if (!player.isOnline()) return false;
+	public void execute() {
+		if (!player.isOnline()) return;
 
-
-		final boolean[] result = {false};
 		plugin.getServer().getScheduler().runTask(plugin, () -> {
+			boolean result = false;
 			switch (commandName) {
 				case "build":
-					result[0] = executeBuild();
+					result = executeBuild();
 					break;
 				case "place":
-					result[0] = executePlace();
+					result = executePlace();
 					break;
 				case "move":
-					result[0] = executeMove();
+					result = executeMove();
 					break;
 				case "turn":
-					result[0] = executeTurn();
+					result = executeTurn();
 					break;
 				case "tilt":
-					result[0] =  executeTilt();
+					result =  executeTilt();
 					break;
 				case "undo":
-					result[0] = executeUndo();
+					result = executeUndo();
 					break;
 				case "redo":
-					result[0] = executeRedo();
+					result = executeRedo();
 					break;
 				case "store":
-					result[0] = executeStore();
+					result = executeStore();
 					break;
 				case "clone":
-					result[0] = executeClone();
+					result = executeClone();
 					break;
 				case "give":
-					result[0] = executeGive();
+					result = executeGive();
 					break;
 				case "tbuild":
-					result[0] = executeTBuild();
-					break;
+					result = executeTBuild();
+			}
+			if (!result) {
+				player.sendMessage(String.format("\"%s\" command execution failed.", commandName));
 			}
 		});
-
-		return result[0];
 	}
 
 	public boolean executeBuild() {

@@ -179,8 +179,9 @@ public class MultiCraftCommandExecutor implements CommandExecutor {
 					}
 				}
 
-				p.sendMessage(" Cloning " + args[0] + ".");
+				p.sendMessage("Cloning " + args[0] + ".");
 				String mmbuildArgs = String.join(" ", buildData);
+				p.sendMessage("mmbuild " + mmbuildArgs);
 				return p.performCommand("mmbuild " + mmbuildArgs);
 			}
 			case "copyloc1": {

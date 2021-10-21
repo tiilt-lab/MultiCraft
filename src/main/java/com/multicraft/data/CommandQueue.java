@@ -51,17 +51,9 @@ public class CommandQueue {
 					JSONObject jsonObject = getInstance().consumeObject();
 
 					try {
-						GameCommand gComm = new GameCommand(jsonObject, plugin);
-						boolean success = gComm.execute();
-						if (success) continue;
+						new GameCommand(jsonObject, plugin).execute();
 					} catch (Exception e) {
 						e.printStackTrace();
-					}
-
-					String client = (String) jsonObject.get("client_name");
-					Player issuer = plugin.getServer().getPlayer(UUIDParser.parse(client));
-					if (issuer != null) {
-						issuer.sendMessage(String.format("\"%s\" command execution failed.", jsonObject.get("command")));
 					}
 				}
 			}
